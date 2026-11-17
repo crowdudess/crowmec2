@@ -454,6 +454,7 @@ const SKINS = [
   { id: 'golden', name: 'Golden Crow', body: '#c99a2e', wing: '#a07820', sheen: 'rgba(255,240,180,.6)', beak: '#6a4a10', eye: '#fff6d0', glow: '#e8b84a', cond: 'Reach wave 20 in endless mode.', has: s => !!s.ach.endless20 },
   { id: 'dune', name: 'Dune Crow', body: '#b08a50', wing: '#8a6a38', sheen: 'rgba(255,230,170,.55)', beak: '#4a3a20', eye: '#fff', cond: 'Defeat the Emperor Scorpion.', has: s => !!s.ach.emperor },
   { id: 'widow', name: 'Widow Crow', body: '#0d0a10', wing: '#060408', sheen: 'rgba(210,30,45,.65)', beak: '#2a1a1a', eye: '#e33', glow: '#a01828', cond: 'Defeat the Spider Queen.', has: s => !!s.ach.queen },
+  { id: 'bandito', name: 'Bandito', body: '#3a2a20', wing: '#24180f', sheen: 'rgba(232,184,74,.45)', beak: '#e8b84a', eye: '#fff', googly: true, mask: true, bandana: '#c8322a', cond: 'Secret. Enter its code on the Fly tab.', has: s => !!(s.codes && s.codes.bandito) || !!s.testMode },
   { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
 ];
 
@@ -1005,8 +1006,20 @@ function drawCrow(S, a, flap, bob, time) {
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(16, 0, 10, 0, TAU); ctx.fill();
   ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
   if (flap) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
-  ctx.fillStyle = S.eye; ctx.beginPath(); ctx.arc(19, -5, 2.2, 0, TAU); ctx.arc(19, 5, 2.2, 0, TAU); ctx.fill();
-  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.6, -5, 1.1, 0, TAU); ctx.arc(19.6, 5, 1.1, 0, TAU); ctx.fill();
+  if (S.googly) {
+    if (S.bandana) { ctx.fillStyle = S.bandana; ctx.beginPath(); ctx.moveTo(8, -10); ctx.lineTo(13, -10); ctx.lineTo(13, 10); ctx.lineTo(8, 10); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(8, 9); ctx.lineTo(0, 16 + Math.sin(time / 150) * 2); ctx.lineTo(4, 8); ctx.fill(); }
+    if (S.mask) { ctx.fillStyle = '#050505'; ctx.beginPath(); ctx.ellipse(19, 0, 4.5, 12, 0, 0, TAU); ctx.fill(); }
+    const spin = time / 110;
+    for (const [ey, dir] of [[-6, 1], [6, -1]]) {
+      ctx.fillStyle = S.eye; ctx.beginPath(); ctx.arc(19.5, ey, 4.2, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#000'; ctx.lineWidth = .8; ctx.stroke();
+      const a = spin * dir + (dir > 0 ? 0 : 1.7);
+      ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.5 + Math.cos(a) * 2.2, ey + Math.sin(a) * 2.2, 1.8, 0, TAU); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = S.eye; ctx.beginPath(); ctx.arc(19, -5, 2.2, 0, TAU); ctx.arc(19, 5, 2.2, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.6, -5, 1.1, 0, TAU); ctx.arc(19.6, 5, 1.1, 0, TAU); ctx.fill();
+  }
   if (S.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(10, -8); ctx.lineTo(6, -12); ctx.lineTo(12, -10); ctx.lineTo(14, -15); ctx.lineTo(16, -10); ctx.lineTo(22, -12); ctx.lineTo(18, -7); ctx.closePath(); ctx.fill(); ctx.fillRect(9, -8, 10, 3); }
   ctx.restore();
 }
@@ -1527,6 +1540,16 @@ $('codeForm').addEventListener('submit', ev => {
   ev.preventDefault();
   const v = $('codeInput').value.trim().toLowerCase();
   $('codeInput').value = '';
+  if (v === 'bandito') {
+    save.codes = Object.assign({}, save.codes, { bandito: true });
+    if (!save.skinsSeen.includes('bandito')) save.skinsSeen.push('bandito');
+    save.skin = 'bandito';
+    if (save.testMode && codeBackup) { try { const b = JSON.parse(codeBackup); b.codes = Object.assign({}, b.codes, { bandito: true }); if (!(b.skinsSeen || []).includes('bandito')) b.skinsSeen = (b.skinsSeen || ['classic']).concat('bandito'); codeBackup = JSON.stringify(b); localStorage.setItem(BACKUP_KEY, codeBackup); } catch (e) {} }
+    persist(); sfx.ach();
+    renderMenu();
+    codeStatus('Bandito unlocked. You are wearing it now.');
+    return;
+  }
   if (v !== 'crow') { codeStatus('That code does nothing.'); return; }
   if (save.testMode) {
     let back = null;
