@@ -70,6 +70,14 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .row.spread { justify-content: space-between; }
 .muted { color: var(--bone-dim); font-size: 13px; }
+.setgrid { display: grid; gap: 14px; }
+.setrow { display: grid; grid-template-columns: minmax(120px, 180px) 1fr auto; gap: 12px; align-items: center; }
+.setrow label { font-weight: 700; }
+.setrow input[type=range] { width: 100%; accent-color: var(--shine); }
+.setrow .val { font-family: var(--mono); color: var(--bone-dim); min-width: 3.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+.setrow select { font: 600 14px var(--body); color: var(--bone); background: var(--moss-2); border: 1px solid var(--moss-3); border-radius: 10px; padding: 8px 10px; }
+.setrow input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--shine); }
+@media (max-width: 520px) { .setrow { grid-template-columns: 1fr auto; } .setrow input[type=range], .setrow select { grid-column: 1 / -1; } }
 .codein { font: 600 14px var(--mono); color: var(--bone); background: var(--night); border: 1px solid var(--moss-3); border-radius: 10px; padding: 10px 12px; width: 140px; user-select: text; -webkit-user-select: text; }
 .codein:focus-visible { outline: 3px solid var(--bone); outline-offset: 2px; }
 .testmode { color: var(--shine); font-weight: 700; }
@@ -155,18 +163,19 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 
 <div class="hud" id="hud" hidden>
   <div class="hud-top">
-    <div class="stat">Wave<b id="hWave">1</b><span id="hLeft"></span></div>
+    <div class="stat"><span data-i18n="wave">Wave</span><b id="hWave">1</b><span id="hLeft"></span></div>
     <div class="hpwrap">
-      <span>Nest</span><div class="hpbar"><i id="hHp"></i></div><div class="hpnum" id="hHpNum"></div>
+      <span data-i18n="nest">Nest</span><div class="hpbar"><i id="hHp"></i></div><div class="hpnum" id="hHpNum"></div>
       <div id="bossWrap" hidden><span id="bossName">Boss</span><div class="hpbar bossbar"><i id="hBoss"></i></div></div>
     </div>
-    <div class="stat gold">Shinies<b id="hGold">0</b><span class="coinc" id="hCoins"></span></div>
+    <div class="stat gold"><span data-i18n="shinies">Shinies</span><b id="hGold">0</b><span class="coinc" id="hCoins"></span></div>
   </div>
   <div></div>
   <div class="hud-bottom">
-    <button class="ghost" id="pauseBtn" type="button">Pause</button>
+    <button class="ghost" id="hudMute" type="button">Sound on</button>
+    <button class="ghost" id="pauseBtn" type="button" data-i18n="pause">Pause</button>
     <div class="spells" id="spellBar"></div>
-    <button class="btn" id="cawBtn" type="button"><span class="fill" id="cawFill"></span><span class="lbl">CAW!<span class="kbd hide-sm">Space</span></span></button>
+    <button class="btn" id="cawBtn" type="button"><span class="fill" id="cawFill"></span><span class="lbl"><span data-i18n="caw">CAW!</span><span class="kbd hide-sm" data-i18n="space">Space</span></span></button>
   </div>
 </div>
 
@@ -176,16 +185,17 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 <div class="overlay" id="menu">
   <div class="panel">
     <div class="row spread">
-      <div><div class="eyebrow">A roguelike nest defence</div><h1>Nestguard</h1></div>
-      <div class="stat gold coin">Coins<b id="mCoins">0</b></div>
+      <div><div class="eyebrow" data-i18n="tagline">A roguelike nest defence</div><h1>Nestguard</h1></div>
+      <div class="stat gold coin"><span data-i18n="coins">Coins</span><b id="mCoins">0</b></div>
     </div>
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="fly" type="button">Fly</button>
-      <button class="tab" role="tab" data-tab="roost" type="button">Roost</button>
-      <button class="tab" role="tab" data-tab="spells" type="button">Spells</button>
-      <button class="tab" role="tab" data-tab="skins" type="button">Skins</button>
-      <button class="tab" role="tab" data-tab="monsters" type="button">Monsters</button>
-      <button class="tab" role="tab" data-tab="feats" type="button">Achievements</button>
+      <button class="tab" role="tab" data-tab="fly" type="button" data-i18n="tab_fly">Fly</button>
+      <button class="tab" role="tab" data-tab="roost" type="button" data-i18n="tab_roost">Roost</button>
+      <button class="tab" role="tab" data-tab="spells" type="button" data-i18n="tab_spells">Spells</button>
+      <button class="tab" role="tab" data-tab="skins" type="button" data-i18n="tab_skins">Skins</button>
+      <button class="tab" role="tab" data-tab="monsters" type="button" data-i18n="tab_monsters">Monsters</button>
+      <button class="tab" role="tab" data-tab="feats" type="button" data-i18n="tab_feats">Achievements</button>
+      <button class="tab" role="tab" data-tab="settings" type="button" data-i18n="tab_settings">Settings</button>
     </div>
     <section id="tab-fly" class="tabpane">
       <div class="grid" id="biomes"></div>
@@ -193,31 +203,33 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
       <div id="challenges" style="margin-top:14px"></div>
       <div class="row spread" style="margin-top:16px">
         <button class="btn" id="startBtn" type="button">Defend the nest</button>
-        <button class="ghost" id="muteBtn" type="button">Sound on</button>
       </div>
-      <p class="muted" style="margin-top:14px">Your crow shoots by itself. Press Space or tap the field to caw. Press 1 to 5 or tap a spell, then tap the field to place it. Shop after every wave. Beat the boss on wave 10 to unlock the next biome, then fly home with your coins or stay for endless waves.</p>
+      <p class="muted" style="margin-top:14px" data-i18n="howto">Your crow shoots by itself. Press Space or tap the field to caw. Press 1 to 5 or tap a spell, then tap the field to place it. Shop after every wave. Beat the boss on wave 10 to unlock the next biome, then fly home with your coins or stay for endless waves.</p>
       <form class="row" id="codeForm" style="margin-top:14px" autocomplete="off">
-        <label class="muted" for="codeInput">Code</label>
-        <input class="codein" id="codeInput" type="text" spellcheck="false" autocapitalize="off" placeholder="Enter code">
-        <button class="ghost" type="submit">Enter</button>
+        <label class="muted" for="codeInput" data-i18n="code">Code</label>
+        <input class="codein" id="codeInput" type="text" spellcheck="false" autocapitalize="off" placeholder="Enter code" data-i18n-ph="code_ph">
+        <button class="ghost" type="submit" data-i18n="enter">Enter</button>
         <span class="muted" id="codeMsg" role="status"></span>
       </form>
     </section>
     <section id="tab-roost" class="tabpane" hidden>
-      <p>Spend coins on permanent upgrades. They apply to every run.</p>
+      <p data-i18n="roost_intro">Spend coins on permanent upgrades. They apply to every run.</p>
       <div class="list" id="roost" style="margin-top:14px"></div>
     </section>
     <section id="tab-spells" class="tabpane" hidden>
-      <p>Spells are placed on the field during a wave. Unlock them with coins, then pick up to 5 to take into each run.</p>
+      <p data-i18n="spells_intro">Spells are placed on the field during a wave. Unlock them with coins, then pick up to 5 to take into each run.</p>
       <div class="grid" id="spellList" style="margin-top:14px"></div>
     </section>
     <section id="tab-skins" class="tabpane" hidden>
-      <p>Win to unlock new feathers. Tap a skin to wear it.</p>
+      <p data-i18n="skins_intro">Win to unlock new feathers. Tap a skin to wear it.</p>
       <div class="grid" id="skinList" style="margin-top:14px"></div>
     </section>
     <section id="tab-monsters" class="tabpane" hidden>
       <p id="monCount"></p>
       <div id="monList" style="margin-top:14px"></div>
+    </section>
+    <section id="tab-settings" class="tabpane" hidden>
+      <div id="settingsMenu"></div>
     </section>
     <section id="tab-feats" class="tabpane" hidden>
       <p id="achCount"></p>
@@ -231,7 +243,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
     <canvas id="monPopCanvas" width="960" height="600"></canvas>
     <div class="row spread">
       <div><div class="eyebrow" id="monPopBiome"></div><h2 id="monPopName"></h2></div>
-      <button class="ghost" id="monPopClose" type="button">Close</button>
+      <button class="ghost" id="monPopClose" type="button" data-i18n="close">Close</button>
     </div>
     <p class="muted" id="monPopStats"></p>
     <div class="tags" id="monPopTags"></div>
@@ -241,10 +253,10 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 <div class="overlay" id="shop" hidden>
   <div class="panel">
     <div class="row spread">
-      <div><div class="eyebrow" id="shopEyebrow">Wave cleared</div><h2>The Magpie's Stall</h2></div>
+      <div><div class="eyebrow" id="shopEyebrow">Wave cleared</div><h2 data-i18n="shop_title">The Magpie's Stall</h2></div>
       <div class="row">
-        <div class="stat gold">Shinies<b id="sGold">0</b></div>
-        <div class="stat gold coin">Coins<b id="sCoins">0</b></div>
+        <div class="stat gold"><span data-i18n="shinies">Shinies</span><b id="sGold">0</b></div>
+        <div class="stat gold coin"><span data-i18n="coins">Coins</span><b id="sCoins">0</b></div>
       </div>
     </div>
     <p id="shopNote"></p>
@@ -257,20 +269,20 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
     <div class="owned" id="owned"></div>
     <div class="row spread">
       <span class="stat" id="nextInfo"></span>
-      <button class="btn" id="nextBtn" type="button">Start next wave</button>
+      <button class="btn" id="nextBtn" type="button" data-i18n="next_wave">Start next wave</button>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="choice" hidden>
   <div class="panel">
-    <div class="eyebrow">Boss defeated</div>
+    <div class="eyebrow" data-i18n="boss_defeated">Boss defeated</div>
     <h2 id="choiceTitle">The boss is beaten</h2>
     <p id="choiceText"></p>
     <div class="unlocks" id="choiceUnlocks"></div>
     <div class="row">
       <button class="btn" id="leaveBtn" type="button">Fly home</button>
-      <button class="ghost" id="stayBtn" type="button">Stay for endless waves</button>
+      <button class="ghost" id="stayBtn" type="button" data-i18n="stay">Stay for endless waves</button>
     </div>
   </div>
 </div>
@@ -283,15 +295,16 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
     <p id="overCoins"></p>
     <div class="unlocks" id="overUnlocks"></div>
     <div class="owned" id="overOwned"></div>
-    <div class="row"><button class="btn" id="againBtn" type="button">Fly again</button><button class="ghost" id="roostBtn" type="button">Back to the roost</button></div>
+    <div class="row"><button class="btn" id="againBtn" type="button" data-i18n="fly_again">Fly again</button><button class="ghost" id="roostBtn" type="button" data-i18n="back_roost">Back to the roost</button></div>
   </div>
 </div>
 
 <div class="overlay" id="pause" hidden>
   <div class="panel">
-    <h2>Paused</h2>
+    <h2 data-i18n="paused">Paused</h2>
     <p id="pauseInfo"></p>
-    <div class="row"><button class="btn" id="resumeBtn" type="button">Resume</button><button class="ghost" id="quitBtn" type="button">Give up run</button><button class="ghost" id="muteBtn2" type="button">Sound on</button></div>
+    <div class="row"><button class="btn" id="resumeBtn" type="button" data-i18n="resume">Resume</button><button class="ghost" id="quitBtn" type="button" data-i18n="giveup">Give up run</button></div>
+    <div id="settingsPause"></div>
   </div>
 </div>
 
@@ -320,17 +333,87 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 // ---------- audio ----------
-let actx = null, muted = false;
-function tone(f0, f1, dur, type = 'square', vol = .06) {
-  if (muted || api.sim) return;
+let actx = null, muted = false, master = null, musicBus = null, sfxBus = null, noiseBuf = null;
+const vol = { music: .6, sfx: .8 };
+function initAudio() {
+  if (actx || api.sim) return;
   try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    master = actx.createGain(); musicBus = actx.createGain(); sfxBus = actx.createGain();
+    musicBus.connect(master); sfxBus.connect(master); master.connect(actx.destination);
+    noiseBuf = actx.createBuffer(1, actx.sampleRate * .5, actx.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    applyVolumes();
+    music.start();
+  } catch (e) { actx = null; }
+}
+function applyVolumes() {
+  if (!actx) return;
+  const t = actx.currentTime;
+  master.gain.setTargetAtTime(muted ? 0 : 1, t, .05);
+  musicBus.gain.setTargetAtTime(vol.music * .55, t, .05);
+  sfxBus.gain.setTargetAtTime(vol.sfx, t, .05);
+}
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { initAudio(); if (actx && actx.state === 'suspended') actx.resume(); }, { passive: true }));
+function tone(f0, f1, dur, type = 'square', v = .06) {
+  if (api.sim || !actx || muted) return;
+  try {
     const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
     o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t + dur);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(sfxBus); o.start(t); o.stop(t + dur);
   } catch (e) {}
 }
+// ---------- music: a small live sequencer, one tune per biome ----------
+const SC = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], phryg: [0, 1, 3, 5, 7, 8, 10], hijaz: [0, 1, 4, 5, 7, 8, 10], lydian: [0, 2, 4, 6, 7, 9, 11], pent: [0, 2, 4, 7, 9], mpent: [0, 3, 5, 7, 10], insen: [0, 1, 5, 7, 10], whole: [0, 2, 4, 6, 8, 10], locrian: [0, 1, 3, 5, 6, 8, 10] };
+const SONGS = {
+  menu:    { bpm: 84,  root: 50, sc: 'minor',   prog: [0, 5, 3, 4], lead: 'triangle', bass: 'sine', pad: .5, arp: [0, 2, 4, 2, 0, 2, 4, 6] },
+  forest:  { bpm: 98,  root: 55, sc: 'major',   prog: [0, 4, 5, 3], lead: 'triangle', bass: 'triangle', pad: .35, arp: [0, 2, 4, 2, 4, 5, 4, 2] },
+  marsh:   { bpm: 82,  root: 50, sc: 'dorian',  prog: [0, 3, 0, 4], lead: 'sine', bass: 'triangle', pad: .45, arp: [0, 4, 2, 4, 0, 4, 2, 6] },
+  snow:    { bpm: 74,  root: 57, sc: 'minor',   prog: [0, 5, 2, 6], lead: 'sine', bass: 'sine', pad: .55, arp: [4, 2, 0, 2, 4, 6, 4, 2], bell: true },
+  city:    { bpm: 112, root: 45, sc: 'mpent',   prog: [0, 0, 2, 3], lead: 'square', bass: 'sawtooth', pad: .2, arp: [0, 1, 2, 1, 3, 2, 1, 0], hat: true },
+  dunes:   { bpm: 100, root: 52, sc: 'hijaz',   prog: [0, 1, 0, 6], lead: 'sawtooth', bass: 'triangle', pad: .3, arp: [0, 1, 2, 1, 0, 1, 4, 2], hat: true },
+  jungle:  { bpm: 114, root: 53, sc: 'pent',    prog: [0, 3, 1, 0], lead: 'triangle', bass: 'triangle', pad: .25, arp: [0, 2, 1, 3, 2, 4, 3, 1], hat: true, kick: true },
+  spider:  { bpm: 76,  root: 49, sc: 'locrian', prog: [0, 1, 0, 4], lead: 'sine', bass: 'sine', pad: .5, arp: [0, 1, 0, 3, 0, 1, 4, 3] },
+  volcano: { bpm: 122, root: 40, sc: 'phryg',   prog: [0, 1, 5, 0], lead: 'sawtooth', bass: 'sawtooth', pad: .25, arp: [0, 0, 2, 0, 1, 0, 4, 3], kick: true, hat: true },
+  fairy:   { bpm: 94,  root: 62, sc: 'lydian',  prog: [0, 1, 4, 0], lead: 'sine', bass: 'triangle', pad: .45, arp: [0, 2, 4, 6, 4, 2, 4, 3], bell: true },
+  sakura:  { bpm: 86,  root: 57, sc: 'insen',   prog: [0, 2, 3, 0], lead: 'triangle', bass: 'sine', pad: .4, arp: [0, 1, 2, 3, 4, 3, 2, 1], bell: true },
+  void:    { bpm: 66,  root: 44, sc: 'whole',   prog: [0, 3, 1, 4], lead: 'sine', bass: 'sine', pad: .6, arp: [0, 3, 1, 4, 2, 5, 3, 0] },
+  office:  { bpm: 106, root: 55, sc: 'major',   prog: [1, 4, 0, 5], lead: 'square', bass: 'triangle', pad: .3, arp: [0, 2, 4, 6, 4, 2, 1, 2], hat: true },
+};
+const midi = n => 440 * Math.pow(2, (n - 69) / 12);
+const music = {
+  song: 'menu', boss: false, step: 0, next: 0, timer: 0,
+  start() { if (this.timer) return; this.next = actx.currentTime + .1; this.timer = setInterval(() => this.tick(), 30); },
+  set(song, boss) { this.song = SONGS[song] ? song : 'menu'; this.boss = !!boss; },
+  note(f, t, dur, type, v, slide) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(f * slide, t + dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + Math.min(.02, dur / 4)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(musicBus); o.start(t); o.stop(t + dur + .05);
+  },
+  noise(t, dur, v, hp) {
+    const n = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+    n.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = hp; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    n.connect(f).connect(g).connect(musicBus); n.start(t); n.stop(t + dur + .02);
+  },
+  tick() {
+    if (!actx || muted || vol.music <= 0) { if (actx) this.next = actx.currentTime + .05; return; }
+    const S = SONGS[this.song], scale = SC[S.sc], bpm = S.bpm * (this.boss ? 1.12 : 1), sp = 60 / bpm / 4;
+    const deg = (d, oct = 0) => S.root + scale[((d % scale.length) + scale.length) % scale.length] + 12 * (Math.floor(d / scale.length) + oct);
+    while (this.next < actx.currentTime + .15) {
+      const t = this.next, st = this.step % 16, bar = Math.floor(this.step / 16) % S.prog.length, ch = S.prog[bar];
+      if (st === 0 && S.pad) for (const k of [0, 2, 4]) this.note(midi(deg(ch + k)), t, sp * 16, 'sine', .035 * S.pad);
+      if (st === 0 || st === 8 || (this.boss && (st === 6 || st === 14)) || (S.hat && st === 14)) this.note(midi(deg(ch, -1)), t, sp * (st === 0 ? 6 : 4), S.bass, .12);
+      if (st % 2 === 0) { const a = S.arp[(st / 2 + bar * 2) % S.arp.length], up = (this.step >> 6) % 2 && st >= 8 ? 1 : 0; this.note(midi(deg(ch + a, up + (S.root < 48 ? 1 : 0))), t, sp * 1.8, S.lead, S.lead === 'square' || S.lead === 'sawtooth' ? .028 : .05); }
+      if (S.bell && st === 12 && bar % 2 === 1) this.note(midi(deg(ch + 4, 2)), t, sp * 8, 'sine', .04);
+      if ((S.kick || this.boss) && st % 4 === 0) this.note(110, t, .18, 'sine', .22, .35);
+      if ((S.hat || this.boss) && st % 4 === 2) this.noise(t, .05, .05, 7000);
+      if (this.boss && st % 8 === 4) this.noise(t, .12, .08, 1500);
+      this.next += sp; this.step++;
+    }
+  },
+};
 let lastHit = 0;
 const sfx = {
   caw: () => { tone(900, 380, .18, 'sawtooth', .09); setTimeout(() => tone(820, 340, .2, 'sawtooth', .08), 140); },
@@ -343,6 +426,22 @@ const sfx = {
   ach: () => { tone(660, 660, .1, 'triangle', .06); setTimeout(() => tone(990, 990, .18, 'triangle', .06), 110); },
 };
 
+// ---------- languages ----------
+const LANGS = [['en', 'English'], ['fr', 'Français'], ['es', 'Español'], ['de', 'Deutsch']];
+const TX = {"tagline": ["A roguelike nest defence", "Un roguelike de défense de nid", "Un roguelike de defensa del nido", "Ein Nestverteidigungs-Roguelike"], "coins": ["Coins", "Pièces", "Monedas", "Münzen"], "shinies": ["Shinies", "Brillants", "Brillos", "Glitzer"], "wave": ["Wave", "Vague", "Oleada", "Welle"], "nest": ["Nest", "Nid", "Nido", "Nest"], "tab_fly": ["Fly", "Voler", "Volar", "Fliegen"], "tab_roost": ["Roost", "Perchoir", "Percha", "Horst"], "tab_spells": ["Spells", "Sorts", "Hechizos", "Zauber"], "tab_skins": ["Skins", "Skins", "Aspectos", "Skins"], "tab_monsters": ["Monsters", "Monstres", "Monstruos", "Monster"], "tab_feats": ["Achievements", "Succès", "Logros", "Erfolge"], "tab_settings": ["Settings", "Réglages", "Ajustes", "Einstellungen"], "start": ["Defend the nest", "Défendre le nid", "Defender el nido", "Nest verteidigen"], "start_ch": ["Start {0} challenge", "Lancer le défi {0}", "Empezar el reto {0}", "Herausforderung {0} starten"], "howto": ["Your crow shoots by itself. Press Space or tap the field to caw. Press 1 to 5 or tap a spell, then tap the field to place it. Shop after every wave. Beat the boss on wave 10 to unlock the next biome, then fly home with your coins or stay for endless waves.", "Ton corbeau tire tout seul. Appuie sur Espace ou touche le terrain pour croasser. Appuie sur 1 à 5 ou touche un sort, puis touche le terrain pour le placer. Boutique après chaque vague. Bats le boss de la vague 10 pour débloquer le biome suivant, puis rentre avec tes pièces ou reste pour des vagues sans fin.", "Tu cuervo dispara solo. Pulsa Espacio o toca el campo para graznar. Pulsa 1 a 5 o toca un hechizo y luego el campo para colocarlo. Tienda tras cada oleada. Vence al jefe de la oleada 10 para desbloquear el siguiente bioma; después vuelve a casa con tus monedas o quédate para oleadas sin fin.", "Deine Krähe schießt von selbst. Drücke die Leertaste oder tippe aufs Feld, um zu krächzen. Drücke 1 bis 5 oder tippe einen Zauber an und dann aufs Feld, um ihn zu platzieren. Nach jeder Welle gibt es den Laden. Besiege den Boss in Welle 10, um das nächste Biom freizuschalten, und fliege dann mit deinen Münzen heim oder bleib für endlose Wellen."], "code": ["Code", "Code", "Código", "Code"], "code_ph": ["Enter code", "Entrer un code", "Introduce un código", "Code eingeben"], "enter": ["Enter", "Valider", "Aceptar", "OK"], "code_bad": ["That code does nothing.", "Ce code ne fait rien.", "Ese código no hace nada.", "Dieser Code bewirkt nichts."], "code_bandito": ["Bandito skin and the Corporate Office DLC map unlocked. Pick the office in the biome list.", "Skin Bandito et carte DLC Bureau d’Entreprise débloqués. Choisis le bureau dans la liste des biomes.", "Aspecto Bandito y mapa DLC Oficina Corporativa desbloqueados. Elige la oficina en la lista de biomas.", "Bandito-Skin und DLC-Karte Großraumbüro freigeschaltet. Wähle das Büro in der Biomliste."], "code_on": ["Everything unlocked for testing. Enter the code again to undo.", "Tout est débloqué pour tester. Entre le code à nouveau pour annuler.", "Todo desbloqueado para pruebas. Vuelve a introducir el código para deshacerlo.", "Alles zum Testen freigeschaltet. Gib den Code erneut ein, um es rückgängig zu machen."], "code_off": ["Test mode off. Your real progress is back.", "Mode test désactivé. Ta vraie progression est revenue.", "Modo de prueba desactivado. Tu progreso real ha vuelto.", "Testmodus aus. Dein echter Fortschritt ist zurück."], "code_test": ["Test mode is on. Enter the code again to go back to your real progress.", "Le mode test est activé. Entre le code à nouveau pour retrouver ta vraie progression.", "El modo de prueba está activado. Vuelve a introducir el código para recuperar tu progreso real.", "Der Testmodus ist an. Gib den Code erneut ein, um zu deinem echten Fortschritt zurückzukehren."], "roost_intro": ["Spend coins on permanent upgrades. They apply to every run.", "Dépense tes pièces en améliorations permanentes. Elles s’appliquent à chaque partie.", "Gasta monedas en mejoras permanentes. Se aplican a cada partida.", "Gib Münzen für dauerhafte Verbesserungen aus. Sie gelten in jedem Lauf."], "spells_intro": ["Spells are placed on the field during a wave. Unlock them with coins, then pick up to 5 to take into each run.", "Les sorts se placent sur le terrain pendant une vague. Débloque-les avec des pièces, puis choisis-en jusqu’à 5 pour chaque partie.", "Los hechizos se colocan en el campo durante una oleada. Desbloquéalos con monedas y elige hasta 5 para cada partida.", "Zauber werden während einer Welle aufs Feld gesetzt. Schalte sie mit Münzen frei und wähle bis zu 5 für jeden Lauf."], "skins_intro": ["Win to unlock new feathers. Tap a skin to wear it.", "Gagne pour débloquer de nouvelles plumes. Touche un skin pour le porter.", "Gana para desbloquear plumas nuevas. Toca un aspecto para ponértelo.", "Gewinne, um neue Federn freizuschalten. Tippe einen Skin an, um ihn zu tragen."], "pause": ["Pause", "Pause", "Pausa", "Pause"], "paused": ["Paused", "En pause", "En pausa", "Pausiert"], "resume": ["Resume", "Reprendre", "Continuar", "Weiter"], "giveup": ["Give up run", "Abandonner", "Rendirse", "Aufgeben"], "pause_info": ["{0}, wave {1}. {2} coins this run. Giving up keeps half.", "{0}, vague {1}. {2} pièces cette partie. Abandonner en garde la moitié.", "{0}, oleada {1}. {2} monedas en esta partida. Si te rindes, conservas la mitad.", "{0}, Welle {1}. {2} Münzen in diesem Lauf. Aufgeben behält die Hälfte."], "caw": ["CAW!", "CROÂ !", "¡CRUA!", "KRAH!"], "space": ["Space", "Espace", "Espacio", "Leertaste"], "left": ["{0} left", "encore {0}", "quedan {0}", "noch {0}"], "plus_coins": ["+{0} coins", "+{0} pièces", "+{0} monedas", "+{0} Münzen"], "wave_n": ["Wave {0}", "Vague {0}", "Oleada {0}", "Welle {0}"], "is_coming": ["{0} is coming", "{0} arrive", "{0} se acerca", "{0} kommt"], "elite_leads": ["An elite leads them", "Une élite les mène", "Les guía una élite", "Ein Elitegegner führt sie an"], "endless": ["Endless", "Sans fin", "Sin fin", "Endlos"], "challenge_n": ["{0} challenge", "Défi {0}", "Reto {0}", "Herausforderung {0}"], "shop_title": ["The Magpie’s Stall", "L’étal de la Pie", "El puesto de la Urraca", "Der Elsternstand"], "wave_cleared": ["Wave {0} cleared", "Vague {0} terminée", "Oleada {0} superada", "Welle {0} geschafft"], "wave_bonus": ["Wave bonus +{0} shinies", "Bonus de vague +{0} brillants", "Bonus de oleada +{0} brillos", "Wellenbonus +{0} Glitzer"], "golden_egg": [", Golden Egg +{0}", ", Œuf d’or +{0}", ", Huevo de oro +{0}", ", Goldenes Ei +{0}"], "coins_note": [". +{0} coins.", ". +{0} pièces.", ". +{0} monedas.", ". +{0} Münzen."], "fly_any": [" You can fly home any time from here.", " Tu peux rentrer à tout moment.", " Puedes volver a casa cuando quieras.", " Du kannst jederzeit heimfliegen."], "next_boss": ["Next: wave {0}. {1} is coming.", "Suivante : vague {0}. {1} arrive.", "Siguiente: oleada {0}. Se acerca {1}.", "Nächste: Welle {0}. {1} kommt."], "next_elite": ["Next: wave {0}, with an elite.", "Suivante : vague {0}, avec une élite.", "Siguiente: oleada {0}, con una élite.", "Nächste: Welle {0}, mit einem Elitegegner."], "next": ["Next: wave {0}", "Suivante : vague {0}", "Siguiente: oleada {0}", "Nächste: Welle {0}"], "reroll": ["Reroll ({0})", "Relancer ({0})", "Cambiar ({0})", "Neu würfeln ({0})"], "patch": ["Patch nest +35 HP ({0})", "Réparer le nid +35 PV ({0})", "Reparar nido +35 PS ({0})", "Nest flicken +35 LP ({0})"], "nopatch": ["No patching (Glass Nest)", "Pas de réparation (Nid de verre)", "Sin reparar (Nido de cristal)", "Kein Flicken (Glasnest)"], "fly_home_n": ["Fly home with {0} coins", "Rentrer avec {0} pièces", "Volver con {0} monedas", "Mit {0} Münzen heimfliegen"], "next_wave": ["Start next wave", "Vague suivante", "Siguiente oleada", "Nächste Welle"], "nest_hp": ["Nest {0}/{1} HP", "Nid {0}/{1} PV", "Nido {0}/{1} PS", "Nest {0}/{1} LP"], "boss_defeated": ["Boss defeated", "Boss vaincu", "Jefe derrotado", "Boss besiegt"], "x_defeated": ["{0} defeated", "{0} vaincu", "{0} derrotado", "{0} besiegt"], "choice_text": ["Fly home now and keep all {0} coins from this run. Or stay for endless waves: they pay 50% more coins and a boss returns every 10 waves, but if the nest falls you keep only half.", "Rentre maintenant et garde les {0} pièces de cette partie. Ou reste pour des vagues sans fin : elles rapportent 50 % de pièces en plus et un boss revient toutes les 10 vagues, mais si le nid tombe tu n’en gardes que la moitié.", "Vuelve ahora y quédate con las {0} monedas de esta partida. O quédate para oleadas sin fin: dan un 50 % más de monedas y un jefe vuelve cada 10 oleadas, pero si cae el nido solo conservas la mitad.", "Fliege jetzt heim und behalte alle {0} Münzen dieses Laufs. Oder bleib für endlose Wellen: Sie bringen 50 % mehr Münzen und alle 10 Wellen kommt ein Boss zurück, aber wenn das Nest fällt, behältst du nur die Hälfte."], "stay": ["Stay for endless waves", "Rester pour des vagues sans fin", "Quedarse para oleadas sin fin", "Für endlose Wellen bleiben"], "fly_home": ["Fly home", "Rentrer", "Volver a casa", "Heimfliegen"], "safe_home": ["Safe flight home", "Retour sans encombre", "Vuelta a casa a salvo", "Sicher heimgeflogen"], "eggs_gone": ["The eggs are gone", "Les œufs ont disparu", "Los huevos se han perdido", "Die Eier sind weg"], "home_from": ["Home from {0}", "Retour de {0}", "De vuelta de {0}", "Zurück aus {0}"], "fell_on": ["Fell on wave {0}", "Tombé à la vague {0}", "Caído en la oleada {0}", "Gefallen in Welle {0}"], "sum_enemies": ["Enemies", "Ennemis", "Enemigos", "Gegner"], "sum_kept": ["Coins kept", "Pièces gardées", "Monedas guardadas", "Behaltene Münzen"], "sum_best": ["Best here", "Record ici", "Récord aquí", "Bestwert hier"], "kept_all": ["You kept all {0} coins. Spend them in the Roost.", "Tu gardes les {0} pièces. Dépense-les au Perchoir.", "Te quedas con las {0} monedas. Gástalas en la Percha.", "Du behältst alle {0} Münzen. Gib sie im Horst aus."], "kept_half": ["The nest fell, so you kept half of your {0} coins: {1}. Beat the boss and fly home to keep them all.", "Le nid est tombé, tu gardes la moitié de tes {0} pièces : {1}. Bats le boss et rentre pour tout garder.", "El nido cayó, así que conservas la mitad de tus {0} monedas: {1}. Vence al jefe y vuelve a casa para quedártelas todas.", "Das Nest ist gefallen, also behältst du die Hälfte deiner {0} Münzen: {1}. Besiege den Boss und fliege heim, um alle zu behalten."], "fly_again": ["Fly again", "Rejouer", "Volver a volar", "Nochmal fliegen"], "back_roost": ["Back to the roost", "Retour au perchoir", "Volver a la percha", "Zurück zum Horst"], "cleared": ["Cleared", "Terminé", "Superado", "Geschafft"], "unlocked": ["Unlocked", "Débloqué", "Desbloqueado", "Freigeschaltet"], "locked": ["Locked", "Verrouillé", "Bloqueado", "Gesperrt"], "best_wave": ["Best wave {0} · coins x{1}", "Record vague {0} · pièces x{1}", "Mejor oleada {0} · monedas x{1}", "Beste Welle {0} · Münzen x{1}"], "dlc_secret": ["Secret DLC map. Unlock it with a code.", "Carte DLC secrète. Débloque-la avec un code.", "Mapa DLC secreto. Desbloquéalo con un código.", "Geheime DLC-Karte. Schalte sie mit einem Code frei."], "defeat_to_unlock": ["Defeat {0} to unlock.", "Bats {0} pour débloquer.", "Derrota a {0} para desbloquear.", "Besiege {0} zum Freischalten."], "ch_locked": ["Beat {0} here to unlock this biome’s 3 challenge runs.", "Bats {0} ici pour débloquer les 3 défis de ce biome.", "Vence a {0} aquí para desbloquear los 3 retos de este bioma.", "Besiege {0} hier, um die 3 Herausforderungen dieses Bioms freizuschalten."], "ch_header": ["Challenges · {0}/3 done", "Défis · {0}/3 réussis", "Retos · {0}/3 completados", "Herausforderungen · {0}/3 geschafft"], "ch_all": ["All done. {0} skin unlocked.", "Tout réussi. Skin {0} débloqué.", "Todo completado. Aspecto {0} desbloqueado.", "Alles geschafft. Skin {0} freigeschaltet."], "ch_pay": ["Challenge runs pay 50% more coins. Complete all 3 to unlock the {0} skin.", "Les défis rapportent 50 % de pièces en plus. Réussis les 3 pour débloquer le skin {0}.", "Los retos dan un 50 % más de monedas. Completa los 3 para desbloquear el aspecto {0}.", "Herausforderungen bringen 50 % mehr Münzen. Schaffe alle 3, um den Skin {0} freizuschalten."], "normal_run": ["Normal run", "Partie normale", "Partida normal", "Normaler Lauf"], "normal_desc": ["No extra rules.", "Aucune règle en plus.", "Sin reglas extra.", "Keine Zusatzregeln."], "standard": ["Standard", "Standard", "Estándar", "Standard"], "challenge": ["Challenge", "Défi", "Reto", "Herausforderung"], "completed": ["Completed", "Réussi", "Completado", "Geschafft"], "spent": ["{0} coins spent here. Resetting gives every coin back so you can try a different build.", "{0} pièces dépensées ici. Réinitialiser rend toutes les pièces pour essayer autre chose.", "{0} monedas gastadas aquí. Reiniciar devuelve todas las monedas para probar otra combinación.", "{0} Münzen hier ausgegeben. Zurücksetzen gibt jede Münze zurück, damit du etwas anderes probieren kannst."], "nothing": ["Nothing bought yet.", "Rien d’acheté pour l’instant.", "Aún no has comprado nada.", "Noch nichts gekauft."], "reset_confirm": ["Tap again to reset and get {0} coins", "Touche encore pour réinitialiser et récupérer {0} pièces", "Toca otra vez para reiniciar y recuperar {0} monedas", "Nochmal tippen zum Zurücksetzen und für {0} Münzen"], "reset": ["Reset Roost", "Réinitialiser le perchoir", "Reiniciar la percha", "Horst zurücksetzen"], "maxed": ["Maxed", "Au max", "Al máximo", "Maximal"], "upgrade": ["Upgrade · {0} coins", "Améliorer · {0} pièces", "Mejorar · {0} monedas", "Verbessern · {0} Münzen"], "refund": ["Refund {0}", "Rembourser {0}", "Reembolsar {0}", "Erstatten {0}"], "loadout": ["Loadout {0}/{1}. You take up to {1} spells into each run. Tap an unlocked spell to add it to or remove it from your loadout.", "Équipement {0}/{1}. Tu emportes jusqu’à {1} sorts par partie. Touche un sort débloqué pour l’ajouter ou le retirer.", "Equipo {0}/{1}. Llevas hasta {1} hechizos a cada partida. Toca un hechizo desbloqueado para añadirlo o quitarlo.", "Ausrüstung {0}/{1}. Du nimmst bis zu {1} Zauber in jeden Lauf mit. Tippe einen freigeschalteten Zauber an, um ihn hinzuzufügen oder zu entfernen."], "equipped": ["Equipped (slot {0}) · tap to remove", "Équipé (emplacement {0}) · touche pour retirer", "Equipado (hueco {0}) · toca para quitar", "Ausgerüstet (Platz {0}) · tippen zum Entfernen"], "lo_full": ["Owned · loadout full", "Possédé · équipement plein", "Tuyo · equipo lleno", "Besitzt du · Ausrüstung voll"], "tap_equip": ["Owned · tap to equip", "Possédé · touche pour équiper", "Tuyo · toca para equipar", "Besitzt du · tippen zum Ausrüsten"], "reach_first": ["Reach {0} first", "Atteins d’abord {0}", "Llega primero a {0}", "Erreiche zuerst {0}"], "n_coins": ["{0} coins", "{0} pièces", "{0} monedas", "{0} Münzen"], "recharge": ["Recharge {0}s", "Recharge {0} s", "Recarga {0} s", "Aufladen {0} s"], "wearing": ["Wearing", "Porté", "Puesto", "Getragen"], "tap_wear": ["Tap to wear", "Touche pour porter", "Toca para ponértelo", "Tippen zum Tragen"], "shoots": ["Shoots: {0}", "Tire : {0}", "Dispara: {0}", "Schießt: {0}"], "mon_count": ["{0} of {1} monsters discovered. Defeat a monster once to add it to the index.", "{0} monstres sur {1} découverts. Bats un monstre une fois pour l’ajouter à l’index.", "{0} de {1} monstruos descubiertos. Derrota a un monstruo una vez para añadirlo al índice.", "{0} von {1} Monstern entdeckt. Besiege ein Monster einmal, um es ins Verzeichnis aufzunehmen."], "reveal": ["Defeat one to reveal it.", "Bats-en un pour le révéler.", "Derrota a uno para revelarlo.", "Besiege eines, um es aufzudecken."], "bosses": ["Bosses", "Boss", "Jefes", "Bosse"], "bosses_sub": ["Each biome ends with a boss on wave 10.", "Chaque biome se termine par un boss à la vague 10.", "Cada bioma termina con un jefe en la oleada 10.", "Jedes Biom endet mit einem Boss in Welle 10."], "boss_tag": ["Boss", "Boss", "Jefe", "Boss"], "close": ["Close", "Fermer", "Cerrar", "Schließen"], "not_defeated": ["You have not defeated one yet.", "Tu n’en as pas encore battu.", "Aún no has derrotado a ninguno.", "Du hast noch keines besiegt."], "read_story": ["Defeat one to read its story.", "Bats-en un pour lire son histoire.", "Derrota a uno para leer su historia.", "Besiege eines, um seine Geschichte zu lesen."], "mon_stats": ["Defeated {0} · HP {1} · Speed {2} · Bite {3}", "Vaincus {0} · PV {1} · Vitesse {2} · Morsure {3}", "Derrotados {0} · PS {1} · Velocidad {2} · Mordisco {3}", "Besiegt {0} · LP {1} · Tempo {2} · Biss {3}"], "ach_count": ["{0} of {1} earned. Each one pays coins.", "{0} sur {1} obtenus. Chacun rapporte des pièces.", "{0} de {1} conseguidos. Cada uno da monedas.", "{0} von {1} erreicht. Jeder bringt Münzen."], "earned": ["Earned · +{0}", "Obtenu · +{0}", "Conseguido · +{0}", "Erreicht · +{0}"], "music": ["Music", "Musique", "Música", "Musik"], "sfx": ["Sound effects", "Effets sonores", "Efectos de sonido", "Soundeffekte"], "mute_all": ["Mute everything", "Tout couper", "Silenciar todo", "Alles stumm"], "language": ["Language", "Langue", "Idioma", "Sprache"], "sound_on": ["Sound on", "Son activé", "Sonido activado", "Ton an"], "muted": ["Muted", "Muet", "Silenciado", "Stumm"], "settings_note": ["The music is played live by the game. Every biome has its own tune, and it gets more intense during boss fights.", "La musique est jouée en direct par le jeu. Chaque biome a son air, et elle s’intensifie pendant les combats de boss.", "El juego toca la música en directo. Cada bioma tiene su melodía, y se intensifica en las peleas contra jefes.", "Die Musik spielt das Spiel live. Jedes Biom hat seine eigene Melodie, und in Bosskämpfen wird sie intensiver."], "settings_title": ["Settings", "Réglages", "Ajustes", "Einstellungen"]};
+const BNAMES = {"forest": ["Whispering Wood", "Bois Murmurant", "Bosque Susurrante", "Flüsterwald"], "marsh": ["Murkwater Marsh", "Marais Trouble", "Pantano Turbio", "Trübwassersumpf"], "snow": ["Frostfang Pass", "Col Croc-de-Givre", "Paso Colmillo Helado", "Frostzahnpass"], "city": ["Ashen Alleys", "Ruelles Cendrées", "Callejones de Ceniza", "Aschengassen"], "dunes": ["Sunscorch Dunes", "Dunes Brûlantes", "Dunas Abrasadoras", "Sonnenglutdünen"], "jungle": ["Banana Jungle", "Jungle Banane", "Selva Banana", "Bananendschungel"], "spider": ["Silkshade Hollow", "Creux Soieombre", "Hondonada Sedasombra", "Seidenschattenhöhle"], "volcano": ["Cinder Peak", "Pic des Cendres", "Pico Ceniza", "Aschegipfel"], "fairy": ["Glimmer Glade", "Clairière Scintillante", "Claro Resplandeciente", "Glimmerlichtung"], "sakura": ["Blossom Ridge", "Crête des Fleurs", "Cresta Florida", "Blütenkamm"], "void": ["The Void", "Le Néant", "El Vacío", "Die Leere"], "office": ["Corporate Office", "Bureau d’Entreprise", "Oficina Corporativa", "Großraumbüro"]};
+const CHNAMES = {"glass": [["Glass Nest", "The nest has 40% of its HP and the shop cannot patch it."], ["Nid de verre", "Le nid n’a que 40 % de ses PV et la boutique ne peut pas le réparer."], ["Nido de cristal", "El nido tiene el 40 % de sus PS y la tienda no puede repararlo."], ["Glasnest", "Das Nest hat 40 % seiner LP und der Laden kann es nicht flicken."]], "swarm": [["Swarm", "60% more enemies, and they move 20% faster."], ["Essaim", "60 % d’ennemis en plus, 20 % plus rapides."], ["Enjambre", "60 % más enemigos, y un 20 % más rápidos."], ["Schwarm", "60 % mehr Gegner, und sie sind 20 % schneller."]], "pauper": [["Pauper", "Kills give half the shinies and rerolls cost double."], ["Fauché", "Les ennemis donnent moitié moins de brillants et relancer coûte le double."], ["Pobre", "Las bajas dan la mitad de brillos y cambiar cuesta el doble."], ["Pleite", "Gegner geben nur halb so viel Glitzer und Neuwürfeln kostet doppelt."]]};
+let lang = 'en';
+const li = () => Math.max(0, LANGS.findIndex(l => l[0] === lang));
+function T(k, ...a) { const row = TX[k]; let str = row ? (row[li()] || row[0]) : k; a.forEach((v, i) => { str = str.split('{' + i + '}').join(v); }); return str; }
+const bn = b => (BNAMES[b.id] && BNAMES[b.id][li()]) || b.name;
+const chn = c => (CHNAMES[c.id] && CHNAMES[c.id][li()]) ? CHNAMES[c.id][li()][0] : c.name;
+const chd = c => (CHNAMES[c.id] && CHNAMES[c.id][li()]) ? CHNAMES[c.id][li()][1] : c.desc;
+function applyStatic() {
+  document.documentElement.lang = lang;
+  for (const e of document.querySelectorAll('[data-i18n]')) e.textContent = T(e.dataset.i18n);
+  for (const e of document.querySelectorAll('[data-i18n-ph]')) e.placeholder = T(e.dataset.i18nPh);
+}
 // ---------- data: biomes & enemies ----------
 const BIOMES = [
   { id: 'forest', name: 'Whispering Wood', hp: 1, dmg: 1, coin: 1, boss: 'cat', elite: 'raccoon',
@@ -688,7 +787,7 @@ function startWave() {
   spawnQ.sort((a, b) => a.t - b.t);
   run.waveClock = 0; run.waveDmg = 0; run.boss = null;
   state = 'wave';
-  toast(`Wave ${w}`, isBoss ? `${E[B.boss].name} is coming` : isElite ? `An elite ${E[B.elite].name.toLowerCase()} leads them` : run.endless ? 'Endless' : run.ch ? `${CHALLENGES.find(c => c.id === run.ch).name} challenge` : B.name);
+  toast(T('wave_n', w), isBoss ? T('is_coming', E[B.boss].name) : isElite ? T('elite_leads') : run.endless ? T('endless') : run.ch ? T('challenge_n', chn(CHALLENGES.find(c => c.id === run.ch))) : bn(B));
 }
 function spawn(q) {
   const d = E[q.k], n = q.boss || q.elite ? 1 : (d.pack || 1), a0 = rnd(0, TAU);
@@ -1721,9 +1820,9 @@ function hud() {
   if (!run || state === 'menu') return;
   $('hWave').textContent = run.wave + (run.endless ? '∞' : '');
   const left = enemies.length + spawnQ.length;
-  $('hLeft').textContent = state === 'wave' ? `${left} left` : '';
+  $('hLeft').textContent = state === 'wave' ? T('left', left) : '';
   $('hGold').textContent = run.gold;
-  $('hCoins').textContent = `+${run.coins} coins`;
+  $('hCoins').textContent = T('plus_coins', run.coins);
   const hp = Math.max(0, run.hp);
   $('hHp').style.width = (hp / run.maxHp * 100) + '%';
   $('hHpNum').textContent = `${Math.ceil(hp)} / ${run.maxHp}`;
@@ -1822,7 +1921,7 @@ function waveCleared() {
   if (run.endless && w >= 30) grant('endless30');
   if (run.gold >= 150) grant('hoard');
   persist();
-  run.lastNote = `Wave bonus +${bonus} shinies` + (interest ? `, Golden Egg +${interest}` : '') + `. +${wc} coins.`;
+  run.lastNote = T('wave_bonus', bonus) + (interest ? T('golden_egg', interest) : '') + T('coins_note', wc);
   if (w === BOSS_WAVE && !run.bossBeaten) return bossBeaten();
   openShop();
 }
@@ -1857,11 +1956,11 @@ function bossBeaten() {
   }
   persist();
   if (api.sim) return;
-  $('choiceTitle').textContent = `${boss.name} defeated`;
-  $('choiceText').textContent = `Fly home now and keep all ${run.coins} coins from this run. Or stay for endless waves: they pay 50% more coins and a boss returns every 10 waves, but if the nest falls you keep only half.`;
+  $('choiceTitle').textContent = T('x_defeated', boss.name);
+  $('choiceText').textContent = T('choice_text', run.coins);
   const u = $('choiceUnlocks'); u.innerHTML = '';
   for (const s of run.unlocks) { const d = el('div'); d.innerHTML = s; u.append(d); }
-  $('leaveBtn').textContent = `Fly home with ${run.coins} coins`;
+  $('leaveBtn').textContent = T('fly_home_n', run.coins);
   $('hud').hidden = true; $('choice').hidden = false;
   $('leaveBtn').focus({ preventScroll: true });
 }
@@ -1870,10 +1969,10 @@ function openShop() {
   rerollCost = 2 * (run.rerollMult || 1); healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
   rollOffers();
   if (api.sim) return;
-  $('shopEyebrow').textContent = `Wave ${run.wave} cleared`;
-  $('shopNote').textContent = run.lastNote + (run.bossBeaten ? ' You can fly home any time from here.' : '');
+  $('shopEyebrow').textContent = T('wave_cleared', run.wave);
+  $('shopNote').textContent = run.lastNote + (run.bossBeaten ? T('fly_any') : '');
   const nw = run.wave + 1;
-  $('nextInfo').textContent = nw % BOSS_WAVE === 0 ? `Next: wave ${nw}. ${E[B.boss].name} is coming.` : nw % 5 === 0 ? `Next: wave ${nw}, with an elite.` : `Next: wave ${nw}`;
+  $('nextInfo').textContent = nw % BOSS_WAVE === 0 ? T('next_boss', nw, E[B.boss].name) : nw % 5 === 0 ? T('next_elite', nw) : T('next', nw);
   $('homeBtn').hidden = !run.bossBeaten;
   renderShop();
   $('hud').hidden = true; $('choice').hidden = true; $('shop').hidden = false;
@@ -1892,17 +1991,17 @@ function renderShop() {
     b.onclick = () => buy(i);
     cards.append(b);
   });
-  $('rerollBtn').textContent = `Reroll (${rerollCost})`;
+  $('rerollBtn').textContent = T('reroll', rerollCost);
   $('rerollBtn').disabled = run.gold < rerollCost;
-  $('healBtn').textContent = `Patch nest +35 HP (${healCost})`;
+  $('healBtn').textContent = T('patch', healCost);
   $('healBtn').disabled = run.noHeal || run.gold < healCost || run.hp >= run.maxHp || healsLeft <= 0;
-  if (run.noHeal) $('healBtn').textContent = 'No patching (Glass Nest)';
-  $('homeBtn').textContent = `Fly home with ${run.coins} coins`;
+  if (run.noHeal) $('healBtn').textContent = T('nopatch');
+  $('homeBtn').textContent = T('fly_home_n', run.coins);
   renderOwned($('owned'));
 }
 function renderOwned(box) {
   box.innerHTML = '';
-  box.append(el('span', '', `Nest ${Math.ceil(Math.max(0, run.hp))}/${run.maxHp} HP`));
+  box.append(el('span', '', T('nest_hp', Math.ceil(Math.max(0, run.hp)), run.maxHp)));
   for (const id of Object.keys(run.items)) { const it = ITEMS.find(x => x.id === id); const s = el('span', '', it.name + ' '); s.append(el('em', '', 'x' + run.items[id])); box.append(s); }
 }
 function buy(i) {
@@ -1943,11 +2042,11 @@ function endRun(home) {
   persist();
   if (api.sim) return;
   const bs = biomeState(B.id);
-  $('overEyebrow').textContent = home ? 'Safe flight home' : 'The eggs are gone';
-  $('overTitle').textContent = home ? `Home from ${B.name}` : `Fell on wave ${run.wave}`;
+  $('overEyebrow').textContent = home ? T('safe_home') : T('eggs_gone');
+  $('overTitle').textContent = home ? T('home_from', bn(B)) : T('fell_on', run.wave);
   const sum = $('summary'); sum.innerHTML = '';
-  for (const [k, v] of [['Wave', run.wave], ['Enemies', run.kills], ['Coins kept', kept], ['Best here', bs.best || 0]]) { const d = el('div', '', k); d.prepend(el('b', '', v)); sum.append(d); }
-  $('overCoins').textContent = home ? `You kept all ${kept} coins. Spend them in the Roost.` : `The nest fell, so you kept half of your ${run.coins} coins: ${kept}. Beat the boss and fly home to keep them all.`;
+  for (const [k, v] of [[T('wave'), run.wave], [T('sum_enemies'), run.kills], [T('sum_kept'), kept], [T('sum_best'), bs.best || 0]]) { const d = el('div', '', k); d.prepend(el('b', '', v)); sum.append(d); }
+  $('overCoins').textContent = home ? T('kept_all', kept) : T('kept_half', run.coins, kept);
   const u = $('overUnlocks'); u.innerHTML = '';
   for (const s of run.unlocks) { const d = el('div'); d.innerHTML = s; u.append(d); }
   renderOwned($('overOwned'));
@@ -1964,7 +2063,7 @@ function toMenu(tab) {
 function setPause(v) {
   if (state !== 'wave') return;
   paused = v; $('pause').hidden = !v;
-  if (v) $('pauseInfo').textContent = `${B.name}, wave ${run.wave}. ${run.coins} coins this run. Giving up keeps half.`;
+  if (v) { $('pauseInfo').textContent = T('pause_info', bn(B), run.wave, run.coins); buildSettings($('settingsPause'), 'p'); }
 }
 $('startBtn').onclick = begin;
 $('againBtn').onclick = begin;
@@ -1973,9 +2072,48 @@ $('pauseBtn').onclick = () => setPause(true);
 $('resumeBtn').onclick = () => setPause(false);
 $('quitBtn').onclick = () => { $('pause').hidden = true; paused = false; endRun(false); };
 $('cawBtn').onclick = caw;
-function setMute(m) { muted = m; save.muted = m; persist(); $('muteBtn').textContent = $('muteBtn2').textContent = m ? 'Sound off' : 'Sound on'; }
-$('muteBtn').onclick = () => setMute(!muted);
-$('muteBtn2').onclick = () => setMute(!muted);
+function setMute(m) { muted = m; save.muted = m; persist(); applyVolumes(); $('hudMute').textContent = m ? T('muted') : T('sound_on'); $('hudMute').setAttribute('aria-pressed', String(m)); syncSettings(); }
+$('hudMute').onclick = () => setMute(!muted);
+function buildSettings(box, pre) {
+  box.innerHTML = '';
+  const g = el('div', 'setgrid'); if (pre === 'p') g.style.marginTop = '8px';
+  if (pre === 'm') g.append(el('p', 'muted', T('settings_note')));
+  const slider = (key, label) => {
+    const r = el('div', 'setrow'), lab = el('label', '', label), inp = document.createElement('input'), val = el('span', 'val');
+    inp.type = 'range'; inp.min = 0; inp.max = 100; inp.step = 5; inp.id = pre + '-' + key; lab.htmlFor = inp.id; inp.value = Math.round(vol[key] * 100); val.textContent = inp.value + '%';
+    inp.oninput = () => { vol[key] = inp.value / 100; val.textContent = inp.value + '%'; save.vol = { music: vol.music, sfx: vol.sfx }; applyVolumes(); if (key === 'sfx') sfx.kill(); };
+    inp.onchange = () => { persist(); syncSettings(); };
+    r.append(lab, inp, val); return r;
+  };
+  g.append(slider('music', T('music')), slider('sfx', T('sfx')));
+  const mr = el('div', 'setrow'), ml = el('label', '', T('mute_all')), mc = document.createElement('input');
+  mc.type = 'checkbox'; mc.id = pre + '-mute'; ml.htmlFor = mc.id; mc.checked = muted; mc.onchange = () => setMute(mc.checked);
+  mr.append(ml, mc, el('span')); g.append(mr);
+  const lr = el('div', 'setrow'), ll = el('label', '', T('language')), sel = document.createElement('select');
+  sel.id = pre + '-lang'; ll.htmlFor = sel.id;
+  for (const [code, name] of LANGS) { const o = document.createElement('option'); o.value = code; o.textContent = name; if (code === lang) o.selected = true; sel.append(o); }
+  sel.onchange = () => setLang(sel.value);
+  lr.append(ll, sel, el('span')); g.append(lr);
+  box.append(g);
+}
+function syncSettings() {
+  for (const pre of ['m', 'p']) {
+    const mc = $(pre + '-mute'); if (mc) mc.checked = muted;
+    for (const key of ['music', 'sfx']) { const i = $(pre + '-' + key); if (i && document.activeElement !== i) { i.value = Math.round(vol[key] * 100); i.nextSibling.textContent = i.value + '%'; } }
+  }
+}
+function setLang(l) {
+  lang = LANGS.some(x => x[0] === l) ? l : 'en'; save.lang = lang; persist();
+  applyStatic(); setMute(muted);
+  renderMenu();
+  if (state === 'shop' && run) { renderShop(); $('shopEyebrow').textContent = T('wave_cleared', run.wave); }
+  if (!$('pause').hidden && run) { $('pauseInfo').textContent = T('pause_info', bn(B), run.wave, run.coins); buildSettings($('settingsPause'), 'p'); const s = $('p-lang'); if (s) s.focus(); }
+  if (curTab === 'settings') { const s = $('m-lang'); if (s) s.focus(); }
+}
+if (save.vol) { vol.music = +save.vol.music; vol.sfx = +save.vol.sfx; if (!(vol.music >= 0)) vol.music = .6; if (!(vol.sfx >= 0)) vol.sfx = .8; }
+lang = save.lang || ((navigator.language || 'en').slice(0, 2));
+if (!LANGS.some(x => x[0] === lang)) lang = 'en';
+applyStatic();
 setMute(muted);
 
 function toWorld(ev) { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left - vw / 2) / scale, y: (ev.clientY - r.top - vh / 2) / scale }; }
@@ -2015,6 +2153,7 @@ function renderMenu(tab) {
   if (curTab === 'skins') renderSkins();
   if (curTab === 'feats') renderAch();
   if (curTab === 'monsters') renderMonsters();
+  if (curTab === 'settings') buildSettings($('settingsMenu'), 'm');
 }
 for (const t of document.querySelectorAll('.tab')) t.onclick = () => renderMenu(t.dataset.tab);
 function renderFly() {
@@ -2023,8 +2162,8 @@ function renderFly() {
     const st = biomeState(b.id), c = el('button', 'card' + (save.biome === i ? ' sel' : '') + (st.unlocked ? '' : ' locked'));
     c.type = 'button';
     const sw = el('div', 'swatch'); sw.style.background = `linear-gradient(90deg, ${b.ground[0]}, ${b.blade[0]}, ${b.ground[1]})`;
-    c.append(sw, el('span', 'rar', (b.dlc ? 'DLC · ' : '') + (st.unlocked ? (st.cleared ? 'Cleared' : 'Unlocked') : 'Locked')), el('span', 'nm', b.name),
-      el('span', 'ds', st.unlocked ? `Best wave ${st.best || '-'} · coins x${b.coin}` : b.dlc ? 'Secret DLC map. Unlock it with a code.' : i > 0 ? `Defeat ${E[BIOMES[i - 1].boss].name} to unlock.` : ''));
+    c.append(sw, el('span', 'rar', (b.dlc ? 'DLC · ' : '') + (st.unlocked ? (st.cleared ? T('cleared') : T('unlocked')) : T('locked'))), el('span', 'nm', bn(b)),
+      el('span', 'ds', st.unlocked ? T('best_wave', st.best || '-', b.coin) : b.dlc ? T('dlc_secret') : i > 0 ? T('defeat_to_unlock', E[BIOMES[i - 1].boss].name) : ''));
     const fr = el('span', 'feathers');
     const got = CHALLENGES.filter(ch => st.ch && st.ch[ch.id]).length;
     fr.setAttribute('aria-label', `${got} of 3 challenges completed`);
@@ -2044,23 +2183,23 @@ function renderFly() {
   $('biomeInfo').textContent = b.blurb;
   const chBox = $('challenges'); chBox.innerHTML = '';
   const bs = biomeState(b.id);
-  if (!bs.cleared) { save.challenge = ''; chBox.append(el('p', 'muted', `Beat ${E[b.boss].name} here to unlock this biome's 3 challenge runs.`)); }
+  if (!bs.cleared) { save.challenge = ''; chBox.append(el('p', 'muted', T('ch_locked', E[b.boss].name))); }
   else {
     const done = CHALLENGES.filter(c => bs.ch && bs.ch[c.id]).length;
     const sk = SKINS.find(s => s.id === 'ch-' + b.id);
-    chBox.append(el('div', 'eyebrow', `Challenges · ${done}/3 done`), el('p', 'muted', done === 3 ? `All done. ${sk ? sk.name + ' skin unlocked.' : ''}` : `Challenge runs pay 50% more coins. Complete all 3 to unlock the ${sk ? sk.name : ''} skin.`));
+    chBox.append(el('div', 'eyebrow', T('ch_header', done)), el('p', 'muted', done === 3 ? T('ch_all', sk ? sk.name : '') : T('ch_pay', sk ? sk.name : '')));
     const g = el('div', 'grid'); g.style.marginTop = '10px';
-    for (const c of [{ id: '', name: 'Normal run', desc: 'No extra rules.' }, ...CHALLENGES]) {
+    for (const c of [{ id: '', name: T('normal_run'), desc: T('normal_desc') }, ...CHALLENGES]) {
       const card = el('button', 'card' + ((save.challenge || '') === c.id ? ' sel' : '')); card.type = 'button';
       const ok = c.id && bs.ch && bs.ch[c.id];
-      card.append(el('span', 'rar', c.id ? (ok ? 'Completed' : 'Challenge') : 'Standard'), el('span', 'nm', c.name), el('span', 'ds', c.desc));
+      card.append(el('span', 'rar', c.id ? (ok ? T('completed') : T('challenge')) : T('standard')), el('span', 'nm', c.id ? chn(c) : c.name), el('span', 'ds', c.id ? chd(c) : c.desc));
       card.onclick = () => { save.challenge = c.id; persist(); renderFly(); };
       g.append(card);
     }
     chBox.append(g);
   }
   const C = CHALLENGES.find(c => c.id === save.challenge);
-  $('startBtn').textContent = C ? `Start ${C.name} challenge` : 'Defend the nest';
+  $('startBtn').textContent = C ? T('start_ch', chn(C)) : T('start');
 }
 let resetArmed = 0;
 function roostRefund() { let n = 0; for (const u of ROOST) for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(u, l); return n; }
@@ -2068,8 +2207,8 @@ function renderRoost() {
   const box = $('roost'); box.innerHTML = '';
   const refund = roostRefund();
   const top = el('div', 'row spread');
-  top.append(el('span', 'muted', refund ? `${refund} coins spent here. Resetting gives every coin back so you can try a different build.` : 'Nothing bought yet.'));
-  const rb = el('button', 'ghost', resetArmed > Date.now() ? `Tap again to reset and get ${refund} coins` : 'Reset Roost'); rb.type = 'button';
+  top.append(el('span', 'muted', refund ? T('spent', refund) : T('nothing')));
+  const rb = el('button', 'ghost', resetArmed > Date.now() ? T('reset_confirm', refund) : T('reset')); rb.type = 'button';
   rb.id = 'resetRoostBtn';
   rb.disabled = !refund;
   if (resetArmed > Date.now()) rb.style.borderColor = 'var(--blood)';
@@ -2083,13 +2222,13 @@ function renderRoost() {
     const li = el('div', 'li'), left = el('div');
     left.append(el('div', 'nm', `${u.name} · ${lvl}/${u.max}`), el('div', 'ds', u.desc));
     const pips = el('div', 'pips'); for (let i = 0; i < u.max; i++) pips.append(el('i', i < lvl ? 'on' : '')); left.append(pips);
-    const b = el('button', 'ghost', max ? 'Maxed' : `Upgrade · ${cost} coins`); b.type = 'button';
+    const b = el('button', 'ghost', max ? T('maxed') : T('upgrade', cost)); b.type = 'button';
     b.disabled = max || save.coins < cost;
     b.onclick = () => { if (save.coins < cost || max) return; save.coins -= cost; save.up[u.id] = lvl + 1; sfx.buy(); if (lvl + 1 >= u.max) grant('fledged'); persist(); renderMenu(); };
     const acts = el('div', 'row'); acts.style.justifyContent = 'flex-end';
     if (lvl > 0) {
       let back = 0; for (let l = 0; l < lvl; l++) back += roostCost(u, l);
-      const rf = el('button', 'ghost', `Refund ${back}`); rf.type = 'button';
+      const rf = el('button', 'ghost', T('refund', back)); rf.type = 'button';
       rf.title = `Reset ${u.name} to level 0 and get ${back} coins back`;
       rf.onclick = () => { save.coins += back; delete save.up[u.id]; sfx.buy(); persist(); toastSmall(`${u.name} reset · +${back} coins`, 'Refunded'); renderMenu(); };
       acts.append(rf);
@@ -2101,7 +2240,7 @@ function renderRoost() {
 function renderSpells() {
   const box = $('spellList'); box.innerHTML = '';
   const lo = loadout();
-  const head = el('p', 'muted', `Loadout ${lo.length}/${MAX_LOADOUT}. You take up to ${MAX_LOADOUT} spells into each run. Tap an unlocked spell to add it to or remove it from your loadout.`);
+  const head = el('p', 'muted', T('loadout', lo.length, MAX_LOADOUT));
   head.style.gridColumn = '1 / -1'; box.append(head);
   for (const s of SPELLS) {
     const have = save.spells.includes(s.id), reqOk = !s.req || biomeState(s.req).unlocked;
@@ -2109,8 +2248,8 @@ function renderSpells() {
     const sw = el('div', 'swatch'); sw.style.background = s.col;
     const inLo = lo.includes(s.id);
     if (have) c.classList.toggle('sel', inLo);
-    const status = have ? (inLo ? `Equipped (slot ${lo.indexOf(s.id) + 1}) · tap to remove` : lo.length >= MAX_LOADOUT ? 'Owned · loadout full' : 'Owned · tap to equip') : !reqOk ? `Reach ${BIOMES.find(b => b.id === s.req).name} first` : `${s.cost} coins`;
-    c.append(sw, el('span', 'nm', s.name), el('span', 'ds', s.desc), el('span', 'ds', `Recharge ${s.cd}s`), el('span', 'pr coinc', status));
+    const status = have ? (inLo ? T('equipped', lo.indexOf(s.id) + 1) : lo.length >= MAX_LOADOUT ? T('lo_full') : T('tap_equip')) : !reqOk ? T('reach_first', bn(BIOMES.find(b => b.id === s.req))) : T('n_coins', s.cost);
+    c.append(sw, el('span', 'nm', s.name), el('span', 'ds', s.desc), el('span', 'ds', T('recharge', s.cd)), el('span', 'pr coinc', status));
     c.disabled = have || !reqOk || save.coins < s.cost;
     if (have) c.disabled = false;
     c.onclick = () => {
@@ -2134,7 +2273,7 @@ function renderSkins() {
   for (const s of SKINS) {
     const has = s.has(save), c = el('button', 'card skinc' + (save.skin === s.id ? ' sel' : '') + (has ? '' : ' locked')); c.type = 'button';
     const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 192;
-    c.append(cvs, el('span', 'nm', s.name), el('span', 'ds', has ? (save.skin === s.id ? 'Wearing' : 'Tap to wear') : s.cond), el('span', 'ds', has ? `Shoots: ${projOf(s.id)[2]}` : 'Shoots: ???'));
+    c.append(cvs, el('span', 'nm', s.name), el('span', 'ds', has ? (save.skin === s.id ? T('wearing') : T('tap_wear')) : s.cond), el('span', 'ds', T('shoots', has ? projOf(s.id)[2] : '???')));
     if (has) c.onclick = () => { save.skin = s.id; persist(); renderSkins(); };
     else c.disabled = true;
     box.append(c);
@@ -2225,12 +2364,12 @@ function openMonster(k) {
   save.seen = save.seen || {};
   const d = E[k], known = !!save.seen[k], home = BIOMES.find(b => b.enemies.includes(k) || b.boss === k || b.enemies.some(x => E[x].split === k));
   monPopKey = k;
-  $('monPopBiome').textContent = (d.boss ? 'Boss · ' : '') + (home ? home.name : '');
+  $('monPopBiome').textContent = (d.boss ? T('boss_tag') + ' · ' : '') + (home ? bn(home) : '');
   $('monPopName').textContent = known ? d.name : '???';
-  $('monPopStats').textContent = known ? `Defeated ${save.seen[k]} · HP ${d.hp} · Speed ${d.spd} · Bite ${d.dmg}${d.armor ? ' · Armour ' + d.armor : ''}` : 'You have not defeated one yet.';
+  $('monPopStats').textContent = known ? T('mon_stats', save.seen[k], d.hp, d.spd, d.dmg) + (d.armor ? ' · Armour ' + d.armor : '') : T('not_defeated');
   const tg = $('monPopTags'); tg.innerHTML = '';
   if (known) for (const t of monsterTraits(k)) tg.append(el('span', '', t));
-  $('monPopLore').textContent = known ? (LORE[k] || 'Nobody knows much about this one yet.') : 'Defeat one to read its story.';
+  $('monPopLore').textContent = known ? (LORE[k] || 'Nobody knows much about this one yet.') : T('read_story');
   $('monPop').hidden = false;
   $('monPopClose').focus({ preventScroll: true });
   cancelAnimationFrame(monPopRaf);
@@ -2296,7 +2435,7 @@ function renderMonsters() {
   const box = $('monList'); box.innerHTML = '';
   const all = monsterList(), visible = all.filter(k => !E[k].dlcOnly || biomeState('office').unlocked || save.seen[k]);
   const found = visible.filter(k => save.seen[k]).length;
-  $('monCount').textContent = `${found} of ${visible.length} monsters discovered. Defeat a monster once to add it to the index.`;
+  $('monCount').textContent = T('mon_count', found, visible.length);
   const card = k => {
     const d = E[k], known = !!save.seen[k];
     const c = el('div', 'card mon' + (known ? '' : ' unknown'));
@@ -2306,9 +2445,9 @@ function renderMonsters() {
     const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 220;
     c.append(cvs, el('span', 'nm', known ? d.name : '???'));
     if (known) {
-      c.append(el('span', 'ds', `Defeated ${save.seen[k]} · HP ${d.hp} · Speed ${d.spd} · Bite ${d.dmg}`));
+      c.append(el('span', 'ds', T('mon_stats', save.seen[k], d.hp, d.spd, d.dmg)));
       const tg = el('div', 'tags'); for (const t of monsterTraits(k)) tg.append(el('span', '', t)); c.append(tg);
-    } else c.append(el('span', 'ds', 'Defeat one to reveal it.'));
+    } else c.append(el('span', 'ds', T('reveal')));
     drawMonsterPreview(cvs, k, known);
     return c;
   };
@@ -2317,25 +2456,25 @@ function renderMonsters() {
     const show = ks.filter(k => visible.includes(k));
     if (!show.length) continue;
     const grp = el('div', 'mongroup');
-    grp.append(el('h3', '', b.name + (b.dlc ? ' (DLC)' : '')));
+    grp.append(el('h3', '', bn(b) + (b.dlc ? ' (DLC)' : '')));
     const g = el('div', 'grid'); for (const k of show) g.append(card(k)); grp.append(g);
     box.append(grp);
   }
   const bosses = BIOMES.map(b => b.boss).filter(k => visible.includes(k));
   const bg = el('div', 'mongroup bosses');
-  bg.append(el('h3', '', 'Bosses'), el('p', 'muted', 'Each biome ends with a boss on wave 10.'));
+  bg.append(el('h3', '', T('bosses')), el('p', 'muted', T('bosses_sub')));
   const g = el('div', 'grid');
-  for (const k of bosses) { const c = card(k); const home = BIOMES.find(b => b.boss === k); c.querySelector('.nm').after(el('span', 'rar', home.name)); g.append(c); }
+  for (const k of bosses) { const c = card(k); const home = BIOMES.find(b => b.boss === k); c.querySelector('.nm').after(el('span', 'rar', bn(home))); g.append(c); }
   bg.append(g); box.append(bg);
 }
 function renderAch() {
   const box = $('achList'); box.innerHTML = '';
   const n = Object.keys(save.ach).length;
-  $('achCount').textContent = `${n} of ${ACH.length} earned. Each one pays coins.`;
+  $('achCount').textContent = T('ach_count', n, ACH.length);
   for (const a of ACH) {
     const done = !!save.ach[a.id], li = el('div', 'li' + (done ? ' done' : '')), left = el('div');
     left.append(el('div', 'nm', a.name), el('div', 'ds', a.desc));
-    li.append(left, el('span', 'badge' + (done ? ' ok' : ''), done ? `Earned · +${a.coins}` : `+${a.coins} coins`));
+    li.append(left, el('span', 'badge' + (done ? ' ok' : ''), done ? T('earned', a.coins) : T('plus_coins', a.coins)));
     box.append(li);
   }
 }
@@ -2346,7 +2485,7 @@ try { codeBackup = localStorage.getItem(BACKUP_KEY); } catch (e) {}
 function codeStatus(text) {
   const m = $('codeMsg');
   m.className = save.testMode ? 'muted testmode' : 'muted';
-  m.textContent = text || (save.testMode ? 'Test mode is on. Enter the code again to go back to your real progress.' : '');
+  m.textContent = text || (save.testMode ? T('code_test') : '');
 }
 $('codeForm').addEventListener('submit', ev => {
   ev.preventDefault();
@@ -2360,10 +2499,10 @@ $('codeForm').addEventListener('submit', ev => {
     if (save.testMode && codeBackup) { try { const b = JSON.parse(codeBackup); b.codes = Object.assign({}, b.codes, { bandito: true }); b.biomes = b.biomes || {}; b.biomes.office = Object.assign({ cleared: false, best: 0 }, b.biomes.office, { unlocked: true }); if (!(b.skinsSeen || []).includes('bandito')) b.skinsSeen = (b.skinsSeen || ['classic']).concat('bandito'); codeBackup = JSON.stringify(b); localStorage.setItem(BACKUP_KEY, codeBackup); } catch (e) {} }
     persist(); sfx.ach();
     renderMenu();
-    codeStatus('Bandito skin and the Corporate Office DLC map unlocked. Pick the office in the biome list.');
+    codeStatus(T('code_bandito'));
     return;
   }
-  if (v !== 'crow') { codeStatus('That code does nothing.'); return; }
+  if (v !== 'crow') { codeStatus(T('code_bad')); return; }
   if (save.testMode) {
     let back = null;
     try { back = JSON.parse(codeBackup); } catch (e) {}
@@ -2372,7 +2511,7 @@ $('codeForm').addEventListener('submit', ev => {
     codeBackup = null;
     try { localStorage.removeItem(BACKUP_KEY); } catch (e) {}
     persist(); sfx.buy();
-    codeStatus('Test mode off. Your real progress is back.');
+    codeStatus(T('code_off'));
   } else {
     codeBackup = JSON.stringify(save);
     try { localStorage.setItem(BACKUP_KEY, codeBackup); } catch (e) {}
@@ -2383,7 +2522,7 @@ $('codeForm').addEventListener('submit', ev => {
     const seen = {}; for (const k of monsterList()) seen[k] = 1;
     Object.assign(save, { seen, testMode: true, coins: 999999, up, ach, biomes, spells: SPELLS.map(s => s.id), loadout: SPELLS.slice(0, MAX_LOADOUT).map(s => s.id), skinsSeen: SKINS.map(s => s.id) });
     persist(); sfx.ach();
-    codeStatus('Everything unlocked for testing. Enter the code again to undo.');
+    codeStatus(T('code_on'));
   }
   const keep = $('codeMsg').textContent;
   renderMenu();
@@ -2399,7 +2538,7 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   if (!paused && !api.sim) update(dt);
-  if (!api.sim) { draw(now); hud(); }
+  if (!api.sim) { draw(now); hud(); if (actx) music.set(state === 'menu' || !B ? 'menu' : B.id, !!(run && run.boss && !run.boss.dead && state === 'wave')); }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -2408,7 +2547,7 @@ requestAnimationFrame(frame);
 Object.assign(api, { newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
   get: () => ({ state, run, P, enemies, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
-  clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS });
+  audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS });
 window.__nestguard = api;
 })();
 </script>
