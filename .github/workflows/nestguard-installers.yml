@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
     defaults:
       run:
         working-directory: desktop
@@ -61,7 +61,6 @@ jobs:
           name: nestguard-${{ matrix.os }}
           path: |
             desktop/release/*.exe
-            desktop/release/*.dmg
             desktop/release/*.AppImage
           if-no-files-found: error
 
