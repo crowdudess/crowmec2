@@ -1276,12 +1276,52 @@ function drawMagpie(m) {
   ctx.fillStyle = '#101216'; ctx.beginPath(); ctx.arc(8, 0, 4, 0, TAU); ctx.fill();
   ctx.restore();
 }
+const PROJ = {
+  classic: ['feather', '#e6e1d2', 'Feathers'], ash: ['feather', '#9a9ca2', 'Ash feathers'], albino: ['feather', '#ffffff', 'Snow-white feathers'],
+  bog: ['leaf', '#6aa040', 'Lily leaves'], frost: ['ice', '#bfe6ff', 'Ice shards'], ember: ['flame', '#ff7a2a', 'Fireballs'],
+  golden: ['coin', '#f0c030', 'Gold coins'], dune: ['gem', '#e8a030', 'Amber gems'], widow: ['web', '#f0eef4', 'Silk darts'],
+  bandito: ['star', '#c8ccd4', 'Throwing stars'], phoenix: ['flame', '#ffd040', 'Phoenix fire'], fae: ['orb', '#a0f0e0', 'Pixie dust'],
+  blossom: ['petal', '#ffb0d0', 'Cherry petals'], eclipse: ['orb', '#ff3a6a', 'Void bolts'], suitbandito: ['card', '#f4f2ec', 'Business cards'],
+  bananacrow: ['banana', '#f0d040', 'Bananas'], 'ch-forest': ['leaf', '#4a8a3a', 'Oak leaves'], 'ch-marsh': ['orb', '#8ad08a', 'Swamp bubbles'],
+  'ch-snow': ['snowflake', '#e8f4ff', 'Snowflakes'], 'ch-city': ['cap', '#e0402a', 'Bottle caps'], 'ch-dunes': ['gem', '#3a6ad0', 'Lapis gems'],
+  'ch-spider': ['web', '#ffffff', 'Silk darts'], 'ch-volcano': ['shard', '#ff7a2a', 'Obsidian shards'], 'ch-fairy': ['star', '#f0a0d8', 'Moon stars'],
+  'ch-sakura': ['shuriken', '#d8dce4', 'Shuriken'], 'ch-void': ['orb', '#b88ae0', 'Void orbs'], 'ch-office': ['plane', '#ffffff', 'Paper planes'],
+  'ch-jungle': ['leaf', '#c8d040', 'Jungle leaves'], royal: ['gem', '#b88ae0', 'Crown jewels'],
+};
+const projOf = id => PROJ[id] || PROJ.classic;
+function drawProj(kind, col, a, k, t) {
+  const spin = t / 90;
+  switch (kind) {
+    case 'feather': { const l = 11 * k; ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4 * k, -l, 0); ctx.quadraticCurveTo(0, 4 * k, l, 0); ctx.fill(); ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(l, 0); ctx.lineTo(-l - 3, 0); ctx.stroke(); break; }
+    case 'leaf': { ctx.rotate(a + Math.sin(spin) * .4); ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, 10 * k, 5 * k, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-10 * k, 0); ctx.lineTo(10 * k, 0); ctx.stroke(); break; }
+    case 'ice': { ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(12 * k, 0); ctx.lineTo(-2 * k, -4 * k); ctx.lineTo(-10 * k, 0); ctx.lineTo(-2 * k, 4 * k); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.moveTo(10 * k, 0); ctx.lineTo(0, -1.5 * k); ctx.lineTo(-4 * k, 0); ctx.closePath(); ctx.fill(); break; }
+    case 'flame': { ctx.rotate(a); ctx.shadowColor = col; ctx.shadowBlur = 10; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-14 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, 5 * k, -4 * k); ctx.arc(5 * k, 0, 4.5 * k, -Math.PI / 2, Math.PI / 2); ctx.quadraticCurveTo(-4 * k, 6 * k, -14 * k, 0); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#fff6c0'; ctx.beginPath(); ctx.arc(5 * k, 0, 2.2 * k, 0, TAU); ctx.fill(); break; }
+    case 'coin': { const w = Math.abs(Math.cos(spin)) * 6 * k + 1; ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, w, 6 * k, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#a07010'; ctx.lineWidth = 1.2; ctx.stroke(); break; }
+    case 'gem': { ctx.rotate(spin * .5); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -7 * k); ctx.lineTo(6 * k, 0); ctx.lineTo(0, 7 * k); ctx.lineTo(-6 * k, 0); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.moveTo(0, -7 * k); ctx.lineTo(3 * k, -1 * k); ctx.lineTo(-2 * k, -1 * k); ctx.closePath(); ctx.fill(); break; }
+    case 'web': { ctx.rotate(a); ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-16 * k, 0); ctx.lineTo(4 * k, 0); ctx.stroke(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(6 * k, 0, 3.5 * k, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(6 * k, 0, 5.5 * k, 0, TAU); ctx.stroke(); break; }
+    case 'star': { ctx.rotate(spin); ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i < 10; i++) { const rr = (i % 2 ? 3 : 7.5) * k, aa = i / 10 * TAU; i ? ctx.lineTo(Math.cos(aa) * rr, Math.sin(aa) * rr) : ctx.moveTo(rr, 0); } ctx.closePath(); ctx.fill(); break; }
+    case 'shuriken': { ctx.rotate(spin * 1.5); ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i < 4; i++) { const aa = i / 4 * TAU; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(aa - .35) * 3 * k, Math.sin(aa - .35) * 3 * k); ctx.lineTo(Math.cos(aa) * 9 * k, Math.sin(aa) * 9 * k); ctx.lineTo(Math.cos(aa + .35) * 3 * k, Math.sin(aa + .35) * 3 * k); } ctx.fill(); ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(0, 0, 1.6 * k, 0, TAU); ctx.fill(); break; }
+    case 'orb': { ctx.shadowColor = col; ctx.shadowBlur = 12; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 5 * k, 0, TAU); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(-1.5 * k, -1.5 * k, 1.8 * k, 0, TAU); ctx.fill(); ctx.rotate(a); ctx.fillStyle = col + '66'; ctx.beginPath(); ctx.ellipse(-9 * k, 0, 6 * k, 2.5 * k, 0, 0, TAU); ctx.fill(); break; }
+    case 'petal': { ctx.rotate(a + spin * .6); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-7 * k, 0); ctx.quadraticCurveTo(0, -6 * k, 7 * k, -1 * k); ctx.lineTo(5 * k, 0); ctx.lineTo(7 * k, 1 * k); ctx.quadraticCurveTo(0, 6 * k, -7 * k, 0); ctx.fill(); break; }
+    case 'snowflake': { ctx.rotate(spin * .5); ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU, c = Math.cos(aa), sn = Math.sin(aa); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(c * 8 * k, sn * 8 * k); ctx.moveTo(c * 5 * k, sn * 5 * k); ctx.lineTo(c * 5 * k + Math.cos(aa + 1) * 2.5 * k, sn * 5 * k + Math.sin(aa + 1) * 2.5 * k); ctx.stroke(); } break; }
+    case 'cap': { ctx.rotate(spin); ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i < 16; i++) { const rr = (i % 2 ? 6 : 7) * k, aa = i / 16 * TAU; i ? ctx.lineTo(Math.cos(aa) * rr, Math.sin(aa) * rr) : ctx.moveTo(rr, 0); } ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(0, 0, 3.5 * k, 0, TAU); ctx.fill(); break; }
+    case 'shard': { ctx.rotate(a); ctx.fillStyle = '#0e0c10'; ctx.beginPath(); ctx.moveTo(13 * k, 0); ctx.lineTo(-3 * k, -5 * k); ctx.lineTo(-11 * k, 1 * k); ctx.lineTo(-2 * k, 4 * k); ctx.closePath(); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.stroke(); break; }
+    case 'plane': { ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(11 * k, 0); ctx.lineTo(-9 * k, -8 * k); ctx.lineTo(-5 * k, 0); ctx.lineTo(-9 * k, 8 * k); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#9aa4b8'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(11 * k, 0); ctx.lineTo(-5 * k, 0); ctx.stroke(); break; }
+    case 'banana': { ctx.rotate(spin); ctx.strokeStyle = col; ctx.lineWidth = 4.5 * k; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, -3 * k, 8 * k, .5, 2.6); ctx.stroke(); ctx.strokeStyle = '#5a4010'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(Math.cos(.5) * 8 * k, Math.sin(.5) * 8 * k - 3 * k); ctx.lineTo(Math.cos(.5) * 10 * k, Math.sin(.5) * 6 * k - 3 * k); ctx.stroke(); break; }
+    case 'card': { ctx.rotate(spin * .8); ctx.fillStyle = col; ctx.fillRect(-7 * k, -4.5 * k, 14 * k, 9 * k); ctx.fillStyle = '#c8322a'; ctx.fillRect(-5 * k, -2.5 * k, 5 * k, 1.5 * k); ctx.fillStyle = '#888'; ctx.fillRect(-5 * k, .5 * k, 9 * k, 1 * k); ctx.fillRect(-5 * k, 2.3 * k, 7 * k, 1 * k); break; }
+  }
+}
 function drawFeather(s) {
-  const a = Math.atan2(s.vy, s.vx), l = s.small ? 7 : s.big ? 16 : 11;
-  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(a);
-  ctx.fillStyle = s.big ? '#e8b84a' : P.burn ? '#f08a3a' : s.small ? '#cfd6e6' : '#e6e1d2';
-  ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
-  ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(l, 0); ctx.lineTo(-l - 3, 0); ctx.stroke();
+  const a = Math.atan2(s.vy, s.vx);
+  ctx.save(); ctx.translate(s.x, s.y);
+  if (s.small) {
+    const l = 7; ctx.rotate(a); ctx.fillStyle = '#cfd6e6';
+    ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
+  } else {
+    const [kind, col] = projOf(save.skin);
+    if (P.burn) { ctx.fillStyle = 'rgba(240,138,58,.35)'; ctx.beginPath(); ctx.arc(0, 0, s.big ? 14 : 9, 0, TAU); ctx.fill(); }
+    drawProj(kind, s.big ? '#e8b84a' : col, a, s.big ? 1.5 : 1, performance.now() + s.x);
+  }
   ctx.restore();
 }
 function drawEnemy(e, time) {
@@ -1974,12 +2014,14 @@ function renderSkins() {
   for (const s of SKINS) {
     const has = s.has(save), c = el('button', 'card skinc' + (save.skin === s.id ? ' sel' : '') + (has ? '' : ' locked')); c.type = 'button';
     const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 192;
-    c.append(cvs, el('span', 'nm', s.name), el('span', 'ds', has ? (save.skin === s.id ? 'Wearing' : 'Tap to wear') : s.cond));
+    c.append(cvs, el('span', 'nm', s.name), el('span', 'ds', has ? (save.skin === s.id ? 'Wearing' : 'Tap to wear') : s.cond), el('span', 'ds', has ? `Shoots: ${projOf(s.id)[2]}` : 'Shoots: ???'));
     if (has) c.onclick = () => { save.skin = s.id; persist(); renderSkins(); };
     else c.disabled = true;
     box.append(c);
     const pc = cvs.getContext('2d'); pc.setTransform(2.2, 0, 0, 2.2, 160, 96);
-    ctx = pc; drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, 0); ctx = mainCtx;
+    ctx = pc; drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, 0);
+    if (has) { const [kind, col] = projOf(s.id); for (const [x, y] of [[44, -12], [56, -30]]) { pc.save(); pc.translate(x, y); drawProj(kind, col, -Math.PI / 2, 1.1, 400 + x * 9); pc.restore(); } }
+    ctx = mainCtx;
   }
 }
 const LORE = {
