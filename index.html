@@ -400,7 +400,7 @@ const E = {
   moth:     { name: 'Moth', shape: 'bug', wings: true, col: ['#8a7a6a', '#5a4a3a', '#000'], hp: 36, spd: 120, dmg: 6, gold: 4, r: 13, cost: 2, from: 3, fly: true },
   tarantula:{ name: 'Tarantula', shape: 'spider', col: ['#3a2418', '#c86a2a', '#e33'], hp: 190, spd: 32, dmg: 22, gold: 12, r: 20, cost: 5, from: 4, armor: 6, split: 'spiderling' },
   queen:    { name: 'Spider Queen', shape: 'spider', col: ['#1a1220', '#a01828', '#f44'], hp: 680, spd: 26, dmg: 55, gold: 130, r: 42, boss: true, armor: 5, summon: 'spiderling', weave: true, crown: true },
-  bat:       { name: 'Bat Swarm', shape: 'bird', col: ['#2a1a22', '#3a2830', '#f44'], hp: 22, spd: 150, dmg: 5, gold: 2, r: 10, cost: 2, from: 1, fly: true, pack: 3 },
+  bat:       { name: 'Bat Swarm', shape: 'bat', col: ['#5a3050', '#8a5a78', '#f44'], hp: 22, spd: 150, dmg: 5, gold: 2, r: 13, cost: 2, from: 1, fly: true, pack: 3 },
   firebeetle:{ name: 'Fire Beetle', shape: 'bug', col: ['#c8401a', '#2a0a04', '#ff0'], hp: 34, spd: 55, dmg: 6, gold: 2, r: 12, cost: 1, from: 1, armor: 4 },
   magmaworm: { name: 'Magma Worm', shape: 'snake', col: ['#e0602a', '#8a2a10', '#ff0'], hp: 110, spd: 50, dmg: 16, gold: 8, r: 16, cost: 3, from: 2, burrow: true, armor: 3 },
   slime:     { name: 'Lava Slime', shape: 'slime', col: ['#f07a2a', '#b03a10', '#200'], hp: 60, spd: 40, dmg: 8, gold: 4, r: 15, cost: 2, from: 3, split: 'slimelet' },
@@ -1308,6 +1308,33 @@ function drawEnemy(e, time) {
       ctx.strokeStyle = c1; ctx.lineWidth = 2; ctx.beginPath();
       for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU; ctx.moveTo(Math.cos(aa) * r * .35, Math.sin(aa) * r * .35); ctx.lineTo(Math.cos(aa) * r * .8, Math.sin(aa) * r * .7); }
       ctx.arc(0, 0, r * .35, 0, TAU); ctx.stroke();
+      break; }
+    case 'bat': {
+      const f = Math.sin(time / 45 + e.ph * 7);
+      const span = r * (2.3 + f * .45), sweep = r * (.15 - f * .2);
+      for (const sd of [-1, 1]) {
+        ctx.fillStyle = fl ? '#fff' : c0;
+        ctx.beginPath();
+        ctx.moveTo(r * .35, sd * r * .3);
+        ctx.quadraticCurveTo(r * .9 + sweep, sd * span * .55, r * .45 + sweep, sd * span);
+        ctx.quadraticCurveTo(r * .05, sd * span * .7, -r * .2 + sweep * .5, sd * span * .9);
+        ctx.quadraticCurveTo(-r * .45, sd * span * .5, -r * .8, sd * span * .65);
+        ctx.quadraticCurveTo(-r * .75, sd * span * .3, -r * 1.05, sd * span * .3);
+        ctx.quadraticCurveTo(-r * .7, sd * r * .4, -r * .45, sd * r * .2);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = c1; ctx.lineWidth = Math.max(1.2, r * .09); ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(r * .25, sd * r * .32); ctx.lineTo(r * .45 + sweep, sd * span);
+        ctx.moveTo(r * .2, sd * r * .4); ctx.lineTo(-r * .2 + sweep * .5, sd * span * .9);
+        ctx.moveTo(r * .1, sd * r * .4); ctx.lineTo(-r * .8, sd * span * .65);
+        ctx.moveTo(0, sd * r * .35); ctx.lineTo(-r * 1.05, sd * span * .3);
+        ctx.stroke();
+      }
+      ctx.fillStyle = fl ? '#fff' : '#1a0e14'; ctx.beginPath(); ctx.ellipse(-r * .05, 0, r * .6, r * .4, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(r * .55, 0, r * .36, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(r * .5, -r * .2); ctx.lineTo(r * .42, -r * .68); ctx.lineTo(r * .78, -r * .28); ctx.moveTo(r * .5, r * .2); ctx.lineTo(r * .42, r * .68); ctx.lineTo(r * .78, r * .28); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .72, -r * .14, Math.max(1.4, r * .1), 0, TAU); ctx.arc(r * .72, r * .14, Math.max(1.4, r * .1), 0, TAU); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(r * .86, -r * .08); ctx.lineTo(r * .98, -r * .04); ctx.lineTo(r * .86, -r * .01); ctx.moveTo(r * .86, r * .08); ctx.lineTo(r * .98, r * .04); ctx.lineTo(r * .86, r * .01); ctx.fill();
       break; }
     case 'paper': {
       const fl = .55 + Math.abs(Math.sin(time / 90 + e.ph)) * .45;
