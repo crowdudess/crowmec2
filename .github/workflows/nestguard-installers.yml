@@ -1,10 +1,20 @@
 name: Nestguard installers
 
 # Builds desktop installers for the Nestguard game.
-# - Push a tag like "v1.0.0" to build and publish a GitHub Release with the installers.
-# - Or run it by hand from the Actions tab to get the installers as run artifacts.
+# - Push to main (or the claude/beautiful-euler-b2t7tl branch) with a change to the game or the desktop app:
+#   builds the installers and publishes them on a release named after the version in desktop/package.json.
+#   Bump that version to make a new release; the same version updates the existing release.
+# - Push a tag like "v1.0.0" to build and publish a release with that name.
+# - Or run it by hand from the Actions tab to get the installers as run artifacts only.
 on:
   push:
+    branches:
+      - main
+      - claude/beautiful-euler-b2t7tl
+    paths:
+      - "index.html"
+      - "desktop/**"
+      - ".github/workflows/nestguard-installers.yml"
     tags:
       - "v*"
       - "nestguard-v*"
@@ -58,9 +68,21 @@ jobs:
   release:
     name: Publish release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick release tag
+        id: tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "name=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=v$(node -p "require('./desktop/package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -68,7 +90,10 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: Nestguard ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          name: Nestguard ${{ steps.tag.outputs.name }}
+          make_latest: true
           files: dist/*
           body: |
             Desktop installers for Nestguard.
