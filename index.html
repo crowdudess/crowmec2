@@ -336,6 +336,9 @@ const BIOMES = [
   { id: 'void', name: 'The Void', hp: 18.5, dmg: 3.6, coin: 15, boss: 'maw', elite: 'gazer',
     enemies: ['voidling', 'shade', 'voidwisp', 'gazer', 'voidworm'], ground: ['#1a1428', '#0e0a18', '#05030a'], blade: ['#3a2a5a', '#2a2040'], stone: '#141020',
     blurb: 'Voidling swarms, fast shades, flickering void wisps, gazers that slow your crow from afar, and void worms. At the end of everything waits the Maw.' },
+  { id: 'office', name: 'Corporate Office', dlc: true, hp: 1.7, dmg: 1.25, coin: 1.8, boss: 'jobapp', elite: 'vending',
+    enemies: ['paper', 'chair', 'coffee', 'printer', 'vending'], ground: ['#3c4452', '#2a303a', '#181c24'], blade: ['#4a5262', '#3a4250'], stone: '#2e3440',
+    blurb: 'DLC. Beat the boss to unlock Bandito in a Suit. Paper swarms, runaway office chairs, coffee machines whose hot coffee burns the nest, printers that jam your crow with paper, and armoured vending machines. The final boss is the Job Application.' },
 ];
 const E = {
   beetle:   { name: 'Beetle', shape: 'bug', col: ['#2f5a4a', '#11140f', '#000'], hp: 16, spd: 48, dmg: 4, gold: 2, r: 11, cost: 1, from: 1 },
@@ -406,6 +409,12 @@ const E = {
   gazer:     { name: 'Gazer', shape: 'eye', col: ['#2a1a40', '#c83aff', '#fff'], hp: 80, spd: 45, dmg: 0, gold: 8, r: 16, cost: 3, from: 3, ranged: true },
   voidworm:  { name: 'Void Worm', shape: 'snake', col: ['#3a2a5a', '#1a0a30', '#c8f'], hp: 180, spd: 50, dmg: 22, gold: 12, r: 18, cost: 4, from: 4, burrow: true, armor: 5 },
   maw:       { name: 'The Maw', shape: 'eye', col: ['#120a20', '#ff3a6a', '#fff'], hp: 640, spd: 24, dmg: 45, gold: 300, r: 46, boss: true, armor: 6, summon: 'voidling', weave: true, lunge: true },
+  paper:     { name: 'Paper Swarm', shape: 'paper', col: ['#f4f4f0', '#8aa0c0', '#222'], hp: 7, spd: 120, dmg: 3, gold: 1, r: 9, cost: 2, from: 1, fly: true, pack: 3 },
+  chair:     { name: 'Office Chair', shape: 'chair', col: ['#2a2a32', '#55555e', '#888'], hp: 16, spd: 115, dmg: 5, gold: 2, r: 12, cost: 1, from: 1, zig: .9 },
+  coffee:    { name: 'Coffee Machine', shape: 'coffee', col: ['#2a2a2e', '#6a4028', '#f33'], hp: 26, spd: 50, dmg: 6, gold: 4, r: 13, cost: 2, from: 2, poison: true },
+  printer:   { name: 'Printer', shape: 'printer', col: ['#d8d8d4', '#3a3a3a', '#4a8'], hp: 34, spd: 40, dmg: 0, gold: 6, r: 15, cost: 3, from: 3, ranged: true, jamText: 'Paper jam!' },
+  vending:   { name: 'Vending Machine', shape: 'vending', col: ['#c8322a', '#9ad0f0', '#fff'], hp: 85, spd: 26, dmg: 16, gold: 14, r: 20, cost: 4, from: 4, armor: 4 },
+  jobapp:    { name: 'The Job Application', shape: 'jobapp', col: ['#f8f6ee', '#2a4a8a', '#c8322a'], hp: 480, spd: 26, dmg: 34, gold: 120, r: 40, boss: true, armor: 3, summon: 'paper', weave: true, lunge: true, jamText: 'Paperwork!' },
   ratking:  { name: 'Rat King', shape: 'quad', tail: 'thin', ears: true, crown: true, col: ['#4a403a', '#2e2824', '#e33'], hp: 600, spd: 28, dmg: 48, gold: 90, r: 36, boss: true, summon: 'rat', lunge: true },
 };
 const BOSS_WAVE = 10;
@@ -530,6 +539,8 @@ const SKINS = [
   { id: 'ch-fairy', name: 'Moonpetal', body: '#d8f0ec', wing: '#b0e0d8', sheen: 'rgba(240,160,216,.8)', beak: '#c890c0', eye: '#5a3a7a', glow: '#f0a0d8', cond: 'Complete all 3 Glimmer Glade challenges.', has: s => chDone(s, 'fairy') },
   { id: 'ch-sakura', name: 'Ronin', body: '#14141a', wing: '#0a0a0e', sheen: 'rgba(255,176,208,.85)', beak: '#c8322a', eye: '#fff', bandana: null, cond: 'Complete all 3 Blossom Ridge challenges.', has: s => chDone(s, 'sakura') },
   { id: 'ch-void', name: 'Voidborn', body: '#000', wing: '#05000a', sheen: 'rgba(184,138,224,.9)', beak: '#b88ae0', eye: '#fff', glow: '#b88ae0', crown: true, cond: 'Complete all 3 Void challenges.', has: s => chDone(s, 'void') },
+  { id: 'suitbandito', name: 'Bandito in a Suit', body: '#2a2e38', wing: '#1c2028', sheen: 'rgba(200,210,230,.35)', beak: '#e8b84a', eye: '#fff', googly: true, mask: true, suit: true, cond: 'Defeat the Job Application in the Corporate Office.', has: s => !!s.ach.jobapp || !!s.testMode },
+  { id: 'ch-office', name: 'Middle Manager', body: '#3a4252', wing: '#262c38', sheen: 'rgba(240,240,240,.6)', beak: '#c8a050', eye: '#fff', crown: false, cond: 'Complete all 3 Corporate Office challenges.', has: s => chDone(s, 'office') },
   { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
 ];
 
@@ -547,6 +558,7 @@ const ACH = [
   { id: 'faequeen', name: 'Iron Wings', desc: 'Defeat the Fairy Queen.', coins: 420 },
   { id: 'oni', name: 'Demon Slayer', desc: 'Defeat the Oni.', coins: 520 },
   { id: 'maw', name: 'Into the Void', desc: 'Defeat the Maw.', coins: 700 },
+  { id: 'jobapp', name: "You're Hired", desc: 'Defeat the Job Application. Unlocks Bandito in a Suit.', coins: 120 },
   { id: 'allbiomes', name: 'Every Nest', desc: 'Clear every biome.', coins: 600 },
   { id: 'challenger', name: 'Up for It', desc: 'Complete a challenge run.', coins: 40 },
   { id: 'chall10', name: 'Glutton for Punishment', desc: 'Complete 10 challenge runs.', coins: 300 },
@@ -572,7 +584,7 @@ function freshSave() { return { coins: 0, earnedTotal: 0, up: {}, spells: ['bram
 let save = freshSave();
 try { const raw = localStorage.getItem(SAVE_KEY); if (raw) save = Object.assign(freshSave(), JSON.parse(raw)); } catch (e) {}
 function persist() { if (api.sim) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
-const biomeState = id => save.biomes[id] || (save.biomes[id] = { unlocked: false, cleared: false, best: 0 });
+const biomeState = id => { const st = save.biomes[id] || (save.biomes[id] = { unlocked: false, cleared: false, best: 0 }); if (id === 'forest') st.unlocked = true; return st; };
 muted = !!save.muted;
 
 // ---------- state ----------
@@ -950,7 +962,7 @@ function healAround(e, frac) {
 }
 function webCrow(e, secs) {
   run.webT = Math.max(run.webT, secs);
-  if (!api.sim) { webLines.push({ x: e.x, y: e.y, t: .5 }); texts.push({ x: 0, y: -NEST_R - 24, v: 'Webbed!', t: 1, bad: true }); }
+  if (!api.sim) { webLines.push({ x: e.x, y: e.y, t: .5 }); texts.push({ x: 0, y: -NEST_R - 24, v: e.jamText || 'Webbed!', t: 1, bad: true }); }
 }
 let webLines = [];
 function biteNest(e) {
@@ -1008,6 +1020,12 @@ function draw(time) {
   if (biome.id === 'volcano') {
     ctx.lineWidth = 3; ctx.strokeStyle = `rgba(255,110,40,${.3 + .12 * Math.sin(time / 400)})`;
     for (const s of deco.stones) { ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x + s.r * 4, s.y + s.r * 1.5); ctx.lineTo(s.x + s.r * 6, s.y - s.r * 2); ctx.moveTo(s.x + s.r * 4, s.y + s.r * 1.5); ctx.lineTo(s.x + s.r * 3, s.y + s.r * 5); ctx.stroke(); }
+  }
+  if (biome.id === 'office') {
+    ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 2;
+    for (let i = -960; i < 960; i += 60) { ctx.beginPath(); ctx.moveTo(i, -960); ctx.lineTo(i, 960); ctx.moveTo(-960, i); ctx.lineTo(960, i); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(180,190,210,.22)'; ctx.lineWidth = 6;
+    for (const s of deco.stones) { if (Math.hypot(s.x, s.y) < 260) continue; const w = s.r * 9; ctx.beginPath(); ctx.moveTo(s.x - w / 2, s.y + w / 2); ctx.lineTo(s.x - w / 2, s.y - w / 2); ctx.lineTo(s.x + w / 2, s.y - w / 2); ctx.stroke(); ctx.fillStyle = 'rgba(120,90,60,.35)'; ctx.fillRect(s.x - w / 2 + 6, s.y - w / 2 + 6, w * .55, w * .3); }
   }
   if (biome.id === 'void') {
     for (const b of deco.blades) { ctx.fillStyle = b.c ? 'rgba(184,138,224,.5)' : 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(b.x, b.y, b.h / 8, 0, TAU); ctx.fill(); }
@@ -1148,6 +1166,11 @@ function drawCrow(S, a, flap, bob, time) {
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.ellipse(0, bob * .3, 18, 13, 0, 0, TAU); ctx.fill();
   ctx.shadowBlur = 0;
   ctx.strokeStyle = S.sheen; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, 0, 13, 8, 0, 2.2, 4.1); ctx.stroke();
+  if (S.suit) {
+    ctx.fillStyle = '#f4f2ec'; ctx.beginPath(); ctx.moveTo(9, -9); ctx.lineTo(-6, 0); ctx.lineTo(9, 9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#c8322a'; ctx.beginPath(); ctx.moveTo(6, -2.2); ctx.lineTo(6, 2.2); ctx.lineTo(3, 3); ctx.lineTo(-13, 0); ctx.lineTo(3, -3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#9a1e18'; ctx.beginPath(); ctx.arc(5.5, 0, 2.4, 0, TAU); ctx.fill();
+  }
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(16, 0, 10, 0, TAU); ctx.fill();
   ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
   if (flap) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
@@ -1258,6 +1281,52 @@ function drawEnemy(e, time) {
       ctx.strokeStyle = c1; ctx.lineWidth = 2; ctx.beginPath();
       for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU; ctx.moveTo(Math.cos(aa) * r * .35, Math.sin(aa) * r * .35); ctx.lineTo(Math.cos(aa) * r * .8, Math.sin(aa) * r * .7); }
       ctx.arc(0, 0, r * .35, 0, TAU); ctx.stroke();
+      break; }
+    case 'paper': {
+      const fl = .55 + Math.abs(Math.sin(time / 90 + e.ph)) * .45;
+      ctx.fillStyle = c0; ctx.fillRect(-r, -r * .75 * fl, r * 2, r * 1.5 * fl);
+      ctx.strokeStyle = c1; ctx.lineWidth = 1.2; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(-r * .7, i * r * .25 * fl); ctx.lineTo(r * .7, i * r * .25 * fl); ctx.stroke(); }
+      break; }
+    case 'chair': {
+      ctx.strokeStyle = c1; ctx.lineWidth = Math.max(2, r * .18); ctx.lineCap = 'round';
+      const sp = time / 120 + e.ph;
+      for (let i = 0; i < 5; i++) { const a = sp + i / 5 * TAU; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); ctx.stroke(); ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(Math.cos(a) * r, Math.sin(a) * r, r * .14, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(0, 0, r * .7, 0, TAU); ctx.fill();
+      ctx.fillRect(-r * 1.05, -r * .6, r * .3, r * 1.2);
+      break; }
+    case 'coffee': {
+      ctx.fillStyle = c0; ctx.fillRect(-r, -r * .8, r * 1.7, r * 1.6);
+      ctx.fillStyle = 'rgba(200,220,230,.5)'; ctx.beginPath(); ctx.arc(r * .55, 0, r * .55, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .55, 0, r * .38, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(-r * .6, -r * .5, r * .1, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; for (let i = -1; i <= 1; i++) { const w = Math.sin(time / 150 + i) * 3; ctx.beginPath(); ctx.moveTo(r * .9, i * r * .3); ctx.quadraticCurveTo(r * 1.3, i * r * .3 + w, r * 1.6, i * r * .3 - w); ctx.stroke(); }
+      break; }
+    case 'printer': {
+      ctx.fillStyle = c0; ctx.fillRect(-r, -r * .85, r * 1.8, r * 1.7);
+      ctx.fillStyle = c1; ctx.fillRect(r * .35, -r * .6, r * .2, r * 1.2);
+      const out = (Math.sin(time / 300 + e.ph) * .5 + .5) * r * .8;
+      ctx.fillStyle = '#fff'; ctx.fillRect(r * .55, -r * .5, out, r);
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(-r * .6, -r * .55, r * .1, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#888'; ctx.fillRect(-r * .5, r * .2, r * .6, r * .3);
+      break; }
+    case 'vending': {
+      ctx.fillStyle = c0; ctx.fillRect(-r * .9, -r * .7, r * 1.8, r * 1.4);
+      ctx.fillStyle = c1; ctx.fillRect(-r * .6, -r * .55, r * 1.2, r * .8);
+      const cans = ['#e33', '#3a8', '#fc3', '#38f', '#f8f', '#fff'];
+      for (let i = 0; i < 6; i++) { ctx.fillStyle = cans[i]; ctx.fillRect(-r * .5 + (i % 3) * r * .38, -r * .45 + Math.floor(i / 3) * r * .38, r * .22, r * .26); }
+      ctx.fillStyle = '#111'; ctx.fillRect(-r * .5, r * .35, r, r * .2);
+      ctx.fillStyle = c2; ctx.fillRect(r * .6, -r * .2, r * .12, r * .3);
+      break; }
+    case 'jobapp': {
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = c0; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 12; ctx.fillRect(-r * .8, -r, r * 1.6, r * 2); ctx.shadowBlur = 0;
+      ctx.fillStyle = c1; ctx.fillRect(-r * .8, -r, r * 1.6, r * .32);
+      ctx.fillStyle = '#fff'; ctx.font = `800 ${r * .15}px Chivo, sans-serif`; ctx.textAlign = 'center'; ctx.fillText('JOB APPLICATION', 0, -r * .78);
+      ctx.strokeStyle = '#9aa4b8'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 7; i++) { const y = -r * .5 + i * r * .2; ctx.beginPath(); ctx.moveTo(-r * .65, y); ctx.lineTo(r * .65, y); ctx.stroke(); ctx.strokeRect(-r * .65, y - r * .1, r * .08, r * .08); }
+      ctx.save(); ctx.rotate(-.35); ctx.strokeStyle = c2; ctx.lineWidth = 3; ctx.strokeRect(-r * .6, r * .35, r * 1.2, r * .32); ctx.fillStyle = c2; ctx.font = `800 ${r * .2}px Chivo, sans-serif`; ctx.fillText('REJECTED', 0, r * .58); ctx.restore();
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-r * .3, -r * .35, r * .08, 0, TAU); ctx.arc(r * .3, -r * .35, r * .08, 0, TAU); ctx.fill();
+      ctx.textAlign = 'start';
       break; }
     case 'slime': {
       const wob = Math.sin(time / 160 + e.ph) * .08;
@@ -1457,8 +1526,8 @@ function bossBeaten() {
     bs.cleared = true;
     const bonus = Math.round(40 * B.coin); addCoins(bonus);
     run.unlocks.push(`First clear of ${B.name}: <b>+${bonus} coins</b>`);
-    const next = BIOMES[run.biome + 1];
-    if (BIOMES.every(b => biomeState(b.id).cleared)) grant('allbiomes');
+    const next = B.dlc ? null : BIOMES.slice(run.biome + 1).find(b => !b.dlc);
+    if (BIOMES.filter(b => !b.dlc).every(b => biomeState(b.id).cleared)) grant('allbiomes');
     if (next && !biomeState(next.id).unlocked) { biomeState(next.id).unlocked = true; run.unlocks.push(`New biome: <b>${next.name}</b>`); }
     const sp = SPELLS.find(s => s.req === (next && next.id));
     if (sp) run.unlocks.push(`New spell available in the Spells tab: <b>${sp.name}</b>`);
@@ -1472,7 +1541,7 @@ function bossBeaten() {
       run.unlocks.push(`Challenge complete: <b>${C.name}</b> (+${cb} coins)`);
       grant('challenger');
       if (chCount(save) >= 10) grant('chall10');
-      if (chCount(save) >= CHALLENGES.length * BIOMES.length) grant('chall30');
+      if (BIOMES.filter(b => !b.dlc).every(b => chDone(save, b.id))) grant('chall30');
       checkSkins();
     }
   }
@@ -1643,8 +1712,8 @@ function renderFly() {
     const st = biomeState(b.id), c = el('button', 'card' + (save.biome === i ? ' sel' : '') + (st.unlocked ? '' : ' locked'));
     c.type = 'button';
     const sw = el('div', 'swatch'); sw.style.background = `linear-gradient(90deg, ${b.ground[0]}, ${b.blade[0]}, ${b.ground[1]})`;
-    c.append(sw, el('span', 'rar', st.unlocked ? (st.cleared ? 'Cleared' : 'Unlocked') : 'Locked'), el('span', 'nm', b.name),
-      el('span', 'ds', st.unlocked ? `Best wave ${st.best || '-'} · coins x${b.coin}` : `Defeat ${E[BIOMES[i - 1].boss].name} to unlock.`));
+    c.append(sw, el('span', 'rar', (b.dlc ? 'DLC · ' : '') + (st.unlocked ? (st.cleared ? 'Cleared' : 'Unlocked') : 'Locked')), el('span', 'nm', b.name),
+      el('span', 'ds', st.unlocked ? `Best wave ${st.best || '-'} · coins x${b.coin}` : b.dlc ? 'Secret DLC map. Unlock it with a code.' : i > 0 ? `Defeat ${E[BIOMES[i - 1].boss].name} to unlock.` : ''));
     if (st.unlocked) c.onclick = () => { save.biome = i; persist(); B = null; makeDeco(); renderFly(); };
     else c.disabled = true;
     box.append(c);
@@ -1779,10 +1848,11 @@ $('codeForm').addEventListener('submit', ev => {
     save.codes = Object.assign({}, save.codes, { bandito: true });
     if (!save.skinsSeen.includes('bandito')) save.skinsSeen.push('bandito');
     save.skin = 'bandito';
-    if (save.testMode && codeBackup) { try { const b = JSON.parse(codeBackup); b.codes = Object.assign({}, b.codes, { bandito: true }); if (!(b.skinsSeen || []).includes('bandito')) b.skinsSeen = (b.skinsSeen || ['classic']).concat('bandito'); codeBackup = JSON.stringify(b); localStorage.setItem(BACKUP_KEY, codeBackup); } catch (e) {} }
+    biomeState('office').unlocked = true;
+    if (save.testMode && codeBackup) { try { const b = JSON.parse(codeBackup); b.codes = Object.assign({}, b.codes, { bandito: true }); b.biomes = b.biomes || {}; b.biomes.office = Object.assign({ cleared: false, best: 0 }, b.biomes.office, { unlocked: true }); if (!(b.skinsSeen || []).includes('bandito')) b.skinsSeen = (b.skinsSeen || ['classic']).concat('bandito'); codeBackup = JSON.stringify(b); localStorage.setItem(BACKUP_KEY, codeBackup); } catch (e) {} }
     persist(); sfx.ach();
     renderMenu();
-    codeStatus('Bandito unlocked. You are wearing it now.');
+    codeStatus('Bandito skin and the Corporate Office DLC map unlocked. Pick the office in the biome list.');
     return;
   }
   if (v !== 'crow') { codeStatus('That code does nothing.'); return; }
@@ -1811,6 +1881,7 @@ $('codeForm').addEventListener('submit', ev => {
   codeStatus(keep);
 });
 renderMenu('fly');
+if (save.codes && save.codes.bandito && !biomeState('office').unlocked) { biomeState('office').unlocked = true; persist(); renderMenu(); }
 codeStatus();
 
 // ---------- loop ----------
