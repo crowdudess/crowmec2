@@ -668,7 +668,7 @@ function deathSfx(k, boss, preview, mode) {
   const base = (220 + hv * 440) * (1.45 - big);
   switch (d.shape) {
     case 'bug': nz(0, .06, .09, 3000); osc('square', base * 2, base, 0, .07, .04); if (d.wings) osc('sawtooth', base * 4, base * 2, 0, .1, .02); break;
-    case 'quad': osc('sawtooth', base * 1.6, base * .6, 0, .18, .05); osc('triangle', base * 2.2, base * 1.2, .02, .12, .035); break;
+    case 'quad': case 'bear': case 'oni': case 'ratking': osc('sawtooth', base * 1.6, base * .6, 0, .18, .05); osc('triangle', base * 2.2, base * 1.2, .02, .12, .035); break;
     case 'bird': osc('triangle', base * 2, base * 3, 0, .06, .06); osc('triangle', base * 3, base * 1.2, .06, .14, .06); break;
     case 'bat': osc('sine', 2400 + hv * 800, 3600, 0, .08, .05); osc('sine', 3000, 1800, .08, .06, .04); break;
     case 'snake': nz(0, .35, .06, 4000); osc('sine', base, base * .7, 0, .2, .025); break;
@@ -781,7 +781,7 @@ const E = {
   wolf:     { name: 'Wolf Pack', shape: 'quad', tail: 'thin', ears: true, col: ['#7a828c', '#5a6068', '#e8d24a'], hp: 36, spd: 78, dmg: 7, gold: 3, r: 14, cost: 4, from: 2, pack: 3 },
   owl:      { name: 'Snowy Owl', shape: 'bird', col: ['#d8dce2', '#f0f2f4', '#e8c860'], hp: 42, spd: 140, dmg: 8, gold: 5, r: 15, cost: 2, from: 3, fly: true },
   elk:      { name: 'Elk', shape: 'quad', tail: 'none', antlers: true, col: ['#7a5a3a', '#5a3f28', '#111'], hp: 150, spd: 32, dmg: 20, gold: 10, r: 21, cost: 5, from: 4, armor: 6 },
-  bear:     { name: 'Frost Bear', shape: 'quad', tail: 'none', ears: true, col: ['#cfd8e2', '#aab6c4', '#111'], hp: 560, spd: 24, dmg: 44, gold: 70, r: 38, boss: true, armor: 8, summon: 'wolf' },
+  bear:     { name: 'Frost Bear', shape: 'bear', aura: '#9fdcff', tail: 'none', ears: true, col: ['#cfd8e2', '#aab6c4', '#111'], hp: 560, spd: 24, dmg: 44, gold: 70, r: 38, boss: true, armor: 8, summon: 'wolf' },
 
   rat:      { name: 'Rats', shape: 'quad', tail: 'thin', ears: true, col: ['#5a504a', '#3a3430', '#e33'], hp: 13, spd: 92, dmg: 3, gold: 1, r: 9, cost: 2, from: 1, pack: 4 },
   roach:    { name: 'Roach', shape: 'bug', col: ['#5a3018', '#2a1408', '#000'], hp: 26, spd: 62, dmg: 4, gold: 2, r: 11, cost: 1, from: 1, armor: 2, split: 'roachling' },
@@ -828,7 +828,7 @@ const E = {
   thrower:   { name: 'Banana Thrower', shape: 'ape', banana: true, col: ['#7a4a2a', '#e8c090', '#222'], hp: 60, spd: 50, dmg: 0, gold: 7, r: 14, cost: 3, from: 3, ranged: true, jamText: "Banana'd!" },
   gorilla:   { name: 'Silverback', shape: 'ape', silver: true, col: ['#2a2a2e', '#5a5a62', '#c33'], hp: 125, spd: 30, dmg: 17, gold: 16, r: 22, cost: 5, from: 4, armor: 5, lunge: true },
   kong:      { name: 'The Monkey King', shape: 'ape', crown: true, silver: true, col: ['#b07a2a', '#f0d080', '#222'], hp: 760, spd: 26, dmg: 56, gold: 260, r: 48, boss: true, armor: 6, lunge: true, summon: 'baboon', weave: true, jamText: 'Banana storm!' },
-  oni:       { name: 'Oni', shape: 'quad', tail: 'none', horns: true, ears: false, col: ['#c8322a', '#8a1a14', '#ff0'], hp: 740, spd: 28, dmg: 55, gold: 230, r: 42, boss: true, armor: 6, summon: 'monkey', lunge: true },
+  oni:       { name: 'Oni', shape: 'oni', aura: '#ff5a1a', tail: 'none', horns: true, ears: false, col: ['#c8322a', '#8a1a14', '#ff0'], hp: 740, spd: 28, dmg: 55, gold: 230, r: 42, boss: true, armor: 6, summon: 'monkey', lunge: true },
 
   voidling:  { name: 'Voidlings', shape: 'orb', col: ['#6a3aa0', '#1a0a30', '#fff'], hp: 18, spd: 100, dmg: 4, gold: 1, r: 8, cost: 2, from: 1, pack: 4 },
   shade:     { name: 'Shade', shape: 'quad', tail: 'thin', ears: true, col: ['#1a1428', '#2a2040', '#b88ae0'], hp: 50, spd: 120, dmg: 8, gold: 4, r: 13, cost: 2, from: 1, phase: true },
@@ -842,7 +842,7 @@ const E = {
   printer:   { name: 'Printer', shape: 'printer', col: ['#d8d8d4', '#3a3a3a', '#4c8'], hp: 34, spd: 40, dmg: 0, gold: 6, r: 19, cost: 3, from: 3, ranged: true, jamText: 'Paper jam!' },
   vending:   { name: 'Vending Machine', shape: 'vending', col: ['#c8322a', '#9ad0f0', '#fff'], hp: 85, spd: 26, dmg: 16, gold: 14, r: 22, cost: 4, from: 4, armor: 4 },
   jobapp:    { name: 'The Job Application', shape: 'jobapp', col: ['#f8f6ee', '#2a4a8a', '#c8322a'], hp: 480, spd: 26, dmg: 34, gold: 120, r: 85, boss: true, armor: 3, summon: 'paper', weave: true, lunge: true, jamText: 'Paperwork!' },
-  ratking:  { name: 'Rat King', shape: 'quad', tail: 'thin', ears: true, crown: true, col: ['#4a403a', '#2e2824', '#e33'], hp: 600, spd: 28, dmg: 48, gold: 90, r: 36, boss: true, summon: 'rat', lunge: true },
+  ratking:  { name: 'Rat King', shape: 'ratking', aura: '#b4ff4a', tail: 'thin', ears: true, crown: true, col: ['#4a403a', '#2e2824', '#e33'], hp: 600, spd: 28, dmg: 48, gold: 90, r: 36, boss: true, summon: 'rat', lunge: true },
 };
 const BOSS_WAVE = 10;
 
@@ -1992,6 +1992,24 @@ function drawFeather(s) {
   }
   ctx.restore();
 }
+function bossAura(e, time) {
+  const r = e.r * (e.auraS || 1), rgb = hexRgb(fxCol(e.aura || e.col[0])), pulse = 1 + Math.sin(time / 320 + e.ph) * .07;
+  ctx.save(); ctx.translate(e.x, e.y);
+  const g = ctx.createRadialGradient(0, 0, r * .5, 0, 0, r * 2.2 * pulse);
+  g.addColorStop(0, `rgba(${rgb},.5)`); g.addColorStop(.45, `rgba(${rgb},.22)`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r * 2.2 * pulse, 0, TAU); ctx.fill();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 24; i++) {
+    const a = i / 24 * TAU + time / 1600 * (i % 2 ? 1 : -1), fl = Math.sin(time / 160 + i * 2.3) * .5 + .5, len = r * (1.25 + fl * .45), w = .2 + fl * .06;
+    ctx.fillStyle = `rgba(${rgb},${.05 + fl * .09})`; ctx.beginPath();
+    ctx.moveTo(Math.cos(a - w) * r * .85, Math.sin(a - w) * r * .85);
+    ctx.quadraticCurveTo(Math.cos(a) * len * .85, Math.sin(a) * len * .85 + Math.sin(time / 90 + i) * r * .06, Math.cos(a + w * .3) * len, Math.sin(a + w * .3) * len);
+    ctx.lineTo(Math.cos(a + w) * r * .85, Math.sin(a + w) * r * .85); ctx.closePath(); ctx.fill();
+  }
+  for (let i = 0; i < 7; i++) { const a = time / 900 + i / 7 * TAU, rr = r * (1.55 + Math.sin(time / 400 + i * 1.7) * .2); ctx.fillStyle = `rgba(${rgb},${.55 + Math.sin(time / 200 + i) * .3})`; ctx.beginPath(); ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, Math.max(1.5, r * .06), 0, TAU); ctx.fill(); }
+  ctx.globalCompositeOperation = 'source-over'; ctx.restore();
+}
+const fxCol = c => /^#[0-9a-f]{3,6}$/i.test(c) ? c : '#ff6a3a';
 function drawEnemy(e, time) {
   const a = e.fly && e.mode === 'out' ? e.retreatA : Math.atan2(-e.y, -e.x), r = e.r, fl = e.flash > 0;
   const [c0, c1, c2] = fl ? ['#fff', '#fff', e.col[2]] : e.col;
@@ -2005,7 +2023,8 @@ function drawEnemy(e, time) {
     ctx.beginPath(); ctx.moveTo(e.x, e.y); for (const p of e.trail) ctx.lineTo(p.x, p.y); ctx.stroke();
     ctx.strokeStyle = c1; ctx.lineWidth = 3; ctx.setLineDash([4, 6]); ctx.stroke(); ctx.setLineDash([]);
   }
-  if (e.elite || e.boss) { ctx.strokeStyle = e.boss ? 'rgba(210,84,63,.6)' : 'rgba(232,184,74,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, r * 1.35, 0, TAU); ctx.stroke(); }
+  if (e.boss) { if (!e.noAura) bossAura(e, time); }
+  else if (e.elite) { ctx.strokeStyle = 'rgba(232,184,74,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, r * 1.35, 0, TAU); ctx.stroke(); }
   if (e.lungeT > .6) { ctx.fillStyle = 'rgba(210,84,63,.25)'; ctx.beginPath(); ctx.arc(e.x, e.y, r * 1.6, 0, TAU); ctx.fill(); }
   ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(a);
   switch (e.shape) {
@@ -2193,7 +2212,94 @@ function drawEnemy(e, time) {
       ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(r * .3, -r * .35, r * .25, r * .12, .4, 0, TAU); ctx.fill();
       ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .55, -r * .25, Math.max(1.5, r * .12), 0, TAU); ctx.arc(r * .55, r * .25, Math.max(1.5, r * .12), 0, TAU); ctx.fill();
       break; }
+    case 'bear': {
+      const st = Math.sin(time / 160 + e.ph);
+      ctx.fillStyle = c1; for (const [px, py, k] of [[.55, -.72, 1], [.55, .72, -1], [-.55, -.7, -1], [-.55, .7, 1]]) { ctx.beginPath(); ctx.ellipse(r * px + st * k * r * .12, r * py, r * .26, r * .2, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#ffffff'; for (const [px, py, k] of [[.55, -.72, 1], [.55, .72, -1]]) for (let c = -1; c <= 1; c++) { ctx.beginPath(); ctx.arc(r * (px + .22) + st * k * r * .12, r * (py + c * .09), r * .04, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath();
+      for (let i = 0; i <= 56; i++) { const a = i / 56 * TAU, k = 1 + (i % 2 ? .035 : 0) + Math.sin(a * 3 + e.ph) * .02; ctx.lineTo(Math.cos(a) * r * 1.02 * k, Math.sin(a) * r * .84 * k); }
+      ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(-r * .15, 0, r * .62, r * .3, 0, 0, TAU); ctx.fill();
+      for (const [x, h, w] of [[-.62, .34, .12], [-.38, .48, .15], [-.1, .4, .13], [.15, .28, .1]]) {
+        ctx.fillStyle = 'rgba(159,220,255,.95)'; ctx.beginPath(); ctx.moveTo(r * (x - w), -r * .04); ctx.lineTo(r * x, -r * h); ctx.lineTo(r * (x + w), -r * .04); ctx.lineTo(r * x, r * h * .6); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.moveTo(r * (x - w * .3), -r * .06); ctx.lineTo(r * x, -r * h * .85); ctx.lineTo(r * (x + w * .15), -r * .06); ctx.fill();
+      }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .98, 0, r * .5, 0, TAU); ctx.fill();
+      for (const sd of [-1, 1]) { ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .78, sd * r * .42, r * .17, 0, TAU); ctx.fill(); ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .8, sd * r * .42, r * .09, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = fl ? '#fff' : '#e9eff5'; ctx.beginPath(); ctx.ellipse(r * 1.34, 0, r * .25, r * .2, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#1a1f26'; ctx.beginPath(); ctx.ellipse(r * 1.52, 0, r * .08, r * .1, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(127,216,255,.35)'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * 1.1, sd * r * .2, r * .13, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#7fd8ff'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * 1.1, sd * r * .2, r * .065, 0, TAU); ctx.fill(); }
+      for (let i = 0; i < 3; i++) { const t = (time / 1100 + i / 3 + e.ph) % 1; ctx.fillStyle = `rgba(235,248,255,${(1 - t) * .4})`; ctx.beginPath(); ctx.arc(r * (1.65 + t * .9), Math.sin(i * 2.1 + time / 400) * r * .15, r * (.1 + t * .22), 0, TAU); ctx.fill(); }
+      break; }
+    case 'oni': {
+      const sw = e.lungeT > 0 ? Math.sin(time / 60) * .6 : Math.sin(time / 500 + e.ph) * .15, st = Math.sin(time / 170 + e.ph);
+      ctx.fillStyle = c1; for (const [py, k] of [[-.55, 1], [.55, -1]]) { ctx.beginPath(); ctx.ellipse(-r * .55 + st * k * r * .14, r * py, r * .28, r * .2, 0, 0, TAU); ctx.fill(); }
+      ctx.save(); ctx.translate(r * .1, r * .95); ctx.rotate(-.35 + sw);
+      ctx.fillStyle = '#3a2a1e'; ctx.fillRect(-r * .1, -r * .09, r * 1.45, r * .18);
+      ctx.fillStyle = '#2a1e16'; ctx.beginPath(); ctx.ellipse(r * 1.05, 0, r * .5, r * .23, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#c9c2b0'; for (let i = 0; i < 6; i++) { const sx = r * (.7 + (i % 3) * .26), sy = (i < 3 ? -1 : 1) * r * .2; ctx.beginPath(); ctx.moveTo(sx - r * .05, sy * .6); ctx.lineTo(sx, sy * 1.45); ctx.lineTo(sx + r * .05, sy * .6); ctx.fill(); }
+      ctx.restore();
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(r * .2, r * .82, r * .3, r * .22, -.3 + sw * .4, 0, TAU); ctx.ellipse(r * .25, -r * .82, r * .3, r * .22, .4, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-r * .05, 0, r * .72, r * 1.0, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(-r * .3, 0, r * .4, r * .75, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(-r * .55, -r * .9); ctx.lineTo(-r * .2, -r * .95); ctx.lineTo(r * .05, r * .95); ctx.lineTo(-r * .3, r * .95); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#1a1410'; ctx.lineWidth = r * .07; for (let i = 0; i < 5; i++) { const t = -.75 + i * .38; ctx.beginPath(); ctx.moveTo(-r * (.42 - t * .17), r * t); ctx.lineTo(-r * (.2 - t * .17), r * (t + .08)); ctx.stroke(); }
+      ctx.fillStyle = '#ece6d6'; ctx.beginPath(); for (let i = 0; i <= 14; i++) { const a = Math.PI * .45 + i / 14 * Math.PI * 1.1, k = i % 2 ? .78 : .56; ctx.lineTo(r * .5 + Math.cos(a) * r * k, Math.sin(a) * r * k * 1.05); } ctx.fill();
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .62, 0, r * .44, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#f2ead2'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * .55, sd * r * .2); ctx.quadraticCurveTo(r * .75, sd * r * .75, r * 1.25, sd * r * .62); ctx.quadraticCurveTo(r * .82, sd * r * .48, r * .72, sd * r * .12); ctx.closePath(); ctx.fill(); }
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(r * .88, 0, r * .12, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,240,80,.35)'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .86, sd * r * .2, r * .13, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(r * .86, sd * r * .2, r * .06, r * .09, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#fff'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * 1.0, sd * r * .14); ctx.lineTo(r * 1.16, sd * r * .1); ctx.lineTo(r * 1.0, sd * r * .05); ctx.fill(); }
+      break; }
+    case 'ratking': {
+      const knot = [-r * .55, 0];
+      for (let i = 0; i < 5; i++) {
+        const a = Math.PI * .55 + i / 4 * Math.PI * .9 + Math.sin(time / 220 + i * 1.3) * .08, d = r * 1.05, mx = knot[0] + Math.cos(a) * d, my = Math.sin(a) * d, ra = a + Math.PI, wig = Math.sin(time / 90 + i * 2) * r * .12;
+        ctx.strokeStyle = '#c8908a'; ctx.lineWidth = Math.max(1.5, r * .06); ctx.beginPath(); ctx.moveTo(knot[0], 0); ctx.quadraticCurveTo(knot[0] + Math.cos(a) * d * .5 + wig, Math.sin(a) * d * .5 - wig, mx, my); ctx.stroke();
+        ctx.save(); ctx.translate(mx, my); ctx.rotate(a);
+        ctx.fillStyle = i % 2 ? c0 : '#5a4e46'; ctx.beginPath(); ctx.ellipse(0, 0, r * .32, r * .2, 0, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(r * .3, 0, r * .14, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#d89a9a'; ctx.beginPath(); ctx.arc(r * .26, -r * .13, r * .06, 0, TAU); ctx.arc(r * .26, r * .13, r * .06, 0, TAU); ctx.fill();
+        ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .38, -r * .06, r * .035, 0, TAU); ctx.arc(r * .38, r * .06, r * .035, 0, TAU); ctx.fill();
+        ctx.restore();
+      }
+      ctx.fillStyle = '#4a3a20'; ctx.beginPath(); ctx.arc(knot[0], 0, r * .17, 0, TAU); ctx.fill(); ctx.strokeStyle = '#c8908a'; ctx.lineWidth = Math.max(1.5, r * .05); ctx.beginPath(); ctx.arc(knot[0], 0, r * .12, time / 300, time / 300 + 4.5); ctx.stroke();
+      const cw = Math.sin(time / 300 + e.ph) * .08;
+      ctx.fillStyle = '#7a1a2a'; ctx.beginPath(); ctx.moveTo(r * .35, -r * .62); ctx.quadraticCurveTo(-r * .55, -r * (.95 + cw), -r * .75, 0); ctx.quadraticCurveTo(-r * .55, r * (.95 - cw), r * .35, r * .62); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#e8b84a'; ctx.lineWidth = Math.max(1.5, r * .06); ctx.beginPath(); ctx.moveTo(r * .35, -r * .62); ctx.quadraticCurveTo(-r * .55, -r * (.95 + cw), -r * .75, 0); ctx.quadraticCurveTo(-r * .55, r * (.95 - cw), r * .35, r * .62); ctx.stroke();
+      ctx.fillStyle = '#f2f0ea'; for (let i = 0; i < 7; i++) { const t = i / 6, px = r * (.3 - Math.sin(t * Math.PI) * .95), py = r * (-.62 + t * 1.24) * .98; ctx.beginPath(); ctx.arc(px * .92, py, r * .05, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(r * .25, 0, r * .62, r * .5, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(r * .85, 0, r * .36, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(r * 1.05, -r * .2); ctx.lineTo(r * 1.45, 0); ctx.lineTo(r * 1.05, r * .2); ctx.fill();
+      ctx.fillStyle = '#e8a0a0'; ctx.beginPath(); ctx.arc(r * 1.45, 0, r * .07, 0, TAU); ctx.fill();
+      for (const sd of [-1, 1]) { ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .7, sd * r * .36, r * .18, 0, TAU); ctx.fill(); ctx.fillStyle = '#d89a9a'; ctx.beginPath(); ctx.arc(r * .7, sd * r * .36, r * .1, 0, TAU); ctx.fill(); }
+      ctx.strokeStyle = 'rgba(240,235,225,.75)'; ctx.lineWidth = 1; for (const sd of [-1, 1]) for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(r * 1.25, sd * r * .08); ctx.lineTo(r * 1.55, sd * r * (.2 + i * .1)); ctx.stroke(); }
+      ctx.fillStyle = 'rgba(255,60,60,.4)'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * 1.0, sd * r * .15, r * .1, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * 1.0, sd * r * .15, r * .055, 0, TAU); ctx.fill(); }
+      ctx.save(); ctx.translate(r * .78, 0);
+      ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(-r * .2, -r * .3); for (let i = 0; i <= 4; i++) { const y = -r * .3 + i * r * .15; ctx.lineTo(i % 2 ? -r * .2 : -r * .42, y); ctx.lineTo(-r * .2, y + r * .075); } ctx.lineTo(r * .05, r * .3); ctx.lineTo(r * .05, -r * .3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#d2543f'; ctx.beginPath(); ctx.arc(-r * .08, 0, r * .07, 0, TAU); ctx.fill(); ctx.fillStyle = '#7fb2c9'; ctx.beginPath(); ctx.arc(-r * .08, -r * .19, r * .045, 0, TAU); ctx.arc(-r * .08, r * .19, r * .045, 0, TAU); ctx.fill();
+      ctx.restore();
+      break; }
     case 'shroom': {
+      const st = Math.sin(time / 110 + e.ph);
+      for (let i = 0; i < 4; i++) { const t = (time / 1300 + i / 4 + e.ph) % 1; ctx.fillStyle = `rgba(238,226,190,${(1 - t) * .55})`; ctx.beginPath(); ctx.arc(-r * (.9 + t * 1.6), Math.sin(i * 2.7 + time / 350) * r * (.2 + t * .5), r * (.07 + t * .1), 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c1; for (const [py, k] of [[-.42, 1], [.42, -1]]) { ctx.beginPath(); ctx.ellipse(r * .1 + st * k * r * .28, r * py, r * .22, r * .14, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#b8a888'; ctx.beginPath(); ctx.ellipse(r * .55, 0, r * .4, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(r * .7, 0, r * .36, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#1a1612'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(r * .92, sd * r * .12, r * .06, r * .085, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#fff'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .94, sd * r * .12 - r * .03, r * .025, 0, TAU); ctx.fill(); }
+      ctx.save(); ctx.translate(-r * .08, 0); ctx.rotate(Math.sin(time / 220 + e.ph) * .06);
+      const cap = ctx.createRadialGradient(-r * .25, -r * .3, r * .1, 0, 0, r * 1.05);
+      cap.addColorStop(0, fl ? '#fff' : '#ff7a6a'); cap.addColorStop(.6, c0); cap.addColorStop(1, fl ? '#fff' : '#7a1a1a');
+      ctx.fillStyle = cap; ctx.beginPath(); for (let i = 0; i <= 24; i++) { const a = i / 24 * TAU, k = 1 + (i % 2 ? -.04 : .02); ctx.lineTo(Math.cos(a) * r * .92 * k, Math.sin(a) * r * .95 * k); } ctx.fill();
+      ctx.strokeStyle = 'rgba(60,10,10,.45)'; ctx.lineWidth = Math.max(1, r * .06); ctx.beginPath(); ctx.arc(0, 0, r * .86, 0, TAU); ctx.stroke();
+      for (const [x, y, q] of [[.3, -.42, .2], [-.3, .3, .24], [.12, .48, .14], [-.42, -.32, .16], [.52, .14, .12], [-.05, -.05, .13], [-.62, .02, .1]]) { ctx.fillStyle = '#f4ead2'; ctx.beginPath(); ctx.arc(x * r, y * r, q * r, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(180,160,120,.5)'; ctx.beginPath(); ctx.arc(x * r + q * r * .25, y * r + q * r * .25, q * r * .5, 0, TAU); ctx.fill(); }
+      ctx.restore();
+      break; }
+    case 'shroom_old': {
       const st = Math.sin(time / 120 + e.ph) * r * .15;
       ctx.fillStyle = c1; ctx.fillRect(-r * .5, -r * .35 + st, r * .4, r * .25); ctx.fillRect(-r * .5, r * .1 - st, r * .4, r * .25);
       ctx.beginPath(); ctx.ellipse(r * .1, 0, r * .45, r * .4, 0, 0, TAU); ctx.fill();
@@ -3116,11 +3222,12 @@ function monsterTraits(k) {
 function drawMonsterPreview(cvs, k, known, time = 1000) {
   const d = E[k], pc = cvs.getContext('2d'), W = cvs.width, H = cvs.height;
   pc.clearRect(0, 0, W, H);
-  const r = d.r, wide = d.shape === 'snake' ? 3 : d.shape === 'quad' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
-  const tall = d.shape === 'bat' ? 6 : d.shape === 'bird' ? 4.8 : d.shape === 'spider' ? 3.4 : 2.4;
+  const r = d.r, wide = d.shape === 'snake' || d.shape === 'ratking' ? 3 : d.shape === 'quad' || d.shape === 'bear' || d.shape === 'oni' || d.shape === 'ratking' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
+  const tall = d.shape === 'bat' ? 6 : d.shape === 'bird' ? 4.8 : d.shape === 'oni' ? 3 : d.shape === 'spider' ? 3.4 : d.shape === 'ratking' ? 2.8 : 2.4;
   const sc = Math.min(H * .8 / (r * tall), W * .8 / (r * wide), W / 100);
   const e = Object.assign({}, d, { k, x: 0, y: 0, hp: 1, max: 1, flash: 0, ph: 1, mode: 'in', trail: [], stun: 0, frozen: 0, under: false, ghostly: false, lungeT: 0, elite: false, stolen: 0, armor: d.armor || 0 });
-  if (!known) e.col = ['#2a2f28', '#232720', '#2a2f28'];
+  if (!known) { e.col = ['#2a2f28', '#232720', '#2a2f28']; e.noAura = true; }
+  e.auraS = .62;
   if (d.shape === 'snake') for (let i = 1; i <= 8; i++) e.trail.push({ x: -i * r * .35, y: Math.sin(i * .9) * r * .35 });
   e.x = -0.0001;
   const keep = ctx; ctx = pc;
