@@ -1113,27 +1113,57 @@ function applyPassive(id) {
 }
 
 // ---------- waves ----------
-function hpMult(w) { const base = 1 + .17 * (Math.min(w, BOSS_WAVE) - 1) + .021 * (Math.min(w, BOSS_WAVE) - 1) ** 2; return base * Math.pow(1.17, Math.max(0, w - BOSS_WAVE)) * B.hp; }
+function hpMult(w) { const base = 1 + .17 * (Math.min(w, BOSS_WAVE) - 1) + .021 * (Math.min(w, BOSS_WAVE) - 1) ** 2; return base * Math.pow(1.17, Math.max(0, w - BOSS_WAVE)) * B.hp * (run && run.endless ? 1.2 + .02 * w : 1); }
+const WAVE_TH = [
+  { n: ['Scouts', 'Éclaireurs', 'Exploradores', 'Späher'], budget: .85 },
+  { n: ['Swarm', 'Essaim', 'Enjambre', 'Schwarm'], budget: 1.35, gap: .55, pick: p => { const m = Math.min(...p.map(k => E[k].cost)); return p.filter(k => E[k].cost <= m); } },
+  { n: ['Fast and flying', 'Rapides et volants', 'Rápidos y voladores', 'Schnell und fliegend'], spd: 1.1, pick: p => { const f = p.filter(k => E[k].fly || E[k].spd >= 90); return f.length ? f : [...p].sort((a, b) => E[b].spd - E[a].spd).slice(0, Math.ceil(p.length / 2)); } },
+  { n: ['Brutes', 'Brutes', 'Brutos', 'Schläger'], budget: 1.15, hp: 1.2, gap: 1.4, pick: p => [...p].sort((a, b) => E[b].cost - E[a].cost).slice(0, Math.ceil(p.length / 2)) },
+  { n: ['Ambush', 'Embuscade', 'Emboscada', 'Hinterhalt'], burst: 6, budget: 1.1 },
+  { n: ['Stampede', 'Ruée', 'Estampida', 'Ansturm'], spd: 1.3, budget: .95, gap: .8 },
+  { n: ['Pincer attack', 'Attaque en tenaille', 'Ataque en pinza', 'Zangenangriff'], sides: true, budget: 1.15 },
+  { n: ['Hardened horde', 'Horde endurcie', 'Horda curtida', 'Abgehärtete Horde'], hp: 1.3, budget: 1.1 },
+  { n: ['Onslaught', 'Déferlante', 'Avalancha', 'Großangriff'], budget: 1.4, gap: .7 },
+];
+const thn = th => th.n[li()] || th.n[0];
 function startWave() {
   run.wave++;
   const w = run.wave;
-  let budget = (6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0)) * (run.countMult || 1) * (chaosOn(3) ? 1.3 : 1);
+  let budget = (6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0)) * (run.countMult || 1) * (chaosOn(3) ? 1.3 : 1) * (run.endless ? 1.2 * (1 + .03 * w) : 1);
   let pool = B.enemies.filter(k => E[k].from <= w);
   if (B.mode === 'endless') {
     const all = []; for (const b of BIOMES) if (!b.mode && (!b.dlc || biomeState(b.id).unlocked)) for (const k of b.enemies) if (E[k].from <= Math.max(1, w) && !all.includes(k)) all.push(k);
     for (let i = all.length - 1; i > 0; i--) { const j2 = Math.floor(Math.random() * (i + 1)); [all[i], all[j2]] = [all[j2], all[i]]; }
     pool = all.slice(0, 6);
   }
+  const isBoss = w % BOSS_WAVE === 0, isElite = !isBoss && w % (chaosOn(9) ? 3 : 5) === 0;
+  const th = (!run.endless && !B.mode && !isBoss) ? WAVE_TH[(w - 1) % WAVE_TH.length] : null;
+  run.theme = th;
+  let tpool = pool;
+  const fresh = th ? pool.filter(k => E[k].from === w) : [];
+  if (th) { budget *= th.budget || 1; if (th.pick) { const p2 = th.pick(pool); if (p2.length) tpool = p2; } }
   const list = [];
+  for (const k of fresh) { list.push(k); budget -= E[k].cost; }
   let guard = 0;
   while (budget > 0 && guard++ < 500) {
-    const k = pool[Math.floor(Math.random() * pool.length)], d = E[k];
+    const k = tpool[Math.floor(Math.random() * tpool.length)], d = E[k];
     if (d.cost > budget && budget > 1) continue;
     list.push(k); budget -= d.cost;
   }
-  const isBoss = w % BOSS_WAVE === 0, isElite = !isBoss && w % (chaosOn(9) ? 3 : 5) === 0;
-  const gap = Math.max(.2, 1.05 - w * .045);
-  spawnQ = list.map((k, i) => ({ k, t: .8 + i * gap * rnd(.6, 1.3) }));
+  if (fresh.length) for (let i = list.length - 1; i > 0; i--) { const j2 = Math.floor(Math.random() * (i + 1)); [list[i], list[j2]] = [list[j2], list[i]]; }
+  const gap = Math.max(.2, 1.05 - w * .045) * ((th && th.gap) || 1);
+  const pinA = rnd(0, TAU), burstA = [];
+  spawnQ = list.map((k, i) => {
+    const q = { k, t: .8 + i * gap * rnd(.6, 1.3) };
+    if (th) {
+      if (th.spd) q.spd = th.spd;
+      if (th.hp) q.hpx = th.hp;
+      if (th.sides) q.ang = pinA + (i % 2) * Math.PI + rnd(-.3, .3);
+      if (th.burst) { const g = Math.floor(i / th.burst); if (burstA[g] == null) burstA[g] = rnd(0, TAU); q.ang = burstA[g] + rnd(-.25, .25); q.t = .8 + g * gap * th.burst * 1.3 + (i % th.burst) * .12; }
+    }
+    return q;
+  });
+  if (fresh.length && !api.sim) toastSmall(fresh.map(k => E[k].name).join(', '), ['New enemy', 'Nouvel ennemi', 'Nuevo enemigo', 'Neuer Gegner'][li()]);
   const mid = spawnQ.length ? spawnQ[Math.floor(spawnQ.length * .4)].t : 2;
   let bossKeys = isBoss ? [B.boss] : [];
   if (B.mode === 'endless' && isBoss) {
@@ -1150,10 +1180,10 @@ function startWave() {
   spawnQ.sort((a, b) => a.t - b.t);
   run.waveClock = 0; run.waveDmg = 0; run.boss = null; run.guardUsed = false;
   state = 'wave';
-  toast(T('wave_n', w), isBoss ? (bossKeys.length > 1 ? T('rift_bosses', bossKeys.length) : T('is_coming', E[bossKeys[0]].name)) : isElite ? T('elite_leads') : run.chaos ? T('chaos_n', run.chaos) : run.endless ? T('endless') : run.ch ? T('challenge_n', chn(CHALLENGES.find(c => c.id === run.ch))) : bn(B));
+  toast(T('wave_n', w), isBoss ? (bossKeys.length > 1 ? T('rift_bosses', bossKeys.length) : T('is_coming', E[bossKeys[0]].name)) : th ? (isElite ? thn(th) + ' · ' + T('elite_leads') : thn(th)) : isElite ? T('elite_leads') : run.chaos ? T('chaos_n', run.chaos) : run.endless ? T('endless') : run.ch ? T('challenge_n', chn(CHALLENGES.find(c => c.id === run.ch))) : bn(B));
 }
 function spawn(q) {
-  const d = E[q.k], n = q.boss || q.elite ? 1 : (d.pack || 1), a0 = rnd(0, TAU);
+  const d = E[q.k], n = q.boss || q.elite ? 1 : (d.pack || 1), a0 = q.ang ?? rnd(0, TAU);
   for (let i = 0; i < n; i++) {
     const a = a0 + (i - (n - 1) / 2) * .09, rr = spawnR + i * 14;
     makeEnemy(q.k, Math.cos(a) * rr, Math.sin(a) * rr, q);
@@ -1164,6 +1194,8 @@ function makeEnemy(k, x, y, q = {}) {
   const e = { k, ...d, x, y, hp: d.hp * m, dmg: d.dmg * B.dmg * (1 + .06 * (run.wave - 1)), armor: (d.armor || 0) * (1 + .05 * (run.wave - 1)),
     kx: 0, ky: 0, stun: 0, frozen: 0, burn: 0, burnD: 0, bite: 0, flash: 0, ph: rnd(0, 7), mode: 'in', trail: [], dead: false, retreatA: 0, stolen: 0, timer: rnd(2, 4), lungeT: 0, seed: rnd(0, 7), under: !!d.burrow, shootT: rnd(1, 2) };
   e.spd *= run.spdMult || 1;
+  if (q.spd) e.spd *= q.spd;
+  if (q.hpx) e.hp *= q.hpx;
   if (run.chaos) { const L = run.chaos; e.hp *= (1 + .08 * L) * (L >= 2 ? 1.25 : 1) * (L >= 10 ? 1.5 : 1); e.spd *= (L >= 1 ? 1.15 : 1) * (L >= 10 ? 1.1 : 1); if (L >= 4) e.dmg *= 1.4; }
   if (d.egg) e.hatchT = d.hatchT;
   if (q.elite) { e.elite = true; e.hp *= 3; e.r *= 1.35; e.gold *= 5; e.dmg *= 1.25; e.name = T('elite_prefix', d.name); }
