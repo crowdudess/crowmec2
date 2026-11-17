@@ -167,11 +167,12 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
     <section id="tab-fly" class="tabpane">
       <div class="grid" id="biomes"></div>
       <p id="biomeInfo" style="margin-top:14px"></p>
+      <div id="challenges" style="margin-top:14px"></div>
       <div class="row spread" style="margin-top:16px">
         <button class="btn" id="startBtn" type="button">Defend the nest</button>
         <button class="ghost" id="muteBtn" type="button">Sound on</button>
       </div>
-      <p class="muted" style="margin-top:14px">Your crow shoots by itself. Press Space or tap the field to caw. Press 1 to 7 or tap a spell, then tap the field to place it. Shop after every wave. Beat the boss on wave 10 to unlock the next biome, then fly home with your coins or stay for endless waves.</p>
+      <p class="muted" style="margin-top:14px">Your crow shoots by itself. Press Space or tap the field to caw. Press 1 to 5 or tap a spell, then tap the field to place it. Shop after every wave. Beat the boss on wave 10 to unlock the next biome, then fly home with your coins or stay for endless waves.</p>
       <form class="row" id="codeForm" style="margin-top:14px" autocomplete="off">
         <label class="muted" for="codeInput">Code</label>
         <input class="codein" id="codeInput" type="text" spellcheck="false" autocapitalize="off" placeholder="Enter code">
@@ -184,7 +185,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
       <div class="list" id="roost" style="margin-top:14px"></div>
     </section>
     <section id="tab-spells" class="tabpane" hidden>
-      <p>Spells are placed on the field during a wave. Every spell you unlock comes with you on every run.</p>
+      <p>Spells are placed on the field during a wave. Unlock them with coins, then pick up to 5 to take into each run.</p>
       <div class="grid" id="spellList" style="margin-top:14px"></div>
     </section>
     <section id="tab-skins" class="tabpane" hidden>
@@ -323,6 +324,18 @@ const BIOMES = [
   { id: 'spider', name: 'Silkshade Hollow', hp: 8.2, dmg: 2.4, coin: 5.5, boss: 'queen', elite: 'tarantula',
     enemies: ['spiderling', 'jumper', 'weaver', 'moth', 'tarantula'], ground: ['#2c2433', '#1b1621', '#0e0b12'], blade: ['#3e3446', '#2e2636'], stone: '#251f2b',
     blurb: 'Spiderling swarms, jumping spiders, weavers that spit webs to slow your crow, moths, and tarantulas that burst into spiderlings. The Spider Queen waits in the dark.' },
+  { id: 'volcano', name: 'Cinder Peak', hp: 12.5, dmg: 2.8, coin: 7, boss: 'wyrm', elite: 'golem',
+    enemies: ['bat', 'firebeetle', 'magmaworm', 'slime', 'golem'], ground: ['#4a2418', '#2a120c', '#140806'], blade: ['#5a2a18', '#3a1a10'], stone: '#2a1814',
+    blurb: 'Bat swarms, fire beetles, magma worms that tunnel through the rock, lava slimes that split in two, and obsidian golems. The Magma Wyrm rises from the lava.' },
+  { id: 'fairy', name: 'Glimmer Glade', hp: 16, dmg: 3.2, coin: 9, boss: 'faequeen', elite: 'unicorn',
+    enemies: ['pixie', 'shroom', 'sprite', 'wisp', 'unicorn'], ground: ['#1e3a3a', '#122626', '#0a1414'], blade: ['#2e5a4a', '#244a3e'], stone: '#1a3030',
+    blurb: 'Pixie swarms, armoured mushroom walkers, sprites that heal other enemies, will-o-wisps that fade in and out, and charging unicorns. The Fairy Queen holds court.' },
+  { id: 'sakura', name: 'Blossom Ridge', hp: 19.5, dmg: 3.7, coin: 11.5, boss: 'oni', elite: 'tanuki',
+    enemies: ['monkey', 'crane', 'kitsune', 'petal', 'tanuki'], ground: ['#4a2a3a', '#2e1a26', '#180e14'], blade: ['#6a3a50', '#4a2e3c'], stone: '#3a2430',
+    blurb: 'Leaping monkeys, cranes, kitsune that blink out of sight, petal sprite swarms and armoured tanuki. The Oni guards the ridge.' },
+  { id: 'void', name: 'The Void', hp: 18.5, dmg: 3.6, coin: 15, boss: 'maw', elite: 'gazer',
+    enemies: ['voidling', 'shade', 'voidwisp', 'gazer', 'voidworm'], ground: ['#1a1428', '#0e0a18', '#05030a'], blade: ['#3a2a5a', '#2a2040'], stone: '#141020',
+    blurb: 'Voidling swarms, fast shades, flickering void wisps, gazers that slow your crow from afar, and void worms. At the end of everything waits the Maw.' },
 ];
 const E = {
   beetle:   { name: 'Beetle', shape: 'bug', col: ['#2f5a4a', '#11140f', '#000'], hp: 16, spd: 48, dmg: 4, gold: 2, r: 11, cost: 1, from: 1 },
@@ -365,6 +378,34 @@ const E = {
   moth:     { name: 'Moth', shape: 'bug', wings: true, col: ['#8a7a6a', '#5a4a3a', '#000'], hp: 36, spd: 120, dmg: 6, gold: 4, r: 13, cost: 2, from: 3, fly: true },
   tarantula:{ name: 'Tarantula', shape: 'spider', col: ['#3a2418', '#c86a2a', '#e33'], hp: 190, spd: 32, dmg: 22, gold: 12, r: 20, cost: 5, from: 4, armor: 6, split: 'spiderling' },
   queen:    { name: 'Spider Queen', shape: 'spider', col: ['#1a1220', '#a01828', '#f44'], hp: 680, spd: 26, dmg: 55, gold: 130, r: 42, boss: true, armor: 5, summon: 'spiderling', weave: true, crown: true },
+  bat:       { name: 'Bat Swarm', shape: 'bird', col: ['#2a1a22', '#3a2830', '#f44'], hp: 22, spd: 150, dmg: 5, gold: 2, r: 10, cost: 2, from: 1, fly: true, pack: 3 },
+  firebeetle:{ name: 'Fire Beetle', shape: 'bug', col: ['#c8401a', '#2a0a04', '#ff0'], hp: 34, spd: 55, dmg: 6, gold: 2, r: 12, cost: 1, from: 1, armor: 4 },
+  magmaworm: { name: 'Magma Worm', shape: 'snake', col: ['#e0602a', '#8a2a10', '#ff0'], hp: 110, spd: 50, dmg: 16, gold: 8, r: 16, cost: 3, from: 2, burrow: true, armor: 3 },
+  slime:     { name: 'Lava Slime', shape: 'slime', col: ['#f07a2a', '#b03a10', '#200'], hp: 60, spd: 40, dmg: 8, gold: 4, r: 15, cost: 2, from: 3, split: 'slimelet' },
+  slimelet:  { name: 'Slimelet', shape: 'slime', col: ['#f09a4a', '#b05a20', '#200'], hp: 15, spd: 70, dmg: 3, gold: 1, r: 8, cost: 0, from: 99 },
+  golem:     { name: 'Obsidian Golem', shape: 'shell', col: ['#2a2a30', '#e0602a', '#f80'], hp: 200, spd: 28, dmg: 24, gold: 14, r: 22, cost: 5, from: 4, armor: 8 },
+  wyrm:      { name: 'Magma Wyrm', shape: 'snake', col: ['#e0502a', '#7a1a08', '#ff0'], hp: 700, spd: 26, dmg: 60, gold: 160, r: 40, boss: true, armor: 6, summon: 'bat', lunge: true },
+
+  pixie:     { name: 'Pixies', shape: 'fairy', col: ['#f0a0d8', '#a0f0e0', '#fff'], hp: 16, spd: 145, dmg: 4, gold: 2, r: 8, cost: 2, from: 1, fly: true, pack: 2 },
+  shroom:    { name: 'Mushroom Walker', shape: 'shroom', col: ['#c83a3a', '#e8dcc0', '#222'], hp: 60, spd: 34, dmg: 9, gold: 4, r: 15, cost: 2, from: 1, armor: 5 },
+  sprite:    { name: 'Healing Sprite', shape: 'fairy', col: ['#a0f0a0', '#f0f0a0', '#fff'], hp: 40, spd: 60, dmg: 0, gold: 6, r: 11, cost: 3, from: 2, ranged: true, healer: true },
+  wisp:      { name: 'Will-o-wisp', shape: 'orb', col: ['#8af0ff', '#2a8aa0', '#fff'], hp: 40, spd: 110, dmg: 7, gold: 4, r: 11, cost: 2, from: 3, fly: true, phase: true },
+  unicorn:   { name: 'Unicorn', shape: 'quad', tail: 'bushy', horn: true, col: ['#f4f0f8', '#d8a0f0', '#4a2a6a'], hp: 140, spd: 45, dmg: 20, gold: 12, r: 20, cost: 5, from: 4, armor: 4, lunge: true },
+  faequeen:  { name: 'Fairy Queen', shape: 'fairy', crown: true, col: ['#f0a0f0', '#a0f0ff', '#fff'], hp: 720, spd: 26, dmg: 50, gold: 190, r: 40, boss: true, armor: 5, summon: 'pixie', healer: true },
+
+  monkey:    { name: 'Snow Monkey', shape: 'quad', tail: 'thin', ears: true, col: ['#b0a090', '#d88a8a', '#222'], hp: 40, spd: 95, dmg: 6, gold: 3, r: 12, cost: 1, from: 1, hop: true },
+  crane:     { name: 'Crane', shape: 'bird', col: ['#f0f0f0', '#202020', '#e33'], hp: 55, spd: 140, dmg: 9, gold: 5, r: 15, cost: 2, from: 1, fly: true },
+  kitsune:   { name: 'Kitsune', shape: 'quad', tail: 'bushy', tails: 3, ears: true, col: ['#f0a040', '#fff0d8', '#222'], hp: 50, spd: 100, dmg: 8, gold: 5, r: 13, cost: 2, from: 2, zig: .7, phase: true },
+  petal:     { name: 'Petal Sprites', shape: 'fairy', col: ['#ffb0d0', '#ffe0ec', '#fff'], hp: 14, spd: 130, dmg: 3, gold: 1, r: 7, cost: 2, from: 3, fly: true, pack: 3 },
+  tanuki:    { name: 'Tanuki', shape: 'quad', tail: 'striped', mask: true, col: ['#8a6a4a', '#5a4030', '#fff'], hp: 170, spd: 34, dmg: 22, gold: 14, r: 21, cost: 5, from: 4, armor: 6 },
+  oni:       { name: 'Oni', shape: 'quad', tail: 'none', horns: true, ears: false, col: ['#c8322a', '#8a1a14', '#ff0'], hp: 740, spd: 28, dmg: 55, gold: 230, r: 42, boss: true, armor: 6, summon: 'monkey', lunge: true },
+
+  voidling:  { name: 'Voidlings', shape: 'orb', col: ['#6a3aa0', '#1a0a30', '#fff'], hp: 18, spd: 100, dmg: 4, gold: 1, r: 8, cost: 2, from: 1, pack: 4 },
+  shade:     { name: 'Shade', shape: 'quad', tail: 'thin', ears: true, col: ['#1a1428', '#2a2040', '#b88ae0'], hp: 50, spd: 120, dmg: 8, gold: 4, r: 13, cost: 2, from: 1, phase: true },
+  voidwisp:  { name: 'Void Wisp', shape: 'orb', col: ['#b88ae0', '#3a1a6a', '#fff'], hp: 50, spd: 120, dmg: 9, gold: 5, r: 12, cost: 2, from: 2, fly: true, phase: true },
+  gazer:     { name: 'Gazer', shape: 'eye', col: ['#2a1a40', '#c83aff', '#fff'], hp: 80, spd: 45, dmg: 0, gold: 8, r: 16, cost: 3, from: 3, ranged: true },
+  voidworm:  { name: 'Void Worm', shape: 'snake', col: ['#3a2a5a', '#1a0a30', '#c8f'], hp: 180, spd: 50, dmg: 22, gold: 12, r: 18, cost: 4, from: 4, burrow: true, armor: 5 },
+  maw:       { name: 'The Maw', shape: 'eye', col: ['#120a20', '#ff3a6a', '#fff'], hp: 640, spd: 24, dmg: 45, gold: 300, r: 46, boss: true, armor: 6, summon: 'voidling', weave: true, lunge: true },
   ratking:  { name: 'Rat King', shape: 'quad', tail: 'thin', ears: true, crown: true, col: ['#4a403a', '#2e2824', '#e33'], hp: 600, spd: 28, dmg: 48, gold: 90, r: 36, boss: true, summon: 'rat', lunge: true },
 };
 const BOSS_WAVE = 10;
@@ -419,29 +460,49 @@ const SPELLS = [
     desc: 'A whirlwind that scours everything inside and pushes it away from the nest for 5 seconds. Bosses stand their ground.' },
   { id: 'web', name: 'Web Snare', short: 'Web', cd: 24, r: 110, cost: 330, req: 'spider', col: '#e8e4f0',
     desc: 'A sticky web that lasts 6 seconds. Each enemy that walks in is stuck for 2.5 seconds and takes 20% more damage.' },
+  { id: 'erupt', name: 'Eruption', short: 'Eruption', cd: 22, r: 100, cost: 420, req: 'volcano', col: '#f0602a',
+    desc: 'A lava pool for 5 seconds. Walking enemies in it burn.' },
+  { id: 'pixie', name: 'Pixie Ring', short: 'Pixies', cd: 26, r: 150, cost: 520, req: 'fairy', col: '#a0f0e0',
+    desc: 'Pixies mend the nest for 5 seconds and zap enemies in the ring.' },
+  { id: 'petal', name: 'Petal Storm', short: 'Petals', cd: 22, r: 120, cost: 640, req: 'sakura', col: '#ffb0d0',
+    desc: 'Razor petals spin in a circle for 6 seconds and cut everything, flying enemies too.' },
+  { id: 'hole', name: 'Black Hole', short: 'Black Hole', cd: 28, r: 150, cost: 800, req: 'void', col: '#b88ae0',
+    desc: 'Pulls enemies to one point for 4 seconds, then collapses for huge damage. Bosses resist the pull.' },
 ];
+const MAX_LOADOUT = 5;
+function loadout() {
+  if (!Array.isArray(save.loadout)) save.loadout = save.spells.slice(0, MAX_LOADOUT);
+  return save.loadout.filter(id => save.spells.includes(id)).slice(0, MAX_LOADOUT);
+}
+const CHALLENGES = [
+  { id: 'glass', name: 'Glass Nest', desc: 'The nest has 40% of its HP and the shop cannot patch it.' },
+  { id: 'swarm', name: 'Swarm', desc: '60% more enemies, and they move 20% faster.' },
+  { id: 'pauper', name: 'Pauper', desc: 'Kills give half the shinies and rerolls cost double.' },
+];
+const chDone = (s, bid) => { const b = s.biomes && s.biomes[bid]; return !!(b && b.ch && CHALLENGES.every(c => b.ch[c.id])); };
+const chCount = s => { let n = 0; for (const k in (s.biomes || {})) { const c = s.biomes[k].ch || {}; n += CHALLENGES.filter(q => c[q.id]).length; } return n; };
 
 // ---------- data: roost (permanent) ----------
 const ROOST = [
-  { id: 'beak',  name: 'Sharp Beak', desc: '+8% feather damage per level.', base: 14, max: 10 },
-  { id: 'wings', name: 'Strong Wings', desc: '+6% attack speed per level.', base: 14, max: 10 },
-  { id: 'nest',  name: 'Sturdy Nest', desc: '+15 max nest HP per level.', base: 10, max: 10 },
+  { id: 'beak',  name: 'Sharp Beak', desc: '+8% feather damage per level.', base: 14, max: 25 },
+  { id: 'wings', name: 'Strong Wings', desc: '+6% attack speed per level.', base: 14, max: 20 },
+  { id: 'nest',  name: 'Sturdy Nest', desc: '+15 max nest HP per level.', base: 10, max: 20 },
   { id: 'egg',   name: 'Nest Egg', desc: 'Start every run with +6 shinies per level.', base: 10, max: 8 },
   { id: 'voice', name: 'Loud Voice', desc: 'Caw recharges 6% faster and hits 8 harder per level.', base: 12, max: 8 },
   { id: 'eye',   name: 'Keen Eye', desc: '+2% critical hit chance per level.', base: 12, max: 8 },
   { id: 'luck',  name: 'Lucky Find', desc: '+6% shinies from kills per level.', base: 12, max: 8 },
-  { id: 'focus', name: 'Spell Focus', desc: 'Spells recharge 6% faster and hit 8% harder per level.', base: 14, max: 8 },
-  { id: 'pen', name: 'Armour Breaker', desc: 'Feathers ignore 1 more armour per level.', base: 16, max: 6 },
-  { id: 'slayer', name: 'Giant Slayer', desc: '+7% damage to bosses and elites per level.', base: 16, max: 8 },
-  { id: 'thorns', name: 'Bramble Nest', desc: 'The nest hurts every biter for 6 damage per level.', base: 12, max: 8 },
-  { id: 'regen', name: 'Mending Moss', desc: 'The nest regrows 0.4 HP per second per level.', base: 14, max: 8 },
+  { id: 'focus', name: 'Spell Focus', desc: 'Spell damage +8% per level; recharge 6% faster per level up to level 8.', base: 14, max: 15 },
+  { id: 'pen', name: 'Armour Breaker', desc: 'Feathers ignore 1 more armour per level.', base: 16, max: 10 },
+  { id: 'slayer', name: 'Giant Slayer', desc: '+7% damage to bosses and elites per level.', base: 16, max: 15 },
+  { id: 'thorns', name: 'Bramble Nest', desc: 'The nest hurts every biter for 6 damage per level.', base: 12, max: 15 },
+  { id: 'regen', name: 'Mending Moss', desc: 'The nest regrows 0.4 HP per second per level.', base: 14, max: 15 },
   { id: 'haggle', name: 'Haggler', desc: 'Shop prices are 4% lower per level.', base: 16, max: 6 },
   { id: 'pierce', name: 'Needle Beak', desc: 'Start every run with feathers that pierce +1 enemy.', base: 70, max: 2 },
   { id: 'twin', name: 'Second Feather', desc: 'Start every run throwing +1 feather.', base: 90, max: 2 },
   { id: 'magpie', name: 'Loyal Magpie', desc: 'Start every run with a magpie friend.', base: 80, max: 2 },
   { id: 'favour', name: "Magpie's Favour", desc: 'The shop shows 5 upgrades instead of 4.', base: 120, max: 1 },
 ];
-const roostCost = (u, lvl) => Math.round(u.base * Math.pow(1.42, lvl));
+const roostCost = (u, lvl) => Math.round(lvl < 10 ? u.base * Math.pow(1.42, lvl) : u.base * Math.pow(1.42, 9) * (1 + .45 * (lvl - 9)));
 
 // ---------- data: skins ----------
 const SKINS = [
@@ -455,6 +516,20 @@ const SKINS = [
   { id: 'dune', name: 'Dune Crow', body: '#b08a50', wing: '#8a6a38', sheen: 'rgba(255,230,170,.55)', beak: '#4a3a20', eye: '#fff', cond: 'Defeat the Emperor Scorpion.', has: s => !!s.ach.emperor },
   { id: 'widow', name: 'Widow Crow', body: '#0d0a10', wing: '#060408', sheen: 'rgba(210,30,45,.65)', beak: '#2a1a1a', eye: '#e33', glow: '#a01828', cond: 'Defeat the Spider Queen.', has: s => !!s.ach.queen },
   { id: 'bandito', name: 'Bandito', body: '#3a2a20', wing: '#24180f', sheen: 'rgba(232,184,74,.45)', beak: '#e8b84a', eye: '#fff', googly: true, mask: true, bandana: '#c8322a', cond: 'Secret. Enter its code on the Fly tab.', has: s => !!(s.codes && s.codes.bandito) || !!s.testMode },
+  { id: 'phoenix', name: 'Phoenix Crow', body: '#b0301a', wing: '#e0702a', sheen: 'rgba(255,220,80,.7)', beak: '#ffd040', eye: '#fff', glow: '#ff7a2a', cond: 'Defeat the Magma Wyrm.', has: s => !!s.ach.wyrm },
+  { id: 'fae', name: 'Fae Crow', body: '#5a3a7a', wing: '#3a2a5a', sheen: 'rgba(160,240,224,.7)', beak: '#f0a0d8', eye: '#fff', glow: '#a0f0e0', cond: 'Defeat the Fairy Queen.', has: s => !!s.ach.faequeen },
+  { id: 'blossom', name: 'Blossom Crow', body: '#2a1a24', wing: '#1a0e16', sheen: 'rgba(255,176,208,.75)', beak: '#ffb0d0', eye: '#fff', cond: 'Defeat the Oni.', has: s => !!s.ach.oni },
+  { id: 'eclipse', name: 'Eclipse Crow', body: '#05030a', wing: '#000', sheen: 'rgba(255,58,106,.7)', beak: '#1a0a30', eye: '#ff3a6a', glow: '#6a3aa0', crown: true, cond: 'Defeat the Maw.', has: s => !!s.ach.maw },
+  { id: 'ch-forest', name: 'Mossback', body: '#2a4a2a', wing: '#1a3a1a', sheen: 'rgba(160,220,120,.6)', beak: '#6a5030', eye: '#e8d24a', cond: 'Complete all 3 Whispering Wood challenges.', has: s => chDone(s, 'forest') },
+  { id: 'ch-marsh', name: 'Bogwitch', body: '#1a3a3a', wing: '#0e2626', sheen: 'rgba(120,220,200,.6)', beak: '#3a2a1a', eye: '#c8f04a', cond: 'Complete all 3 Murkwater Marsh challenges.', has: s => chDone(s, 'marsh') },
+  { id: 'ch-snow', name: 'Glacier', body: '#dce8f4', wing: '#a8c4dc', sheen: 'rgba(120,180,230,.7)', beak: '#5a6a7a', eye: '#2a6aa0', cond: 'Complete all 3 Frostfang Pass challenges.', has: s => chDone(s, 'snow') },
+  { id: 'ch-city', name: 'Streetwise', body: '#3a3a3e', wing: '#26262a', sheen: 'rgba(240,140,40,.65)', beak: '#f08a2a', eye: '#fff', cond: 'Complete all 3 Ashen Alleys challenges.', has: s => chDone(s, 'city') },
+  { id: 'ch-dunes', name: 'Pharaoh', body: '#1a2a5a', wing: '#0e1a40', sheen: 'rgba(232,184,74,.8)', beak: '#e8b84a', eye: '#fff', crown: true, cond: 'Complete all 3 Sunscorch Dunes challenges.', has: s => chDone(s, 'dunes') },
+  { id: 'ch-spider', name: 'Silkweaver', body: '#e8e4f0', wing: '#c8c0d8', sheen: 'rgba(160,30,40,.6)', beak: '#3a2a3a', eye: '#a01828', cond: 'Complete all 3 Silkshade Hollow challenges.', has: s => chDone(s, 'spider') },
+  { id: 'ch-volcano', name: 'Obsidian', body: '#0a0808', wing: '#000', sheen: 'rgba(255,110,40,.8)', beak: '#3a1a10', eye: '#ff7a2a', glow: '#c8401a', cond: 'Complete all 3 Cinder Peak challenges.', has: s => chDone(s, 'volcano') },
+  { id: 'ch-fairy', name: 'Moonpetal', body: '#d8f0ec', wing: '#b0e0d8', sheen: 'rgba(240,160,216,.8)', beak: '#c890c0', eye: '#5a3a7a', glow: '#f0a0d8', cond: 'Complete all 3 Glimmer Glade challenges.', has: s => chDone(s, 'fairy') },
+  { id: 'ch-sakura', name: 'Ronin', body: '#14141a', wing: '#0a0a0e', sheen: 'rgba(255,176,208,.85)', beak: '#c8322a', eye: '#fff', bandana: null, cond: 'Complete all 3 Blossom Ridge challenges.', has: s => chDone(s, 'sakura') },
+  { id: 'ch-void', name: 'Voidborn', body: '#000', wing: '#05000a', sheen: 'rgba(184,138,224,.9)', beak: '#b88ae0', eye: '#fff', glow: '#b88ae0', crown: true, cond: 'Complete all 3 Void challenges.', has: s => chDone(s, 'void') },
   { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
 ];
 
@@ -468,7 +543,14 @@ const ACH = [
   { id: 'ratking', name: 'Long Live the Crow', desc: 'Defeat the Rat King.', coins: 140 },
   { id: 'emperor', name: 'Sting Operation', desc: 'Defeat the Emperor Scorpion.', coins: 190 },
   { id: 'queen', name: 'Unravelled', desc: 'Defeat the Spider Queen.', coins: 260 },
-  { id: 'allbiomes', name: 'Six Nests', desc: 'Clear all six biomes.', coins: 300 },
+  { id: 'wyrm', name: 'Fire Walker', desc: 'Defeat the Magma Wyrm.', coins: 340 },
+  { id: 'faequeen', name: 'Iron Wings', desc: 'Defeat the Fairy Queen.', coins: 420 },
+  { id: 'oni', name: 'Demon Slayer', desc: 'Defeat the Oni.', coins: 520 },
+  { id: 'maw', name: 'Into the Void', desc: 'Defeat the Maw.', coins: 700 },
+  { id: 'allbiomes', name: 'Every Nest', desc: 'Clear every biome.', coins: 600 },
+  { id: 'challenger', name: 'Up for It', desc: 'Complete a challenge run.', coins: 40 },
+  { id: 'chall10', name: 'Glutton for Punishment', desc: 'Complete 10 challenge runs.', coins: 300 },
+  { id: 'chall30', name: 'Master of Trials', desc: 'Complete every challenge run in every biome.', coins: 1500 },
   { id: 'untouched', name: 'Not a Scratch', desc: 'Clear wave 5 or later without the nest taking damage.', coins: 25 },
   { id: 'hoard', name: 'Hoarder', desc: 'Hold 150 shinies at once.', coins: 20 },
   { id: 'shopper', name: 'Shopaholic', desc: 'Buy 12 upgrades in one run.', coins: 25 },
@@ -505,11 +587,13 @@ function newRun(biomeIdx) {
   P = { dmg: 10 * (1 + .08 * u('beak')), rate: 2.2 * (1 + .06 * u('wings')), baseDmg: 10, baseRate: 2.2, speed: 560, multi: 1, pierce: 0, crit: .05 + .02 * u('eye'), critMult: 2,
     range: 470, thorns: 0, goldMult: 1 + .06 * u('luck'), cawR: 170, cawDmg: 20 + 8 * u('voice'), cawCd: 9 * (1 - .06 * u('voice')), stun: .7,
     magpies: 0, slow: 0, burn: 0, regen: 0, interest: false, chain: 0, homing: false, armorPen: 0,
-    spellCd: 1 - .06 * u('focus'), spellPow: 1 + .08 * u('focus'), spellR: 1,
+    spellCd: 1 - .06 * Math.min(8, u('focus')), spellPow: 1 + .08 * u('focus'), spellR: 1,
     bossDmg: 1 + .07 * u('slayer'), lifesteal: 0, pecker: false, execute: false, burst: 0, killCdr: 0, offers: 4 + u('favour'), haggle: 1 - .04 * u('haggle') };
   P.armorPen = u('pen'); P.thorns = 6 * u('thorns'); P.regen = .4 * u('regen'); P.pierce = u('pierce'); P.multi = 1 + u('twin'); P.magpies = u('magpie');
-  const maxHp = 100 + 15 * u('nest');
-  run = { biome: biomeIdx, wave: 0, gold: 6 * u('egg'), hp: maxHp, maxHp, kills: 0, items: {}, bought: 0, earned: 0, coins: 0, endless: false, bossBeaten: false, waveDmg: 0, unlocks: [], boss: null, poisonT: 0, poisonD: 0, webT: 0 };
+  let maxHp = 100 + 15 * u('nest');
+  const ch = save.challenge && biomeState(B.id).cleared ? save.challenge : '';
+  if (ch === 'glass') maxHp = Math.round(maxHp * .4);
+  run = { ch, noHeal: ch === 'glass', countMult: ch === 'swarm' ? 1.6 : 1, spdMult: ch === 'swarm' ? 1.2 : 1, chGold: ch === 'pauper' ? .5 : 1, rerollMult: ch === 'pauper' ? 2 : 1, biome: biomeIdx, wave: 0, gold: 6 * u('egg'), hp: maxHp, maxHp, kills: 0, items: {}, bought: 0, earned: 0, coins: 0, endless: false, bossBeaten: false, waveDmg: 0, unlocks: [], boss: null, poisonT: 0, poisonD: 0, webT: 0 };
   enemies = []; shots = []; parts = []; texts = []; rings = []; coinsFx = []; zones = []; spawnQ = []; webLines = [];
   fireT = 0; cawT = 0; armed = null; spellCds = {};
   for (const s of SPELLS) spellCds[s.id] = 0;
@@ -520,7 +604,7 @@ function hpMult(w) { const base = 1 + .17 * (Math.min(w, BOSS_WAVE) - 1) + .021 
 function startWave() {
   run.wave++;
   const w = run.wave;
-  let budget = 6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0);
+  let budget = (6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0)) * (run.countMult || 1);
   const pool = B.enemies.filter(k => E[k].from <= w);
   const list = [];
   let guard = 0;
@@ -538,7 +622,7 @@ function startWave() {
   spawnQ.sort((a, b) => a.t - b.t);
   run.waveClock = 0; run.waveDmg = 0; run.boss = null;
   state = 'wave';
-  toast(`Wave ${w}`, isBoss ? `${E[B.boss].name} is coming` : isElite ? `An elite ${E[B.elite].name.toLowerCase()} leads them` : run.endless ? 'Endless' : B.name);
+  toast(`Wave ${w}`, isBoss ? `${E[B.boss].name} is coming` : isElite ? `An elite ${E[B.elite].name.toLowerCase()} leads them` : run.endless ? 'Endless' : run.ch ? `${CHALLENGES.find(c => c.id === run.ch).name} challenge` : B.name);
 }
 function spawn(q) {
   const d = E[q.k], n = q.boss || q.elite ? 1 : (d.pack || 1), a0 = rnd(0, TAU);
@@ -550,7 +634,8 @@ function spawn(q) {
 function makeEnemy(k, x, y, q = {}) {
   const d = E[k], m = hpMult(run.wave);
   const e = { k, ...d, x, y, hp: d.hp * m, dmg: d.dmg * B.dmg * (1 + .06 * (run.wave - 1)), armor: (d.armor || 0) * (1 + .05 * (run.wave - 1)),
-    kx: 0, ky: 0, stun: 0, frozen: 0, burn: 0, burnD: 0, bite: 0, flash: 0, ph: rnd(0, 7), mode: 'in', trail: [], dead: false, retreatA: 0, stolen: 0, timer: rnd(2, 4), lungeT: 0, under: !!d.burrow, shootT: rnd(1, 2) };
+    kx: 0, ky: 0, stun: 0, frozen: 0, burn: 0, burnD: 0, bite: 0, flash: 0, ph: rnd(0, 7), mode: 'in', trail: [], dead: false, retreatA: 0, stolen: 0, timer: rnd(2, 4), lungeT: 0, seed: rnd(0, 7), under: !!d.burrow, shootT: rnd(1, 2) };
+  e.spd *= run.spdMult || 1;
   if (q.elite) { e.elite = true; e.hp *= 3; e.r *= 1.35; e.gold *= 5; e.dmg *= 1.25; e.name = 'Elite ' + d.name; }
   if (d.boss) { run.boss = e; }
   e.max = e.hp;
@@ -561,7 +646,7 @@ function makeEnemy(k, x, y, q = {}) {
 // ---------- combat ----------
 function nearest(x, y, maxD, skip) {
   let best = null, bd = maxD * maxD;
-  for (const e of enemies) { if (e.dead || e.under || (skip && skip.has(e))) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
+  for (const e of enemies) { if (e.dead || e.under || e.ghostly || (skip && skip.has(e))) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
   return best;
 }
 function fire(x, y, tx, ty, dmg, opts = {}) {
@@ -571,7 +656,7 @@ function fire(x, y, tx, ty, dmg, opts = {}) {
 function hurt(e, dmg, o = {}) {
   let crit = false;
   if (o.crit !== false && Math.random() < P.crit) { dmg *= P.critMult; crit = true; }
-  if (e.under) return;
+  if (e.under || e.ghostly) return;
   if (e.frozen > 0) dmg *= 1.25;
   if (e.webbed) dmg *= 1.2;
   if (e.boss || e.elite) dmg *= P.bossDmg;
@@ -583,7 +668,7 @@ function hurt(e, dmg, o = {}) {
 }
 function kill(e) {
   e.dead = true; run.kills++; save.stats.kills++;
-  const g = Math.max(1, Math.round(e.gold * .6 * P.goldMult)) + e.stolen;
+  const g = Math.max(1, Math.round(e.gold * .6 * P.goldMult * (run.chGold || 1))) + e.stolen;
   run.gold += g; run.earned += g;
   if (P.lifesteal) run.hp = Math.min(run.maxHp, run.hp + P.lifesteal);
   if (P.killCdr) for (const k in spellCds) spellCds[k] = Math.max(0, spellCds[k] - P.killCdr);
@@ -630,7 +715,7 @@ function caw() {
 }
 
 // ---------- spells ----------
-const ownedSpells = () => SPELLS.filter(s => save.spells.includes(s.id));
+const ownedSpells = () => loadout().map(id => SPELLS.find(s => s.id === id)).filter(Boolean);
 function armSpell(id) {
   if (state !== 'wave' || paused) return;
   if (armed === id || spellCds[id] > 0) { armed = null; } else armed = id;
@@ -651,6 +736,10 @@ function cast(id, x, y) {
   else if (id === 'bolt') zones.push({ id, x, y, r, t: .8, delay: .45 });
   else if (id === 'sand') zones.push({ id, x, y, r, t: 5, tick: 0 });
   else if (id === 'web') zones.push({ id, x, y, r, t: 6 });
+  else if (id === 'erupt') zones.push({ id, x, y, r, t: 5, tick: 0 });
+  else if (id === 'pixie') zones.push({ id, x, y, r, t: 5, tick: 0 });
+  else if (id === 'petal') zones.push({ id, x, y, r, t: 6, tick: 0 });
+  else if (id === 'hole') zones.push({ id, x, y, r, t: 4, done: false });
   else if (id === 'frost') {
     zones.push({ id, x, y, r, t: .7 });
     for (const e of enemies) if (!e.dead && Math.hypot(e.x - x, e.y - y) < r + e.r) { const f = e.boss ? 1.2 : 3; e.frozen = Math.max(e.frozen, f); e.stun = Math.max(e.stun, f); hurt(e, P.dmg * P.spellPow, { crit: false }); }
@@ -668,6 +757,19 @@ function updateZones(dt) {
     } else if (z.id === 'totem') {
       z.cd -= dt;
       if (z.cd <= 0) { const t = nearest(z.x, z.y, z.r); if (t) { fire(z.x, z.y - 18, t.x, t.y, P.dmg * .9 * P.spellPow, { pierce: 0, chain: 0, small: true, target: t }); z.cd = 1 / 2.4; } else z.cd = .1; }
+    } else if (z.id === 'erupt') {
+      z.tick -= dt;
+      if (z.tick <= 0) { z.tick = .3; for (const e of enemies) if (!e.dead && !e.fly && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) { hurt(e, P.dmg * P.spellPow * .2, { crit: false, text: false }); e.burn = 2; e.burnD = Math.max(e.burnD, .3 * P.dmg * P.spellPow); } }
+    } else if (z.id === 'pixie') {
+      run.hp = Math.min(run.maxHp, run.hp + run.maxHp * .03 * dt);
+      z.tick -= dt;
+      if (z.tick <= 0) { z.tick = .5; const near = enemies.filter(e => !e.dead && !e.under && !e.ghostly && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r).slice(0, 3); for (const e of near) { hurt(e, P.dmg * P.spellPow * .7, { crit: true, text: false }); if (!api.sim) parts.push({ x: e.x, y: e.y, vx: 0, vy: -30, t: .4, c: '#a0f0e0', r: 3 }); } }
+    } else if (z.id === 'petal') {
+      z.tick -= dt;
+      if (z.tick <= 0) { z.tick = .25; for (const e of enemies) if (!e.dead && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) hurt(e, P.dmg * P.spellPow * .35, { crit: true, text: false }); }
+    } else if (z.id === 'hole') {
+      for (const e of enemies) { if (e.dead || e.under) continue; const dx = z.x - e.x, dy = z.y - e.y, dd = Math.hypot(dx, dy); if (dd < z.r * 1.5 && dd > 4) { const k = (e.boss ? 20 : 150) * dt; e.x += dx / dd * Math.min(k, dd); e.y += dy / dd * Math.min(k, dd); } }
+      if (z.t <= .12 && !z.done) { z.done = true; for (const e of enemies) if (!e.dead && Math.hypot(e.x - z.x, e.y - z.y) < z.r * .7 + e.r) hurt(e, 8 * P.dmg * P.spellPow, { crit: true }); shake = Math.max(shake, 7); sfx.bolt(); if (!api.sim) rings.push({ x: z.x, y: z.y, r: 10, max: z.r, t: 0, c: '184,138,224' }); }
     } else if (z.id === 'sand') {
       z.tick -= dt;
       if (z.tick <= 0) { z.tick = .25; for (const e of enemies) { if (e.dead || e.under) continue; const dx = e.x - z.x, dy = e.y - z.y, dd = Math.hypot(dx, dy); if (dd < z.r + e.r) { const d0 = Math.hypot(e.x, e.y) || 1, k = e.boss ? 0 : e.elite ? 6 : 16; e.x += e.x / d0 * k; e.y += e.y / d0 * k; hurt(e, P.dmg * P.spellPow * .3, { crit: false, text: false }); } } }
@@ -788,9 +890,15 @@ function update(dt) {
         if (e.summon) { const n = e.k === 'ratking' ? 2 : 2; for (let i = 0; i < n; i++) spawn({ k: e.summon }); }
         if (e.lunge) e.lungeT = .9;
         if (e.weave) webCrow(e, 4);
+        if (e.healer) healAround(e, .08);
       }
       if (e.lungeT > 0) { e.lungeT -= dt; spd *= e.lungeT > .6 ? 0 : 4.5; }
+    } else if (e.lunge) {
+      e.timer -= dt;
+      if (e.timer <= 0) { e.timer = rnd(4, 6); e.lungeT = .9; }
+      if (e.lungeT > 0) { e.lungeT -= dt; spd *= e.lungeT > .6 ? 0 : 3.5; }
     }
+    if (e.phase) e.ghostly = Math.sin(e.ph * 2.4 + e.seed) > .55 && d > NEST_R + e.r + 10;
     if (e.fly) {
       if (e.mode === 'out') {
         e.x += Math.cos(e.retreatA) * spd * dt; e.y += Math.sin(e.retreatA) * spd * dt;
@@ -809,7 +917,10 @@ function update(dt) {
     if (e.under && d < 210) { e.under = false; if (!api.sim) for (let i = 0; i < 14; i++) parts.push({ x: e.x, y: e.y, vx: rnd(-120, 120), vy: rnd(-120, 120), t: rnd(.3, .6), c: '#c8a870', r: 3 }); }
     if (e.ranged && d < 240) {
       e.shootT -= dt;
-      if (e.shootT <= 0) { e.shootT = rnd(3.5, 4.5); webCrow(e, 3); }
+      if (e.shootT <= 0) {
+        e.shootT = rnd(3.5, 4.5);
+        if (e.healer) healAround(e, .12); else webCrow(e, 3);
+      }
       continue;
     }
     if (d > NEST_R + e.r - 4) {
@@ -833,6 +944,10 @@ function update(dt) {
   if (!spawnQ.length && !enemies.length) waveCleared();
 }
 const NEST_R = 50;
+function healAround(e, frac) {
+  for (const o of enemies) if (!o.dead && o !== e && Math.hypot(o.x - e.x, o.y - e.y) < 230) o.hp = Math.min(o.max, o.hp + o.max * frac);
+  if (!api.sim) rings.push({ x: e.x, y: e.y, r: 10, max: 230, t: 0, c: '160,240,160' });
+}
 function webCrow(e, secs) {
   run.webT = Math.max(run.webT, secs);
   if (!api.sim) { webLines.push({ x: e.x, y: e.y, t: .5 }); texts.push({ x: 0, y: -NEST_R - 24, v: 'Webbed!', t: 1, bad: true }); }
@@ -890,6 +1005,14 @@ function draw(time) {
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1200, 0, TAU); ctx.fill();
   if (biome.id === 'marsh') { ctx.fillStyle = 'rgba(40,80,90,.25)'; for (const s of deco.stones) { ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r * 4, s.r * 2.4, 0, 0, TAU); ctx.fill(); } }
   if (biome.id === 'dunes') { ctx.strokeStyle = 'rgba(255,230,170,.08)'; ctx.lineWidth = 3; for (let i = -900; i < 900; i += 46) { ctx.beginPath(); for (let x = -900; x <= 900; x += 30) { const y = i + Math.sin(x / 90 + i) * 14; x === -900 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); } }
+  if (biome.id === 'volcano') {
+    ctx.lineWidth = 3; ctx.strokeStyle = `rgba(255,110,40,${.3 + .12 * Math.sin(time / 400)})`;
+    for (const s of deco.stones) { ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x + s.r * 4, s.y + s.r * 1.5); ctx.lineTo(s.x + s.r * 6, s.y - s.r * 2); ctx.moveTo(s.x + s.r * 4, s.y + s.r * 1.5); ctx.lineTo(s.x + s.r * 3, s.y + s.r * 5); ctx.stroke(); }
+  }
+  if (biome.id === 'void') {
+    for (const b of deco.blades) { ctx.fillStyle = b.c ? 'rgba(184,138,224,.5)' : 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(b.x, b.y, b.h / 8, 0, TAU); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(120,60,200,.12)'; ctx.lineWidth = 18; for (let i = 0; i < 4; i++) { const a0 = time / 4000 + i * 1.57; ctx.beginPath(); ctx.arc(0, 0, 200 + i * 130, a0, a0 + 2.2); ctx.stroke(); }
+  }
   if (biome.id === 'spider') {
     ctx.strokeStyle = 'rgba(220,210,235,.09)'; ctx.lineWidth = 1.5;
     for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 70, Math.sin(a) * 70); ctx.lineTo(Math.cos(a) * 1100, Math.sin(a) * 1100); ctx.stroke(); }
@@ -905,7 +1028,8 @@ function draw(time) {
   for (const z of zones) drawZone(z, time, true);
 
   drawNest();
-  for (const e of enemies) drawEnemy(e, time);
+  for (const e of enemies) { ctx.globalAlpha = e.ghostly ? .25 : 1; drawEnemy(e, time); }
+  ctx.globalAlpha = 1;
   for (const z of zones) drawZone(z, time, false);
   for (const s of shots) drawFeather(s);
   ctx.strokeStyle = 'rgba(235,230,245,.7)'; ctx.lineWidth = 2;
@@ -920,6 +1044,13 @@ function draw(time) {
   for (const p of parts) { ctx.globalAlpha = Math.min(1, p.t * 3); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
   ctx.globalAlpha = 1;
   for (const c of coinsFx) { const k = c.t * c.t; ctx.fillStyle = C.shine; ctx.beginPath(); ctx.arc(c.x * (1 - k), c.y * (1 - k), 4, 0, TAU); ctx.fill(); }
+  if (biome.id === 'sakura' || biome.id === 'fairy' || biome.id === 'volcano') {
+    for (const f of snowflakes) {
+      if (biome.id === 'sakura') { const y = ((f.y + time / 1000 * f.s * .8 + 900) % 1800) - 900, x = f.x + Math.sin(time / 900 + f.s) * 30; ctx.fillStyle = 'rgba(255,176,208,.8)'; ctx.save(); ctx.translate(x, y); ctx.rotate(time / 500 + f.s); ctx.beginPath(); ctx.ellipse(0, 0, f.r * 2.6, f.r * 1.4, 0, 0, TAU); ctx.fill(); ctx.restore(); }
+      else if (biome.id === 'fairy') { const y = ((f.y - time / 1000 * f.s * .5 + 900) % 1800 + 1800) % 1800 - 900; ctx.fillStyle = f.s > 35 ? `rgba(160,240,224,${.4 + .3 * Math.sin(time / 300 + f.s)})` : `rgba(240,160,216,${.4 + .3 * Math.sin(time / 300 + f.s)})`; ctx.beginPath(); ctx.arc(f.x + Math.sin(time / 700 + f.s) * 14, y, f.r * 1.3, 0, TAU); ctx.fill(); }
+      else { const y = ((f.y - time / 1000 * f.s + 900) % 1800 + 1800) % 1800 - 900; ctx.fillStyle = 'rgba(255,140,50,.55)'; ctx.beginPath(); ctx.arc(f.x + Math.sin(time / 500 + f.s) * 8, y, f.r * .8, 0, TAU); ctx.fill(); }
+    }
+  }
   if (biome.id === 'snow') { ctx.fillStyle = 'rgba(255,255,255,.6)'; for (const f of snowflakes) { const y = ((f.y + time / 1000 * f.s + 900) % 1800) - 900; ctx.beginPath(); ctx.arc(f.x + Math.sin(time / 1000 + f.s) * 10, y, f.r, 0, TAU); ctx.fill(); } }
   ctx.textAlign = 'center';
   for (const t of texts) {
@@ -953,6 +1084,20 @@ function drawZone(z, time, under) {
       ctx.strokeStyle = z.delay > 0 ? 'rgba(242,226,122,.6)' : 'rgba(242,226,122,.3)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke();
     } else if (z.id === 'frost') {
       ctx.fillStyle = `rgba(168,216,240,${.35 * z.t / .7})`; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+    } else if (z.id === 'erupt') {
+      ctx.fillStyle = `rgba(240,96,42,${.35 + .1 * Math.sin(time / 120)})`; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,200,80,.5)'; for (let i = 0; i < 7; i++) { const a = i * 2.3 + time / 900, d = (i * 31 % 10) / 10 * z.r * .8; ctx.beginPath(); ctx.arc(z.x + Math.cos(a) * d, z.y + Math.sin(a) * d, 4 + Math.sin(time / 200 + i) * 2, 0, TAU); ctx.fill(); }
+    } else if (z.id === 'pixie') {
+      ctx.strokeStyle = 'rgba(160,240,224,.5)'; ctx.lineWidth = 2; ctx.setLineDash([3, 9]); ctx.beginPath(); ctx.arc(z.x, z.y, z.r, time / 600, time / 600 + TAU); ctx.stroke(); ctx.setLineDash([]);
+      for (let i = 0; i < 5; i++) { const a = time / 300 + i * 1.26; ctx.fillStyle = i % 2 ? '#a0f0e0' : '#f0a0d8'; ctx.beginPath(); ctx.arc(z.x + Math.cos(a) * z.r * .6, z.y + Math.sin(a) * z.r * .6, 4, 0, TAU); ctx.fill(); }
+      ctx.strokeStyle = 'rgba(160,240,224,.35)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 12, 0, TAU); ctx.stroke();
+    } else if (z.id === 'petal') {
+      ctx.fillStyle = 'rgba(255,176,208,.12)'; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#ffb0d0'; for (let i = 0; i < 18; i++) { const a = time / 160 + i * .35, d = z.r * (.25 + (i % 6) * .13); ctx.save(); ctx.translate(z.x + Math.cos(a) * d, z.y + Math.sin(a) * d); ctx.rotate(a * 2); ctx.beginPath(); ctx.ellipse(0, 0, 6, 3, 0, 0, TAU); ctx.fill(); ctx.restore(); }
+    } else if (z.id === 'hole') {
+      const g2 = ctx.createRadialGradient(z.x, z.y, 2, z.x, z.y, z.r * .7); g2.addColorStop(0, '#000'); g2.addColorStop(.6, 'rgba(40,10,70,.8)'); g2.addColorStop(1, 'rgba(40,10,70,0)');
+      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * .7, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(184,138,224,.6)'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { const a0 = -time / 140 + i * 2.1; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (.3 + i * .2), a0, a0 + 2); ctx.stroke(); }
     } else if (z.id === 'web') {
       ctx.strokeStyle = `rgba(232,228,240,${Math.min(.6, z.t / 2)})`; ctx.lineWidth = 1.5;
       for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; ctx.beginPath(); ctx.moveTo(z.x, z.y); ctx.lineTo(z.x + Math.cos(a) * z.r, z.y + Math.sin(a) * z.r); ctx.stroke(); }
@@ -1077,6 +1222,9 @@ function drawEnemy(e, time) {
       ctx.fillStyle = c0;
       if (e.ears === 'long') { ctx.beginPath(); ctx.ellipse(r * .5, -r * .45, r * .55, r * .18, -.5, 0, TAU); ctx.ellipse(r * .5, r * .45, r * .55, r * .18, .5, 0, TAU); ctx.fill(); }
       else if (e.ears) { ctx.beginPath(); ctx.moveTo(r * .8, -r * .4); ctx.lineTo(r * 1.0, -r * .85); ctx.lineTo(r * 1.25, -r * .3); ctx.moveTo(r * .8, r * .4); ctx.lineTo(r * 1.0, r * .85); ctx.lineTo(r * 1.25, r * .3); ctx.fill(); }
+      if (e.tails) { ctx.fillStyle = c1; for (let i = 0; i < e.tails; i++) { const ta = (i - (e.tails - 1) / 2) * .5 + Math.sin(time / 150 + i) * .15; ctx.beginPath(); ctx.ellipse(-r * 1.1 - Math.cos(ta) * r * .4, Math.sin(ta) * r * 1.1, r * .8, r * .3, ta, 0, TAU); ctx.fill(); } ctx.fillStyle = c0; }
+      if (e.horn) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(r * 1.2, -r * .12); ctx.lineTo(r * 2.1, 0); ctx.lineTo(r * 1.2, r * .12); ctx.fill(); ctx.fillStyle = c0; }
+      if (e.horns) { ctx.fillStyle = '#f0e6c8'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * .9, sd * r * .25); ctx.lineTo(r * 1.5, sd * r * .75); ctx.lineTo(r * 1.1, sd * r * .45); ctx.closePath(); ctx.fill(); } ctx.fillStyle = c0; }
       if (e.antlers) { ctx.strokeStyle = '#d8c8a0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(r * .9, -r * .3); ctx.lineTo(r * .6, -r * 1.2); ctx.lineTo(r * .2, -r * 1.4); ctx.moveTo(r * .65, -r * 1.0); ctx.lineTo(r * 1.0, -r * 1.3); ctx.moveTo(r * .9, r * .3); ctx.lineTo(r * .6, r * 1.2); ctx.lineTo(r * .2, r * 1.4); ctx.moveTo(r * .65, r * 1.0); ctx.lineTo(r * 1.0, r * 1.3); ctx.stroke(); }
       ctx.beginPath(); ctx.arc(r * .95, 0, r * .55, 0, TAU); ctx.fill();
       if (e.mask) { ctx.fillStyle = '#1d1c1b'; ctx.fillRect(r * .85, -r * .45, r * .35, r * .9); }
@@ -1110,6 +1258,43 @@ function drawEnemy(e, time) {
       ctx.strokeStyle = c1; ctx.lineWidth = 2; ctx.beginPath();
       for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU; ctx.moveTo(Math.cos(aa) * r * .35, Math.sin(aa) * r * .35); ctx.lineTo(Math.cos(aa) * r * .8, Math.sin(aa) * r * .7); }
       ctx.arc(0, 0, r * .35, 0, TAU); ctx.stroke();
+      break; }
+    case 'slime': {
+      const wob = Math.sin(time / 160 + e.ph) * .08;
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * (1 + wob), r * (.85 - wob), 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(-r * .2, 0, r * .5, r * .4, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(r * .3, -r * .35, r * .25, r * .12, .4, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .55, -r * .25, Math.max(1.5, r * .12), 0, TAU); ctx.arc(r * .55, r * .25, Math.max(1.5, r * .12), 0, TAU); ctx.fill();
+      break; }
+    case 'shroom': {
+      const st = Math.sin(time / 120 + e.ph) * r * .15;
+      ctx.fillStyle = c1; ctx.fillRect(-r * .5, -r * .35 + st, r * .4, r * .25); ctx.fillRect(-r * .5, r * .1 - st, r * .4, r * .25);
+      ctx.beginPath(); ctx.ellipse(r * .1, 0, r * .45, r * .4, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#fff'; for (const [x, y, q] of [[.3, -.4, .2], [-.3, .3, .25], [.1, .45, .15], [-.4, -.35, .15], [.5, .2, .12]]) { ctx.beginPath(); ctx.arc(x * r, y * r, q * r, 0, TAU); ctx.fill(); }
+      break; }
+    case 'fairy': {
+      const f = Math.sin(time / 40 + e.ph) * .5;
+      ctx.fillStyle = c1 === '#fff' ? 'rgba(255,255,255,.6)' : c1 + 'aa';
+      for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(-r * .2, sd * r * .9, r * .9, r * .45, sd * (.5 + f), 0, TAU); ctx.fill(); ctx.beginPath(); ctx.ellipse(-r * .7, sd * r * .6, r * .55, r * .3, sd * (1 + f), 0, TAU); ctx.fill(); }
+      ctx.shadowColor = c0; ctx.shadowBlur = r; ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * .6, r * .35, 0, 0, TAU); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fde8d8'; ctx.beginPath(); ctx.arc(r * .55, 0, r * .3, 0, TAU); ctx.fill();
+      if (e.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(r * .4, -r * .3); ctx.lineTo(r * .25, 0); ctx.lineTo(r * .4, r * .3); ctx.lineTo(r * .55, 0); ctx.closePath(); ctx.fill(); }
+      break; }
+    case 'orb': {
+      ctx.shadowColor = c0; ctx.shadowBlur = r * 1.5;
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(-r * .1, 0, r * .55, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .4, -r * .2, r * .14, 0, TAU); ctx.arc(r * .4, r * .2, r * .14, 0, TAU); ctx.fill();
+      ctx.strokeStyle = c0; ctx.lineWidth = Math.max(1.5, r * .2); ctx.globalAlpha *= .5; ctx.beginPath(); ctx.moveTo(-r, 0); ctx.quadraticCurveTo(-r * 1.6, Math.sin(time / 100 + e.ph) * r * .6, -r * 2.2, 0); ctx.stroke(); ctx.globalAlpha = e.ghostly ? .25 : 1;
+      break; }
+    case 'eye': {
+      ctx.strokeStyle = c0; ctx.lineWidth = Math.max(2, r * .16); ctx.lineCap = 'round';
+      for (let i = 0; i < 6; i++) { const aa = Math.PI * .6 + i / 5 * Math.PI * .8, w = Math.sin(time / 150 + i) * .3; ctx.beginPath(); ctx.moveTo(Math.cos(aa) * r * .7, Math.sin(aa) * r * .7); ctx.quadraticCurveTo(Math.cos(aa + w) * r * 1.3, Math.sin(aa + w) * r * 1.3, Math.cos(aa - w) * r * 1.7, Math.sin(aa - w) * r * 1.7); ctx.stroke(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#f4eef8'; ctx.beginPath(); ctx.ellipse(r * .2, 0, r * .62, r * .5, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .38, 0, r * .3, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(r * .42, 0, r * .08, r * .22, 0, 0, TAU); ctx.fill();
       break; }
     case 'spider': {
       ctx.strokeStyle = c1 === '#fff' ? '#fff' : (e.k === 'tarantula' ? '#2a1a10' : c0); ctx.lineWidth = Math.max(1.5, r * .14); ctx.lineCap = 'round';
@@ -1174,8 +1359,8 @@ function hud() {
 }
 function renderSpellBar() {
   const bar = $('spellBar');
-  if (bar.dataset.built !== save.spells.join()) {
-    bar.innerHTML = ''; bar.dataset.built = save.spells.join();
+  if (bar.dataset.built !== loadout().join()) {
+    bar.innerHTML = ''; bar.dataset.built = loadout().join();
     ownedSpells().forEach((s, i) => {
       const b = el('button', 'sp'); b.type = 'button'; b.dataset.id = s.id;
       b.append(el('span', 'fill'), el('span', 'lbl', s.short));
@@ -1242,7 +1427,7 @@ function rollOffers() {
   }
   offers = picks;
 }
-function waveCoins(w) { return Math.round((2 + w * .5) * B.coin * (run.endless ? 1.5 : 1)); }
+function waveCoins(w) { return Math.round((2 + w * .5) * B.coin * (run.endless ? 1.5 : 1) * (run.ch ? 1.5 : 1)); }
 function waveCleared() {
   const w = run.wave, bs = biomeState(B.id);
   const bonus = 3 + Math.round(w * 1.5);
@@ -1278,6 +1463,19 @@ function bossBeaten() {
     const sp = SPELLS.find(s => s.req === (next && next.id));
     if (sp) run.unlocks.push(`New spell available in the Spells tab: <b>${sp.name}</b>`);
   }
+  if (run.ch) {
+    bs.ch = bs.ch || {};
+    const C = CHALLENGES.find(c => c.id === run.ch);
+    if (!bs.ch[run.ch]) {
+      bs.ch[run.ch] = true;
+      const cb = Math.round(60 * B.coin); addCoins(cb);
+      run.unlocks.push(`Challenge complete: <b>${C.name}</b> (+${cb} coins)`);
+      grant('challenger');
+      if (chCount(save) >= 10) grant('chall10');
+      if (chCount(save) >= CHALLENGES.length * BIOMES.length) grant('chall30');
+      checkSkins();
+    }
+  }
   persist();
   if (api.sim) return;
   $('choiceTitle').textContent = `${boss.name} defeated`;
@@ -1290,7 +1488,7 @@ function bossBeaten() {
 }
 function openShop() {
   state = 'shop';
-  rerollCost = 2; healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
+  rerollCost = 2 * (run.rerollMult || 1); healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
   rollOffers();
   if (api.sim) return;
   $('shopEyebrow').textContent = `Wave ${run.wave} cleared`;
@@ -1318,7 +1516,8 @@ function renderShop() {
   $('rerollBtn').textContent = `Reroll (${rerollCost})`;
   $('rerollBtn').disabled = run.gold < rerollCost;
   $('healBtn').textContent = `Patch nest +35 HP (${healCost})`;
-  $('healBtn').disabled = run.gold < healCost || run.hp >= run.maxHp || healsLeft <= 0;
+  $('healBtn').disabled = run.noHeal || run.gold < healCost || run.hp >= run.maxHp || healsLeft <= 0;
+  if (run.noHeal) $('healBtn').textContent = 'No patching (Glass Nest)';
   $('homeBtn').textContent = `Fly home with ${run.coins} coins`;
   renderOwned($('owned'));
 }
@@ -1336,8 +1535,8 @@ function buy(i) {
   if (!api.sim) renderShop();
   return true;
 }
-function reroll() { if (run.gold < rerollCost) return; run.gold -= rerollCost; rerollCost += 2; rollOffers(); sfx.buy(); if (!api.sim) renderShop(); }
-function heal() { if (run.gold < healCost || healsLeft <= 0 || run.hp >= run.maxHp) return; run.gold -= healCost; healsLeft--; run.hp = Math.min(run.maxHp, run.hp + 35); sfx.buy(); if (!api.sim) renderShop(); }
+function reroll() { if (run.gold < rerollCost) return; run.gold -= rerollCost; rerollCost += 2 * (run.rerollMult || 1); rollOffers(); sfx.buy(); if (!api.sim) renderShop(); }
+function heal() { if (run.noHeal || run.gold < healCost || healsLeft <= 0 || run.hp >= run.maxHp) return; run.gold -= healCost; healsLeft--; run.hp = Math.min(run.maxHp, run.hp + 35); sfx.buy(); if (!api.sim) renderShop(); }
 function nextWave() { $('shop').hidden = true; $('choice').hidden = true; $('hud').hidden = false; startWave(); }
 $('rerollBtn').onclick = reroll;
 $('healBtn').onclick = heal;
@@ -1415,7 +1614,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Space') { e.preventDefault(); caw(); }
   else if (e.key === 'p' || e.key === 'P') setPause(!paused);
   else if (e.key === 'Escape') { if (armed) { armed = null; cv.classList.remove('aiming'); renderSpellBar(); } else setPause(!paused); }
-  else if (/^[1-7]$/.test(e.key)) { const s = ownedSpells()[+e.key - 1]; if (s) armSpell(s.id); }
+  else if (/^[1-5]$/.test(e.key)) { const s = ownedSpells()[+e.key - 1]; if (s) armSpell(s.id); }
 });
 addEventListener('blur', () => setPause(true));
 
@@ -1452,6 +1651,25 @@ function renderFly() {
   });
   const b = BIOMES[save.biome];
   $('biomeInfo').textContent = b.blurb;
+  const chBox = $('challenges'); chBox.innerHTML = '';
+  const bs = biomeState(b.id);
+  if (!bs.cleared) { save.challenge = ''; chBox.append(el('p', 'muted', `Beat ${E[b.boss].name} here to unlock this biome's 3 challenge runs.`)); }
+  else {
+    const done = CHALLENGES.filter(c => bs.ch && bs.ch[c.id]).length;
+    const sk = SKINS.find(s => s.id === 'ch-' + b.id);
+    chBox.append(el('div', 'eyebrow', `Challenges · ${done}/3 done`), el('p', 'muted', done === 3 ? `All done. ${sk ? sk.name + ' skin unlocked.' : ''}` : `Challenge runs pay 50% more coins. Complete all 3 to unlock the ${sk ? sk.name : ''} skin.`));
+    const g = el('div', 'grid'); g.style.marginTop = '10px';
+    for (const c of [{ id: '', name: 'Normal run', desc: 'No extra rules.' }, ...CHALLENGES]) {
+      const card = el('button', 'card' + ((save.challenge || '') === c.id ? ' sel' : '')); card.type = 'button';
+      const ok = c.id && bs.ch && bs.ch[c.id];
+      card.append(el('span', 'rar', c.id ? (ok ? 'Completed' : 'Challenge') : 'Standard'), el('span', 'nm', c.name), el('span', 'ds', c.desc));
+      card.onclick = () => { save.challenge = c.id; persist(); renderFly(); };
+      g.append(card);
+    }
+    chBox.append(g);
+  }
+  const C = CHALLENGES.find(c => c.id === save.challenge);
+  $('startBtn').textContent = C ? `Start ${C.name} challenge` : 'Defend the nest';
 }
 let resetArmed = 0;
 function roostRefund() { let n = 0; for (const u of ROOST) for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(u, l); return n; }
@@ -1491,15 +1709,32 @@ function renderRoost() {
 }
 function renderSpells() {
   const box = $('spellList'); box.innerHTML = '';
+  const lo = loadout();
+  const head = el('p', 'muted', `Loadout ${lo.length}/${MAX_LOADOUT}. You take up to ${MAX_LOADOUT} spells into each run. Tap an unlocked spell to add it to or remove it from your loadout.`);
+  head.style.gridColumn = '1 / -1'; box.append(head);
   for (const s of SPELLS) {
     const have = save.spells.includes(s.id), reqOk = !s.req || biomeState(s.req).unlocked;
     const c = el('button', 'card' + (have ? ' sel' : '')); c.type = 'button';
     const sw = el('div', 'swatch'); sw.style.background = s.col;
-    const status = have ? 'Unlocked' : !reqOk ? `Reach ${BIOMES.find(b => b.id === s.req).name} first` : `${s.cost} coins`;
+    const inLo = lo.includes(s.id);
+    if (have) c.classList.toggle('sel', inLo);
+    const status = have ? (inLo ? `Equipped (slot ${lo.indexOf(s.id) + 1}) · tap to remove` : lo.length >= MAX_LOADOUT ? 'Owned · loadout full' : 'Owned · tap to equip') : !reqOk ? `Reach ${BIOMES.find(b => b.id === s.req).name} first` : `${s.cost} coins`;
     c.append(sw, el('span', 'nm', s.name), el('span', 'ds', s.desc), el('span', 'ds', `Recharge ${s.cd}s`), el('span', 'pr coinc', status));
     c.disabled = have || !reqOk || save.coins < s.cost;
-    if (have) c.disabled = false, c.classList.add('locked');
-    c.onclick = () => { if (have || !reqOk || save.coins < s.cost) return; save.coins -= s.cost; save.spells.push(s.id); sfx.buy(); persist(); renderMenu(); };
+    if (have) c.disabled = false;
+    c.onclick = () => {
+      if (have) {
+        const cur = loadout();
+        if (cur.includes(s.id)) save.loadout = cur.filter(x => x !== s.id);
+        else if (cur.length < MAX_LOADOUT) save.loadout = cur.concat(s.id);
+        else return;
+        persist(); renderMenu(); return;
+      }
+      if (!reqOk || save.coins < s.cost) return;
+      save.coins -= s.cost; save.spells.push(s.id);
+      const cur = loadout(); if (cur.length < MAX_LOADOUT) save.loadout = cur.concat(s.id);
+      sfx.buy(); persist(); renderMenu();
+    };
     box.append(c);
   }
 }
@@ -1566,7 +1801,8 @@ $('codeForm').addEventListener('submit', ev => {
     const up = {}; for (const u of ROOST) up[u.id] = u.max;
     const ach = {}; for (const a of ACH) ach[a.id] = Date.now();
     const biomes = {}; for (const b of BIOMES) biomes[b.id] = { unlocked: true, cleared: true, best: (save.biomes[b.id] || {}).best || 0 };
-    Object.assign(save, { testMode: true, coins: 99999, up, ach, biomes, spells: SPELLS.map(s => s.id), skinsSeen: SKINS.map(s => s.id) });
+    for (const k in biomes) biomes[k].ch = { glass: true, swarm: true, pauper: true };
+    Object.assign(save, { testMode: true, coins: 999999, up, ach, biomes, spells: SPELLS.map(s => s.id), loadout: SPELLS.slice(0, MAX_LOADOUT).map(s => s.id), skinsSeen: SKINS.map(s => s.id) });
     persist(); sfx.ach();
     codeStatus('Everything unlocked for testing. Enter the code again to undo.');
   }
