@@ -96,6 +96,14 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .card .pr { font-family: var(--mono); color: var(--shine); font-size: 14px; margin-top: auto; }
 .card .pr.coinc { color: var(--coin); }
 .swatch { height: 8px; border-radius: 4px; }
+.mon { cursor: default; }
+.mon canvas { width: 100%; height: 110px; display: block; border-radius: 8px; background: var(--night); }
+.mon .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.mon .tags span { font-size: 11px; background: var(--night); color: var(--bone-dim); border-radius: 999px; padding: 2px 8px; }
+.mon.unknown .nm { color: var(--bone-dim); }
+.mongroup { display: grid; gap: 10px; margin-bottom: 22px; }
+.mongroup h3 { font-size: 24px; }
+.mongroup.bosses h3 { color: var(--blood); }
 .feathers { display: flex; gap: 4px; margin-top: 2px; }
 .feathers svg { width: 22px; height: 22px; display: block; }
 .feathers .gold path { fill: var(--shine); }
@@ -168,6 +176,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
       <button class="tab" role="tab" data-tab="roost" type="button">Roost</button>
       <button class="tab" role="tab" data-tab="spells" type="button">Spells</button>
       <button class="tab" role="tab" data-tab="skins" type="button">Skins</button>
+      <button class="tab" role="tab" data-tab="monsters" type="button">Monsters</button>
       <button class="tab" role="tab" data-tab="feats" type="button">Achievements</button>
     </div>
     <section id="tab-fly" class="tabpane">
@@ -197,6 +206,10 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
     <section id="tab-skins" class="tabpane" hidden>
       <p>Win to unlock new feathers. Tap a skin to wear it.</p>
       <div class="grid" id="skinList" style="margin-top:14px"></div>
+    </section>
+    <section id="tab-monsters" class="tabpane" hidden>
+      <p id="monCount"></p>
+      <div id="monList" style="margin-top:14px"></div>
     </section>
     <section id="tab-feats" class="tabpane" hidden>
       <p id="achCount"></p>
@@ -581,6 +594,7 @@ const ACH = [
   { id: 'endless30', name: 'No Dawn', desc: 'Reach wave 30 in endless mode.', coins: 150 },
   { id: 'fledged', name: 'Fully Fledged', desc: 'Max out one Roost upgrade.', coins: 40 },
   { id: 'collector', name: 'Wardrobe', desc: 'Unlock 5 skins.', coins: 50 },
+  { id: 'bestiary', name: 'Monster Hunter', desc: 'Discover every monster in the index (DLC not needed).', coins: 250 },
   { id: 'tycoon', name: 'Tycoon', desc: 'Earn 1,000 coins in total.', coins: 60 },
 ];
 
@@ -686,6 +700,13 @@ function hurt(e, dmg, o = {}) {
 }
 function kill(e) {
   e.dead = true; run.kills++; save.stats.kills++;
+  save.seen = save.seen || {};
+  if (!save.seen[e.k]) {
+    toastSmall(E[e.k].name, 'New in the monster index');
+    if (run.unlocks) run.unlocks.push(`New monster in the index: <b>${E[e.k].name}</b>`);
+  }
+  save.seen[e.k] = (save.seen[e.k] || 0) + 1;
+  if (!save.ach.bestiary && monsterList().filter(k => !E[k].dlcOnly).every(k => save.seen[k])) grant('bestiary');
   const g = Math.max(1, Math.round(e.gold * .6 * P.goldMult * (run.chGold || 1))) + e.stolen;
   run.gold += g; run.earned += g;
   if (P.lifesteal) run.hp = Math.min(run.maxHp, run.hp + P.lifesteal);
@@ -1741,6 +1762,7 @@ function renderMenu(tab) {
   if (curTab === 'spells') renderSpells();
   if (curTab === 'skins') renderSkins();
   if (curTab === 'feats') renderAch();
+  if (curTab === 'monsters') renderMonsters();
 }
 for (const t of document.querySelectorAll('.tab')) t.onclick = () => renderMenu(t.dataset.tab);
 function renderFly() {
@@ -1868,6 +1890,88 @@ function renderSkins() {
     ctx = pc; drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, 0); ctx = mainCtx;
   }
 }
+function monsterList(includeBosses = true) {
+  const out = [];
+  for (const b of BIOMES) {
+    for (const k of b.enemies) { if (!out.includes(k)) out.push(k); const sp = E[k].split; if (sp && !out.includes(sp)) out.push(sp); }
+    if (includeBosses && !out.includes(b.boss)) out.push(b.boss);
+  }
+  for (const b of BIOMES) if (b.dlc) for (const k of [...b.enemies, b.boss]) E[k].dlcOnly = true;
+  return out;
+}
+function monsterTraits(k) {
+  const d = E[k], t = [];
+  if (d.boss) t.push('Boss');
+  if (d.fly) t.push('Flies');
+  if (d.pack) t.push(`Groups of ${d.pack}`);
+  if (d.armor) t.push(`Armour ${d.armor}`);
+  if (d.burrow) t.push('Burrows');
+  if (d.phase) t.push('Fades out');
+  if (d.hop) t.push('Hops');
+  if (d.zig) t.push('Zig-zags');
+  if (d.lunge) t.push('Charges');
+  if (d.poison) t.push('Poisons the nest');
+  if (d.drain) t.push('Heals when it bites');
+  if (d.thief) t.push('Steals shinies');
+  if (d.healer) t.push('Heals monsters');
+  if (d.ranged && !d.healer) t.push(d.jamText ? 'Jams your crow' : 'Slows your crow');
+  if (d.weave && !d.ranged) t.push(d.jamText ? 'Jams your crow' : 'Slows your crow');
+  if (d.split) t.push(`Splits into ${E[d.split].name}`);
+  if (d.summon) t.push(`Calls ${E[d.summon].name}`);
+  return t;
+}
+function drawMonsterPreview(cvs, k, known) {
+  const d = E[k], pc = cvs.getContext('2d'), W = cvs.width, H = cvs.height;
+  pc.clearRect(0, 0, W, H);
+  const r = d.r, wide = d.shape === 'snake' ? 3 : d.shape === 'quad' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
+  const sc = Math.min(H * .7 / (r * 2.2), W * .8 / (r * wide), 3.2);
+  const e = Object.assign({}, d, { k, x: 0, y: 0, hp: 1, max: 1, flash: 0, ph: 1, mode: 'in', trail: [], stun: 0, frozen: 0, under: false, ghostly: false, lungeT: 0, elite: false, stolen: 0, armor: d.armor || 0 });
+  if (!known) e.col = ['#2a2f28', '#232720', '#2a2f28'];
+  if (d.shape === 'snake') for (let i = 1; i <= 8; i++) e.trail.push({ x: -i * r * .35, y: Math.sin(i * .9) * r * .35 });
+  e.x = -0.0001;
+  const keep = ctx; ctx = pc;
+  pc.setTransform(sc, 0, 0, sc, W / 2 + (d.shape === 'snake' ? r * 1.1 * sc : 0), H / 2);
+  pc.globalAlpha = 1;
+  try { drawEnemy(e, 1000); } catch (err) {}
+  pc.setTransform(1, 0, 0, 1, 0, 0);
+  pc.shadowBlur = 0; pc.globalAlpha = 1;
+  if (!known) { pc.globalCompositeOperation = 'source-atop'; pc.fillStyle = '#2c322a'; pc.fillRect(0, 0, W, H); pc.globalCompositeOperation = 'source-over'; }
+  ctx = keep;
+}
+function renderMonsters() {
+  save.seen = save.seen || {};
+  const box = $('monList'); box.innerHTML = '';
+  const all = monsterList(), visible = all.filter(k => !E[k].dlcOnly || biomeState('office').unlocked || save.seen[k]);
+  const found = visible.filter(k => save.seen[k]).length;
+  $('monCount').textContent = `${found} of ${visible.length} monsters discovered. Defeat a monster once to add it to the index.`;
+  const card = k => {
+    const d = E[k], known = !!save.seen[k];
+    const c = el('div', 'card mon' + (known ? '' : ' unknown'));
+    const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 220;
+    c.append(cvs, el('span', 'nm', known ? d.name : '???'));
+    if (known) {
+      c.append(el('span', 'ds', `Defeated ${save.seen[k]} · HP ${d.hp} · Speed ${d.spd} · Bite ${d.dmg}`));
+      const tg = el('div', 'tags'); for (const t of monsterTraits(k)) tg.append(el('span', '', t)); c.append(tg);
+    } else c.append(el('span', 'ds', 'Defeat one to reveal it.'));
+    drawMonsterPreview(cvs, k, known);
+    return c;
+  };
+  for (const b of BIOMES) {
+    const ks = all.filter(k => !E[k].boss && (b.enemies.includes(k) || b.enemies.some(x => E[x].split === k)));
+    const show = ks.filter(k => visible.includes(k));
+    if (!show.length) continue;
+    const grp = el('div', 'mongroup');
+    grp.append(el('h3', '', b.name + (b.dlc ? ' (DLC)' : '')));
+    const g = el('div', 'grid'); for (const k of show) g.append(card(k)); grp.append(g);
+    box.append(grp);
+  }
+  const bosses = BIOMES.map(b => b.boss).filter(k => visible.includes(k));
+  const bg = el('div', 'mongroup bosses');
+  bg.append(el('h3', '', 'Bosses'), el('p', 'muted', 'Each biome ends with a boss on wave 10.'));
+  const g = el('div', 'grid');
+  for (const k of bosses) { const c = card(k); const home = BIOMES.find(b => b.boss === k); c.querySelector('.nm').after(el('span', 'rar', home.name)); g.append(c); }
+  bg.append(g); box.append(bg);
+}
 function renderAch() {
   const box = $('achList'); box.innerHTML = '';
   const n = Object.keys(save.ach).length;
@@ -1920,7 +2024,8 @@ $('codeForm').addEventListener('submit', ev => {
     const ach = {}; for (const a of ACH) ach[a.id] = Date.now();
     const biomes = {}; for (const b of BIOMES) biomes[b.id] = { unlocked: true, cleared: true, best: (save.biomes[b.id] || {}).best || 0 };
     for (const k in biomes) biomes[k].ch = { glass: true, swarm: true, pauper: true };
-    Object.assign(save, { testMode: true, coins: 999999, up, ach, biomes, spells: SPELLS.map(s => s.id), loadout: SPELLS.slice(0, MAX_LOADOUT).map(s => s.id), skinsSeen: SKINS.map(s => s.id) });
+    const seen = {}; for (const k of monsterList()) seen[k] = 1;
+    Object.assign(save, { seen, testMode: true, coins: 999999, up, ach, biomes, spells: SPELLS.map(s => s.id), loadout: SPELLS.slice(0, MAX_LOADOUT).map(s => s.id), skinsSeen: SKINS.map(s => s.id) });
     persist(); sfx.ach();
     codeStatus('Everything unlocked for testing. Enter the code again to undo.');
   }
