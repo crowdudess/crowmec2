@@ -1,6 +1,6 @@
 # Nestguard
 
-A roguelike nest defence game. You are a crow, and everything in the forest wants your eggs.
+A roguelike nest defence game by crowdude. You are a crow, and everything in the forest wants your eggs.
 
 - Hold the nest against waves of enemies. Your crow shoots by itself; press **Space** (or tap the field) to caw.
 - Shop between waves for random upgrades.
