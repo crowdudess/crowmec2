@@ -2991,7 +2991,7 @@ function bossBeaten() {
 }
 function openShop() {
   state = 'shop'; run.shopAt = performance.now();
-  run.freeRerolls = P.freeRe || 0; rerollCost = 2 * (run.rerollMult || 1); healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
+  run.freeRerolls = P.freeRe || 0; rerollCost = run.rerollCost ?? 2 * (run.rerollMult || 1); healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
   rollOffers();
   if (api.sim) return;
   $('shopEyebrow').textContent = T('wave_cleared', run.wave);
@@ -3047,7 +3047,7 @@ function buy(i) {
   if (!api.sim) renderShop();
   return true;
 }
-function reroll() { if (run.freeRerolls > 0) { run.freeRerolls--; rollOffers(); sfx.buy(); if (!api.sim) renderShop(); return; } if (run.gold < rerollCost) return; run.gold -= rerollCost; rerollCost += 2 * (run.rerollMult || 1); rollOffers(); sfx.buy(); if (!api.sim) renderShop(); }
+function reroll() { if (run.freeRerolls > 0) { run.freeRerolls--; rollOffers(); sfx.buy(); if (!api.sim) renderShop(); return; } if (run.gold < rerollCost) return; run.gold -= rerollCost; rerollCost = Math.ceil(rerollCost * 1.3) + (run.rerollMult || 1); run.rerollCost = rerollCost; rollOffers(); sfx.buy(); if (!api.sim) renderShop(); }
 function heal() { if (run.noHeal || run.gold < healCost || healsLeft <= 0 || run.hp >= run.maxHp) return; run.gold -= healCost; healsLeft--; run.hp = Math.min(run.maxHp, run.hp + 35); sfx.buy(); if (!api.sim) renderShop(); }
 function nextWave() { if (state !== 'shop') return; $('shop').hidden = true; $('choice').hidden = true; $('hud').hidden = false; startWave(); }
 $('rerollBtn').onclick = reroll;
