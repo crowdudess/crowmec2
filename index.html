@@ -42,7 +42,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .hpnum { font-family: var(--mono); font-size: 12px; margin-top: 3px; font-variant-numeric: tabular-nums; }
 .bossbar { margin-top: 10px; }
 .bossbar i { background: linear-gradient(90deg, #8a2a1c, var(--blood)); }
-.hud-bottom { display: flex; flex-wrap: wrap; justify-content: center; align-items: end; gap: 8px; }
+.hud-bottom { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 10px; }
 .spells { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .hud-right { display: grid; justify-items: end; gap: 10px; }
 .iconrow { display: flex; gap: 8px; }
@@ -57,9 +57,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .ghost { pointer-events: auto; font: 600 14px var(--body); color: var(--bone); background: var(--moss); border: 1px solid var(--moss-2); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
 .ghost:hover:not(:disabled) { background: var(--moss-2); }
 .ghost:disabled { opacity: .45; cursor: not-allowed; }
-#cawBtn { position: relative; overflow: hidden; min-width: 132px; background: var(--bone); }
 .fill { position: absolute; inset: 0; background: rgba(0,0,0,.35); transform-origin: left; pointer-events: none; }
-#cawBtn .fill { background: var(--bone-dim); }
 .lbl { position: relative; }
 .kbd { font-family: var(--mono); font-size: 11px; opacity: .7; margin-left: 6px; }
 .sp { pointer-events: auto; position: relative; overflow: hidden; width: 62px; height: 62px; padding: 0; background: var(--moss-2); border: 2px solid var(--moss-3); border-radius: 12px; cursor: pointer; }
@@ -69,6 +67,12 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .sp .spkey { position: absolute; left: 5px; top: 3px; font: 700 11px var(--mono); color: var(--bone); opacity: .75; text-shadow: 0 1px 2px #000; pointer-events: none; }
 .sp.ready { border-color: var(--spc, var(--moss-3)); }
 @media (max-width: 560px) { .sp { width: 52px; height: 52px; } .sp .sptime { font-size: 17px; } .iconbtn { width: 40px; height: 40px; } }
+.sp.cawsp { width: 80px; height: 80px; border-radius: 16px; background: radial-gradient(circle at 50% 40%, var(--moss-3), var(--moss-2)); }
+.sp.cawsp canvas { inset: 4px 6px 14px; width: calc(100% - 12px); height: calc(100% - 18px); }
+.sp.cawsp .cawlbl { position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font: 800 11px var(--display); letter-spacing: .08em; color: var(--bone); text-shadow: 0 1px 2px #000; pointer-events: none; }
+.sp.cawsp.ready { border-color: var(--spc); box-shadow: 0 0 14px color-mix(in srgb, var(--spc) 45%, transparent); }
+.sp.cawsp .sptime { font-size: 24px; }
+@media (max-width: 560px) { .sp.cawsp { width: 66px; height: 66px; } .sp.cawsp .sptime { font-size: 19px; } }
 .sp.armed { border-color: var(--shine); box-shadow: inset 0 0 0 2px var(--shine); background: var(--moss-3); }
 .sp:disabled { cursor: not-allowed; }
 
@@ -271,7 +275,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .ach { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateY(12px); background: var(--moss); border: 1px solid var(--coin); border-radius: 12px; padding: 10px 16px; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity .25s, transform .25s; z-index: 50; max-width: min(320px, calc(100% - 32px)); }
 .ach.show { opacity: 1; transform: none; }
 .ach b { color: var(--coin); display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
-@media (max-width: 560px) { .panel { padding: 18px; } .stat b { font-size: 22px; } #cawBtn { min-width: 110px; } .sp { min-width: 0; padding: 9px 10px; } .hide-sm { display: none; } }
+@media (max-width: 560px) { .panel { padding: 18px; } .stat b { font-size: 22px; } .sp { min-width: 0; } .hide-sm { display: none; } }
 @media (prefers-reduced-motion: reduce) { .card, .hpbar i, .toast, .ach { transition: none; } }
 </style>
 
@@ -294,8 +298,8 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
   </div>
   <div></div>
   <div class="hud-bottom">
+    <button class="sp cawsp" id="cawBtn" type="button" data-i18n-aria="caw"><canvas id="cawIcon" width="128" height="128" aria-hidden="true"></canvas><span class="spshade" id="cawShade"></span><span class="sptime" id="cawTime"></span><span class="spkey hide-sm" data-i18n="space">Space</span><span class="cawlbl" data-i18n="caw">CAW!</span></button>
     <div class="spells" id="spellBar"></div>
-    <button class="btn" id="cawBtn" type="button"><span class="fill" id="cawFill"></span><span class="lbl"><span data-i18n="caw">CAW!</span><span class="kbd hide-sm" data-i18n="space">Space</span></span></button>
   </div>
 </div>
 
@@ -2644,7 +2648,7 @@ function hud() {
   const hp = Math.max(0, run.hp);
   $('hHp').style.width = (hp / run.maxHp * 100) + '%';
   $('hHpNum').textContent = `${Math.ceil(hp)} / ${run.maxHp}`;
-  $('cawFill').style.transform = `scaleX(${P ? cawT / P.cawCd : 0})`;
+  { const cb = $('cawBtn'), frac = P ? Math.min(1, cawT / P.cawCd) : 0; $('cawShade').style.height = (frac * 100) + '%'; $('cawShade').style.display = cawT > 0 ? '' : 'none'; $('cawTime').textContent = cawT > 0 ? (cawT >= 1 ? Math.ceil(cawT) : cawT.toFixed(1)) : ''; cb.classList.toggle('ready', cawT <= 0); if (cb.dataset.skin !== save.skin) paintCawIcon(); }
   if (run.boss && run.boss.dead) run.boss = enemies.find(x => x.boss && !x.dead) || run.boss;
   const b = run.boss && !run.boss.dead ? run.boss : null;
   $('bossWrap').hidden = !b;
@@ -2676,6 +2680,21 @@ function drawSpellIcon(cv2, id, col) {
     case 'hole': { const g = c.createRadialGradient(0, 0, 4, 0, 0, 46); g.addColorStop(0, '#000'); g.addColorStop(.55, '#1a0830'); g.addColorStop(1, 'rgba(40,10,70,0)'); c.fillStyle = g; c.beginPath(); c.arc(0, 0, 46, 0, TAU); c.fill(); c.strokeStyle = col; c.lineWidth = 4; for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(0, 0, 14 + i * 10, i * 2, i * 2 + 2.6); c.stroke(); } break; }
     default: c.fillStyle = col; c.beginPath(); c.arc(0, 0, 30, 0, TAU); c.fill();
   }
+  c.restore();
+}
+function paintCawIcon() {
+  const cv2 = $('cawIcon'), c = cv2.getContext('2d'), S = cv2.width, sk = skinOf(save.skin), [, pcol] = projOf(save.skin), accent = save.skin === 'classic' ? '#ece6d6' : pcol;
+  $('cawBtn').dataset.skin = save.skin; $('cawBtn').style.setProperty('--spc', accent);
+  c.clearRect(0, 0, S, S); c.save(); c.translate(S / 2, S / 2); c.scale(S / 104, S / 104); c.lineCap = 'round'; c.lineJoin = 'round';
+  c.strokeStyle = accent; for (let i = 0; i < 3; i++) { c.globalAlpha = .9 - i * .25; c.lineWidth = 6 - i; c.beginPath(); c.arc(4, 4, 30 + i * 12, -.75, .75); c.stroke(); }
+  c.globalAlpha = 1;
+  c.fillStyle = sk.wing; c.beginPath(); c.moveTo(-46, 36); c.quadraticCurveTo(-48, 0, -30, -18); c.lineTo(-10, 30); c.closePath(); c.fill();
+  c.fillStyle = sk.body; c.beginPath(); c.arc(-18, -6, 26, 0, TAU); c.fill(); c.beginPath(); c.moveTo(-40, 8); c.quadraticCurveTo(-30, 40, -6, 44); c.quadraticCurveTo(-4, 20, 2, 10); c.lineTo(-10, 0); c.closePath(); c.fill();
+  c.fillStyle = sk.sheen; c.beginPath(); c.arc(-24, -14, 13, 0, TAU); c.fill();
+  c.fillStyle = sk.beak; c.beginPath(); c.moveTo(2, -14); c.lineTo(30, -16); c.lineTo(4, -4); c.closePath(); c.fill(); c.beginPath(); c.moveTo(2, 0); c.lineTo(26, 10); c.lineTo(2, 6); c.closePath(); c.fill();
+  c.fillStyle = '#c8424a'; c.beginPath(); c.moveTo(4, -4); c.lineTo(20, 2); c.lineTo(4, 1); c.closePath(); c.fill();
+  c.fillStyle = sk.eye; c.beginPath(); c.arc(-12, -14, 5.5, 0, TAU); c.fill(); c.fillStyle = '#111'; c.beginPath(); c.arc(-11, -14, 2.6, 0, TAU); c.fill();
+  if (sk.glow) { c.globalCompositeOperation = 'lighter'; c.fillStyle = sk.glow + '55'; c.beginPath(); c.arc(-12, -14, 9, 0, TAU); c.fill(); c.globalCompositeOperation = 'source-over'; }
   c.restore();
 }
 function renderSpellBar() {
