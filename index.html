@@ -67,12 +67,18 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .sp .spkey { position: absolute; left: 5px; top: 3px; font: 700 11px var(--mono); color: var(--bone); opacity: .75; text-shadow: 0 1px 2px #000; pointer-events: none; }
 .sp.ready { border-color: var(--spc, var(--moss-3)); }
 @media (max-width: 560px) { .sp { width: 52px; height: 52px; } .sp .sptime { font-size: 17px; } .iconbtn { width: 40px; height: 40px; } }
-.sp.cawsp { width: 80px; height: 80px; border-radius: 16px; background: radial-gradient(circle at 50% 40%, var(--moss-3), var(--moss-2)); }
-.sp.cawsp canvas { inset: 4px 6px 14px; width: calc(100% - 12px); height: calc(100% - 18px); }
-.sp.cawsp .cawlbl { position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font: 800 11px var(--display); letter-spacing: .08em; color: var(--bone); text-shadow: 0 1px 2px #000; pointer-events: none; }
-.sp.cawsp.ready { border-color: var(--spc); box-shadow: 0 0 14px color-mix(in srgb, var(--spc) 45%, transparent); }
-.sp.cawsp .sptime { font-size: 24px; }
-@media (max-width: 560px) { .sp.cawsp { width: 66px; height: 66px; } .sp.cawsp .sptime { font-size: 19px; } }
+.cawkey { pointer-events: auto; position: relative; overflow: hidden; width: 232px; height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--moss-3); background: linear-gradient(180deg, var(--moss-3), var(--moss-2)); box-shadow: 0 5px 0 #0b0e0a, 0 8px 14px rgba(0,0,0,.35); color: var(--bone); cursor: pointer; transition: transform .06s, box-shadow .06s; font: inherit; }
+.cawkey:active, .cawkey.hit { transform: translateY(4px); box-shadow: 0 1px 0 #0b0e0a, 0 3px 8px rgba(0,0,0,.35); }
+.cawkey.ready { border-color: #e8b84a; box-shadow: 0 5px 0 #0b0e0a, 0 0 16px rgba(232,184,74,.35); }
+.cawkey:focus-visible { outline: 3px solid var(--bone); outline-offset: 3px; }
+.cawkey canvas { width: 46px; height: 46px; position: relative; }
+.cawkey.cd canvas, .cawkey.cd .cawlbl, .cawkey.cd .cawkbd { opacity: .06; }
+.cawkey .cawlbl { position: relative; font: 800 22px var(--display); letter-spacing: .06em; }
+.cawkey .cawkbd { position: relative; font: 700 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; opacity: .7; padding: 2px 7px; border: 1px solid rgba(236,230,214,.35); border-radius: 6px; }
+.cawkey .spshade { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(8,10,8,.62); border-right: 3px solid #e8b84a; pointer-events: none; }
+.cawkey .sptime { position: absolute; inset: 0; display: grid; place-items: center; font: 800 22px var(--mono); color: var(--bone); text-shadow: 0 1px 4px #000; pointer-events: none; }
+.cawkey .sptime:empty { display: none; }
+@media (max-width: 560px) { .cawkey { width: 180px; height: 46px; } .cawkey .cawlbl { font-size: 19px; } }
 .sp.armed { border-color: var(--shine); box-shadow: inset 0 0 0 2px var(--shine); background: var(--moss-3); }
 .sp:disabled { cursor: not-allowed; }
 
@@ -298,7 +304,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
   </div>
   <div></div>
   <div class="hud-bottom">
-    <button class="sp cawsp" id="cawBtn" type="button" data-i18n-aria="caw"><canvas id="cawIcon" width="128" height="128" aria-hidden="true"></canvas><span class="spshade" id="cawShade"></span><span class="sptime" id="cawTime"></span><span class="spkey hide-sm" data-i18n="space">Space</span><span class="cawlbl" data-i18n="caw">CAW!</span></button>
+    <button class="cawkey" id="cawBtn" type="button" data-i18n-aria="caw"><span class="spshade" id="cawShade"></span><canvas id="cawIcon" width="96" height="96" aria-hidden="true"></canvas><span class="cawlbl" data-i18n="caw">CAW!</span><span class="cawkbd hide-sm" data-i18n="space">Space</span><span class="sptime" id="cawTime"></span></button>
     <div class="spells" id="spellBar"></div>
   </div>
 </div>
@@ -1227,6 +1233,7 @@ function addCoins(n) { run.coins += n; }
 function caw() {
   if (state !== 'wave' || paused || cawT > 0) return;
   cawT = P.cawCd;
+  if (!api.sim) { const kb = $('cawBtn'); kb.classList.add('hit'); setTimeout(() => kb.classList.remove('hit'), 130); }
   { const [kind, col] = projOf(save.skin), cw = CAWS[save.skin] || {};
     rings.push({ x: 0, y: 0, r: 20, max: P.cawR, t: 0, c: save.skin === 'classic' ? '236,230,214' : hexRgb(col), style: cw.ring });
     if (!api.sim) for (let i = 0; i < 22; i++) { const a = i / 22 * TAU + rnd(-.1, .1), sp = rnd(240, 400) * (P.cawR / 170); parts.push({ x: Math.cos(a) * 30, y: Math.sin(a) * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: rnd(.45, .7), proj: kind, col, rot: a }); } }
@@ -2648,7 +2655,7 @@ function hud() {
   const hp = Math.max(0, run.hp);
   $('hHp').style.width = (hp / run.maxHp * 100) + '%';
   $('hHpNum').textContent = `${Math.ceil(hp)} / ${run.maxHp}`;
-  { const cb = $('cawBtn'), frac = P ? Math.min(1, cawT / P.cawCd) : 0; $('cawShade').style.height = (frac * 100) + '%'; $('cawShade').style.display = cawT > 0 ? '' : 'none'; $('cawTime').textContent = cawT > 0 ? (cawT >= 1 ? Math.ceil(cawT) : cawT.toFixed(1)) : ''; cb.classList.toggle('ready', cawT <= 0); if (cb.dataset.skin !== save.skin) paintCawIcon(); }
+  { const cb = $('cawBtn'), frac = P ? Math.min(1, cawT / P.cawCd) : 0; $('cawShade').style.width = (frac * 100) + '%'; $('cawShade').style.display = cawT > 0 ? '' : 'none'; $('cawTime').textContent = cawT > 0 ? (cawT >= 1 ? Math.ceil(cawT) : cawT.toFixed(1)) : ''; cb.classList.toggle('ready', cawT <= 0); cb.classList.toggle('cd', cawT > 0); if (!cb.dataset.painted) paintCawIcon(); }
   if (run.boss && run.boss.dead) run.boss = enemies.find(x => x.boss && !x.dead) || run.boss;
   const b = run.boss && !run.boss.dead ? run.boss : null;
   $('bossWrap').hidden = !b;
@@ -2683,18 +2690,12 @@ function drawSpellIcon(cv2, id, col) {
   c.restore();
 }
 function paintCawIcon() {
-  const cv2 = $('cawIcon'), c = cv2.getContext('2d'), S = cv2.width, sk = skinOf(save.skin), [, pcol] = projOf(save.skin), accent = save.skin === 'classic' ? '#ece6d6' : pcol;
-  $('cawBtn').dataset.skin = save.skin; $('cawBtn').style.setProperty('--spc', accent);
+  const cv2 = $('cawIcon'), c = cv2.getContext('2d'), S = cv2.width; $('cawBtn').dataset.painted = '1';
   c.clearRect(0, 0, S, S); c.save(); c.translate(S / 2, S / 2); c.scale(S / 104, S / 104); c.lineCap = 'round'; c.lineJoin = 'round';
-  c.strokeStyle = accent; for (let i = 0; i < 3; i++) { c.globalAlpha = .9 - i * .25; c.lineWidth = 6 - i; c.beginPath(); c.arc(4, 4, 30 + i * 12, -.75, .75); c.stroke(); }
-  c.globalAlpha = 1;
-  c.fillStyle = sk.wing; c.beginPath(); c.moveTo(-46, 36); c.quadraticCurveTo(-48, 0, -30, -18); c.lineTo(-10, 30); c.closePath(); c.fill();
-  c.fillStyle = sk.body; c.beginPath(); c.arc(-18, -6, 26, 0, TAU); c.fill(); c.beginPath(); c.moveTo(-40, 8); c.quadraticCurveTo(-30, 40, -6, 44); c.quadraticCurveTo(-4, 20, 2, 10); c.lineTo(-10, 0); c.closePath(); c.fill();
-  c.fillStyle = sk.sheen; c.beginPath(); c.arc(-24, -14, 13, 0, TAU); c.fill();
-  c.fillStyle = sk.beak; c.beginPath(); c.moveTo(2, -14); c.lineTo(30, -16); c.lineTo(4, -4); c.closePath(); c.fill(); c.beginPath(); c.moveTo(2, 0); c.lineTo(26, 10); c.lineTo(2, 6); c.closePath(); c.fill();
-  c.fillStyle = '#c8424a'; c.beginPath(); c.moveTo(4, -4); c.lineTo(20, 2); c.lineTo(4, 1); c.closePath(); c.fill();
-  c.fillStyle = sk.eye; c.beginPath(); c.arc(-12, -14, 5.5, 0, TAU); c.fill(); c.fillStyle = '#111'; c.beginPath(); c.arc(-11, -14, 2.6, 0, TAU); c.fill();
-  if (sk.glow) { c.globalCompositeOperation = 'lighter'; c.fillStyle = sk.glow + '55'; c.beginPath(); c.arc(-12, -14, 9, 0, TAU); c.fill(); c.globalCompositeOperation = 'source-over'; }
+  c.fillStyle = '#e8b84a'; c.beginPath(); c.moveTo(-40, -8); c.quadraticCurveTo(-12, -30, 10, -22); c.lineTo(-2, -6); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(-40, 4); c.quadraticCurveTo(-14, 26, 6, 26); c.lineTo(-4, 8); c.closePath(); c.fill();
+  c.fillStyle = '#c8424a'; c.beginPath(); c.moveTo(-40, -2); c.lineTo(-4, -6); c.lineTo(-6, 6); c.closePath(); c.fill();
+  c.strokeStyle = '#ece6d6'; for (let i = 0; i < 3; i++) { c.lineWidth = 7 - i * 1.2; c.globalAlpha = 1 - i * .22; c.beginPath(); c.arc(-10, 0, 26 + i * 13, -.7, .7); c.stroke(); }
   c.restore();
 }
 function renderSpellBar() {
