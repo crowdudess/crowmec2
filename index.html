@@ -455,7 +455,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
     <div class="owned" id="owned"></div>
     <div class="row spread">
       <span class="stat" id="nextInfo"></span>
-      <button class="btn" id="nextBtn" type="button" data-i18n="next_wave">Start next wave</button>
+      <button class="btn" id="nextBtn" type="button"><span data-i18n="next_wave">Start next wave</span><span class="kbd hide-sm" data-i18n="space">Space</span></button>
     </div>
   </div>
 </div>
@@ -1116,7 +1116,7 @@ function applyPassive(id) {
 }
 
 // ---------- waves ----------
-function hpMult(w) { const base = 1 + .17 * (Math.min(w, BOSS_WAVE) - 1) + .021 * (Math.min(w, BOSS_WAVE) - 1) ** 2; return base * Math.pow(1.17, Math.max(0, w - BOSS_WAVE)) * B.hp * (run && run.endless ? 1.2 + .02 * w : 1); }
+function hpMult(w) { const base = 1 + .17 * (Math.min(w, BOSS_WAVE) - 1) + .021 * (Math.min(w, BOSS_WAVE) - 1) ** 2; return base * Math.pow(1.17, Math.max(0, w - BOSS_WAVE)) * B.hp * (run && run.endless ? (1.3 + .06 * w) * Math.pow(1.045, Math.max(0, w - BOSS_WAVE)) : 1); }
 const WAVE_TH = [
   { n: ['Scouts', 'Éclaireurs', 'Exploradores', 'Späher'], budget: .85 },
   { n: ['Swarm', 'Essaim', 'Enjambre', 'Schwarm'], budget: 1.35, gap: .55, pick: p => { const m = Math.min(...p.map(k => E[k].cost)); return p.filter(k => E[k].cost <= m); } },
@@ -1132,14 +1132,14 @@ const thn = th => th.n[li()] || th.n[0];
 function startWave() {
   run.wave++;
   const w = run.wave;
-  let budget = (6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0)) * (run.countMult || 1) * (chaosOn(3) ? 1.3 : 1) * (run.endless ? 1.2 * (1 + .03 * w) : 1);
+  let budget = (6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0)) * (run.countMult || 1) * (chaosOn(3) ? 1.3 : 1) * (run.endless ? 1.3 * (1 + .05 * w) : 1);
   let pool = B.enemies.filter(k => E[k].from <= w);
   if (B.mode === 'endless') {
     const all = []; for (const b of BIOMES) if (!b.mode && (!b.dlc || biomeState(b.id).unlocked)) for (const k of b.enemies) if (E[k].from <= Math.max(1, w) && !all.includes(k)) all.push(k);
     for (let i = all.length - 1; i > 0; i--) { const j2 = Math.floor(Math.random() * (i + 1)); [all[i], all[j2]] = [all[j2], all[i]]; }
     pool = all.slice(0, 6);
   }
-  const isBoss = w % BOSS_WAVE === 0, isElite = !isBoss && w % (chaosOn(9) ? 3 : 5) === 0;
+  const isBoss = w % BOSS_WAVE === 0, isElite = !isBoss && (run.endless ? w % 2 === 0 : w % (chaosOn(9) ? 3 : 5) === 0);
   const th = (!run.endless && !B.mode && !isBoss) ? WAVE_TH[(w - 1) % WAVE_TH.length] : null;
   run.theme = th;
   let tpool = pool;
@@ -1168,22 +1168,24 @@ function startWave() {
   });
   if (fresh.length && !api.sim) toastSmall(fresh.map(k => E[k].name).join(', '), ['New enemy', 'Nouvel ennemi', 'Nuevo enemigo', 'Neuer Gegner'][li()]);
   const mid = spawnQ.length ? spawnQ[Math.floor(spawnQ.length * .4)].t : 2;
-  let bossKeys = isBoss ? [B.boss] : [];
-  if (B.mode === 'endless' && isBoss) {
-    const n = Math.floor(w / BOSS_WAVE) + (chaosOn(5) ? 1 : 0); bossKeys = [];
-    for (let i = 0; i < n; i++) {
+  let bossKeys = isBoss ? [B.boss] : [], miniBoss = false;
+  if (run.endless && (isBoss || w % 3 === 0)) {
+    const n = isBoss ? Math.floor(w / BOSS_WAVE) + (chaosOn(5) ? 1 : 0) : 1; miniBoss = !isBoss;
+    bossKeys = isBoss && !B.mode ? [B.boss] : []; run.bossBag = run.bossBag || [];
+    while (bossKeys.length < n) {
       if (!run.bossBag.length) { run.bossBag = BIOMES.filter(b => b.boss && !b.mode && (!b.dlc || biomeState(b.id).unlocked)).map(b => b.boss); for (let a = run.bossBag.length - 1; a > 0; a--) { const j2 = Math.floor(Math.random() * (a + 1)); [run.bossBag[a], run.bossBag[j2]] = [run.bossBag[j2], run.bossBag[a]]; } }
       bossKeys.push(run.bossBag.pop());
     }
   }
   run.bossCount = bossKeys.length;
-  bossKeys.forEach((k, i) => spawnQ.push({ k, t: mid + i * 4, boss: true, share: bossKeys.length }));
-  const eliteK = B.mode === 'endless' ? (() => { const els = BIOMES.filter(b => b.elite && !b.mode && (!b.dlc || biomeState(b.id).unlocked)).map(b => b.elite); return els[Math.floor(Math.random() * els.length)]; })() : B.elite;
-  if (isElite) spawnQ.push({ k: eliteK, t: (spawnQ.length ? spawnQ[spawnQ.length - 1].t : 0) + 3, elite: true });
+  bossKeys.forEach((k, i) => spawnQ.push({ k, t: mid + i * 4, boss: true, share: bossKeys.length, mini: miniBoss }));
+  const anyElite = () => { const els = BIOMES.filter(b => b.elite && !b.mode && (!b.dlc || biomeState(b.id).unlocked)).map(b => b.elite); return els[Math.floor(Math.random() * els.length)]; };
+  const nElite = isElite ? (run.endless ? 1 + Math.floor(w / 15) : 1) : 0, lastT = spawnQ.length ? spawnQ[spawnQ.length - 1].t : 0;
+  for (let i = 0; i < nElite; i++) spawnQ.push({ k: run.endless && (B.mode || i > 0) ? anyElite() : B.elite, t: lastT * (i ? .5 : 1) + 3 + i * 2.5, elite: true });
   spawnQ.sort((a, b) => a.t - b.t);
   run.waveClock = 0; run.waveDmg = 0; run.boss = null; run.guardUsed = false;
   state = 'wave';
-  toast(T('wave_n', w), isBoss ? (bossKeys.length > 1 ? T('rift_bosses', bossKeys.length) : T('is_coming', E[bossKeys[0]].name)) : th ? (isElite ? thn(th) + ' · ' + T('elite_leads') : thn(th)) : isElite ? T('elite_leads') : run.chaos ? T('chaos_n', run.chaos) : run.endless ? T('endless') : run.ch ? T('challenge_n', chn(CHALLENGES.find(c => c.id === run.ch))) : bn(B));
+  toast(T('wave_n', w), bossKeys.length ? (bossKeys.length > 1 ? T('rift_bosses', bossKeys.length) : T('is_coming', E[bossKeys[0]].name)) : th ? (isElite ? thn(th) + ' · ' + T('elite_leads') : thn(th)) : isElite ? T('elite_leads') : run.chaos ? T('chaos_n', run.chaos) : run.endless ? T('endless') : run.ch ? T('challenge_n', chn(CHALLENGES.find(c => c.id === run.ch))) : bn(B));
 }
 function spawn(q) {
   const d = E[q.k], n = q.boss || q.elite ? 1 : (d.pack || 1), a0 = q.ang ?? rnd(0, TAU);
@@ -1200,9 +1202,11 @@ function makeEnemy(k, x, y, q = {}) {
   if (q.spd) e.spd *= q.spd;
   if (q.hpx) e.hp *= q.hpx;
   if (run.chaos) { const L = run.chaos; e.hp *= (1 + .08 * L) * (L >= 2 ? 1.25 : 1) * (L >= 10 ? 1.5 : 1); e.spd *= (L >= 1 ? 1.15 : 1) * (L >= 10 ? 1.1 : 1); if (L >= 4) e.dmg *= 1.4; }
+  if (d.fly) e.spd = Math.min(e.spd * .72, d.spd * .72 * 1.2);
+  if (run.endless) { const x = Math.max(0, run.wave - BOSS_WAVE); e.dmg *= 1 + .05 * x; e.spd *= 1 + Math.min(.3, .01 * x); }
   if (d.egg) e.hatchT = d.hatchT;
   if (q.elite) { e.elite = true; e.hp *= 3; e.r *= 1.35; e.gold *= 5; e.dmg *= 1.25; e.name = T('elite_prefix', d.name); }
-  if (d.boss) { if (q.share > 1) { e.hp *= .8; } if (!run.boss || run.boss.dead) run.boss = e; }
+  if (d.boss) { if (q.share > 1) { e.hp *= .8; } if (q.mini) e.hp *= .65; if (!run.boss || run.boss.dead) run.boss = e; }
   e.max = e.hp;
   enemies.push(e);
   return e;
@@ -2986,7 +2990,7 @@ function bossBeaten() {
   $('leaveBtn').focus({ preventScroll: true });
 }
 function openShop() {
-  state = 'shop';
+  state = 'shop'; run.shopAt = performance.now();
   run.freeRerolls = P.freeRe || 0; rerollCost = 2 * (run.rerollMult || 1); healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
   rollOffers();
   if (api.sim) return;
@@ -3045,7 +3049,7 @@ function buy(i) {
 }
 function reroll() { if (run.freeRerolls > 0) { run.freeRerolls--; rollOffers(); sfx.buy(); if (!api.sim) renderShop(); return; } if (run.gold < rerollCost) return; run.gold -= rerollCost; rerollCost += 2 * (run.rerollMult || 1); rollOffers(); sfx.buy(); if (!api.sim) renderShop(); }
 function heal() { if (run.noHeal || run.gold < healCost || healsLeft <= 0 || run.hp >= run.maxHp) return; run.gold -= healCost; healsLeft--; run.hp = Math.min(run.maxHp, run.hp + 35); sfx.buy(); if (!api.sim) renderShop(); }
-function nextWave() { $('shop').hidden = true; $('choice').hidden = true; $('hud').hidden = false; startWave(); }
+function nextWave() { if (state !== 'shop') return; $('shop').hidden = true; $('choice').hidden = true; $('hud').hidden = false; startWave(); }
 $('rerollBtn').onclick = reroll;
 $('healBtn').onclick = heal;
 $('nextBtn').onclick = nextWave;
@@ -3199,6 +3203,7 @@ cv.addEventListener('pointerdown', ev => {
 });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => {
+  if (state === 'shop' && e.code === 'Space' && !$('shop').hidden && $('pause').hidden) { e.preventDefault(); if (!e.repeat && performance.now() - (run.shopAt || 0) > 400) nextWave(); return; }
   if (state !== 'wave') return;
   if (e.code === 'Space') { e.preventDefault(); caw(); }
   else if (e.key === 'p' || e.key === 'P') setPause(!paused);
