@@ -2423,7 +2423,6 @@ function drawEnemy(e, time) {
         ctx.save(); ctx.translate(r * px + bob, r * py + Math.cos(run) * r * .03); ctx.rotate(Math.sin(run * .5 + k) * .08);
         const rr = r * .3, col = k % 2 ? c0 : '#5a4e46';
         ctx.strokeStyle = fl ? '#fff' : '#c8908a'; ctx.lineWidth = Math.max(1, rr * .14); ctx.beginPath(); ctx.moveTo(-rr * .9, 0); ctx.quadraticCurveTo(-rr * 1.5, Math.sin(run) * rr * .6, -rr * 2.1, Math.sin(run + 1) * rr * .4); ctx.stroke();
-        ctx.strokeStyle = fl ? '#fff' : '#2e2824'; ctx.lineWidth = Math.max(1, rr * .14); for (const [lx, ph] of [[.4, 0], [-.45, Math.PI]]) for (const sd of [-1, 1]) { const st = Math.sin(run * 2 + ph + (sd > 0 ? Math.PI : 0)) * rr * .25; ctx.beginPath(); ctx.moveTo(rr * lx, sd * rr * .4); ctx.lineTo(rr * lx + st, sd * rr * .75); ctx.stroke(); }
         ctx.fillStyle = fl ? '#fff' : col; ctx.beginPath(); ctx.ellipse(0, 0, rr, rr * .6, 0, 0, TAU); ctx.fill();
         ctx.beginPath(); ctx.ellipse(rr * .95, 0, rr * .5, rr * .4, 0, 0, TAU); ctx.fill();
         ctx.fillStyle = fl ? '#fff' : '#d89a9a'; ctx.beginPath(); ctx.arc(rr * .75, -rr * .38, rr * .2, 0, TAU); ctx.arc(rr * .75, rr * .38, rr * .2, 0, TAU); ctx.fill();
