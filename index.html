@@ -96,7 +96,15 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .card .pr { font-family: var(--mono); color: var(--shine); font-size: 14px; margin-top: auto; }
 .card .pr.coinc { color: var(--coin); }
 .swatch { height: 8px; border-radius: 4px; }
-.mon { cursor: default; }
+.mon { cursor: pointer; }
+.mon:hover { transform: translateY(-2px); border-color: var(--bone-dim); }
+.monpop { width: min(560px, 100%); animation: pop .22s ease-out; }
+.monpop canvas { width: 100%; height: auto; aspect-ratio: 16 / 10; display: block; border-radius: 12px; background: var(--night); }
+.monpop .lore { font-size: 16px; line-height: 1.6; color: var(--bone); font-style: italic; border-left: 3px solid var(--shine); padding-left: 14px; max-width: 60ch; }
+.monpop .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.monpop .tags span { font-size: 12px; background: var(--night); color: var(--bone-dim); border-radius: 999px; padding: 3px 10px; }
+@keyframes pop { from { transform: scale(.82); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .monpop { animation: none; } }
 .mon canvas { width: 100%; height: 110px; display: block; border-radius: 8px; background: var(--night); }
 .mon .tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .mon .tags span { font-size: 11px; background: var(--night); color: var(--bone-dim); border-radius: 999px; padding: 2px 8px; }
@@ -218,6 +226,18 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
   </div>
 </div>
 
+<div class="overlay" id="monPop" hidden>
+  <div class="panel monpop" role="dialog" aria-modal="true" aria-labelledby="monPopName">
+    <canvas id="monPopCanvas" width="960" height="600"></canvas>
+    <div class="row spread">
+      <div><div class="eyebrow" id="monPopBiome"></div><h2 id="monPopName"></h2></div>
+      <button class="ghost" id="monPopClose" type="button">Close</button>
+    </div>
+    <p class="muted" id="monPopStats"></p>
+    <div class="tags" id="monPopTags"></div>
+    <p class="lore" id="monPopLore"></p>
+  </div>
+</div>
 <div class="overlay" id="shop" hidden>
   <div class="panel">
     <div class="row spread">
@@ -1917,6 +1937,98 @@ function renderSkins() {
     ctx = pc; drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, 0); ctx = mainCtx;
   }
 }
+const LORE = {
+  beetle: 'The first to march on any nest. Beetles never stop to think, which is mostly why they never stop.',
+  squirrel: 'Squirrels zig and zag because they forgot where they were going. They remember the eggs, though.',
+  snake: 'A snake can swallow an egg whole. It has tried to swallow a crow too, with less success.',
+  hawk: 'Hawks dive, bite and soar away. They think this is clever. The crow thinks it is rude.',
+  raccoon: 'Raccoons wash their food before eating it. They would like to wash your eggs.',
+  cat: 'The Alley Cat has nine lives and has spent eight of them chasing crows. This one is the last.',
+  frog: 'Marsh frogs hop in bursts, croak in chorus and land, most often, right on the nest.',
+  mosquito: 'One mosquito is a nuisance. Three are a plan.',
+  leech: 'Leeches drink from whatever they bite. That includes nests, somehow.',
+  turtle: 'Snapping turtles are slow, stubborn and wearing their house as armour.',
+  heron: 'Herons stand very still for hours, then strike very fast. Today they are striking very fast.',
+  gator: 'Old Gator has ruled the marsh since before the crow was an egg. He calls the frogs when he wants company.',
+  hare: 'Snow hares are mostly fur, feet and bad decisions.',
+  fox: 'The arctic fox weaves through snow like smoke and smiles the whole time.',
+  wolf: 'Wolves never hunt alone. If you see one, the other two are behind it.',
+  owl: 'Snowy owls fly without a sound. You only hear them when the nest does.',
+  elk: 'An elk wears a crown of bone and walks like it owns the pass. Mostly it does.',
+  bear: 'The Frost Bear sleeps all winter. Something woke him up, and he blames the crow.',
+  rat: 'City rats travel in fours: one to look, one to listen, two to bite.',
+  roach: 'Step on a roach and you get two smaller roaches. Nobody knows how. Nobody wants to know.',
+  roachling: 'Half the size, twice the speed, all of the attitude.',
+  pigeon: 'Thief pigeons do not want the eggs. They want your shinies. Hit them before they fly off.',
+  dog: 'Stray dogs are loyal to nobody but the bins. And now, apparently, to eggs.',
+  binbandit: 'A bin raccoon has eaten things no animal should survive. It considers armour a lifestyle.',
+  ratking: 'The Rat King wears a bottle-cap crown and commands every rat in the alleys. Every. Single. One.',
+  scarab: 'Scarabs roll dung across the dunes. They are hoping to roll your nest next.',
+  lizard: 'Sand lizards move so fast the heat shimmer cannot keep up.',
+  scorpion: 'One sting, and the nest burns for seconds after. Scorpions are patient like that.',
+  vulture: 'Vultures circle what they think is already finished. They are wrong about this nest.',
+  worm: 'Sandworms swim under the dunes and surface only when the eggs are close enough to smell.',
+  emperor: 'The Emperor Scorpion has a shell like polished night and a tail that has never missed.',
+  spiderling: 'Tiny, fast and never alone. Where there is one spiderling, there are four.',
+  jumper: 'Jumping spiders see in eight directions and leap in all of them.',
+  weaver: 'Web Weavers keep their distance and spit silk at the crow. Slow the crow, take the nest.',
+  moth: 'Moths love light. The crow is not light, but the eggs are shiny enough.',
+  tarantula: 'Hairy, armoured and full of spiderlings. Popping one is a mixed blessing.',
+  queen: 'The Spider Queen has spun the Hollow for a thousand years. She would like a new egg for her collection.',
+  bat: 'Bats fly in swarms through the smoke of Cinder Peak, squeaking insults no crow can hear.',
+  firebeetle: 'Fire beetles are ordinary beetles that fell in the lava and decided they liked it.',
+  magmaworm: 'Magma worms tunnel through rock like it is soup. They surface hungry and hot.',
+  slime: 'A lava slime is mostly heat and wobble. Hit it and it becomes two smaller problems.',
+  slimelet: 'A slime that split. It is upset about it.',
+  golem: 'Obsidian golems were statues once. The volcano woke them, and they are still grumpy.',
+  wyrm: 'The Magma Wyrm swims in molten rock and calls the bats to scout for nests.',
+  pixie: 'Pixies giggle when they bite. It is somehow worse.',
+  shroom: 'Mushroom walkers spent a hundred years growing legs. They are not wasting them.',
+  sprite: 'Healing sprites stay back and mend every monster nearby. Take them out first.',
+  wisp: 'A will-o-wisp flickers in and out of the world. Hit it while it is here.',
+  unicorn: 'Unicorns are real, rainbow-coloured and absolutely furious.',
+  faequeen: 'The Fairy Queen heals her court and sends her pixies to steal eggs for her crown.',
+  monkey: 'Snow monkeys bathe in hot springs and leap at nests in between.',
+  crane: 'Cranes are a symbol of good luck. Just not for nests.',
+  kitsune: 'Every tail a kitsune grows is a hundred years of mischief. It blinks out of sight to prove it.',
+  petal: 'Petal sprites ride the cherry blossom wind and sting like paper cuts.',
+  tanuki: 'Tanuki are shapeshifters. This one shifted into a very round, very armoured tanuki.',
+  oni: 'The Oni guards Blossom Ridge with a club, two horns and very little patience.',
+  voidling: 'Voidlings are scraps of nothing that came loose. They want to be something. Something with eggs.',
+  shade: 'A shade is the shadow of a monster that never existed. It still bites.',
+  voidwisp: 'Void wisps fade in and out of reality. You can only hit what is really there.',
+  gazer: 'Gazers stare from afar. When they look at the crow, the crow forgets how fast it is.',
+  voidworm: 'Void worms swim through the dark between stars and come up right under the nest.',
+  maw: 'At the end of everything waits the Maw: one eye, endless hunger, and it has seen your eggs.',
+  paper: 'Loose paperwork that escaped the filing cabinet. Paper cuts hurt, even for crows.',
+  chair: 'An office chair rolling free across the carpet. Nobody is sitting in it. Nobody needs to.',
+  coffee: 'The coffee machine has been on since 1997. Its brew burns the nest for seconds after.',
+  printer: 'PC LOAD LETTER. The printer jams your crow out of pure spite.',
+  vending: 'It took your money once. Now it wants your eggs.',
+  jobapp: 'The Job Application asks for ten years of experience at being a crow. You have zero. It says REJECTED.',
+};
+let monPopRaf = 0, monPopKey = null;
+function openMonster(k) {
+  save.seen = save.seen || {};
+  const d = E[k], known = !!save.seen[k], home = BIOMES.find(b => b.enemies.includes(k) || b.boss === k || b.enemies.some(x => E[x].split === k));
+  monPopKey = k;
+  $('monPopBiome').textContent = (d.boss ? 'Boss · ' : '') + (home ? home.name : '');
+  $('monPopName').textContent = known ? d.name : '???';
+  $('monPopStats').textContent = known ? `Defeated ${save.seen[k]} · HP ${d.hp} · Speed ${d.spd} · Bite ${d.dmg}${d.armor ? ' · Armour ' + d.armor : ''}` : 'You have not defeated one yet.';
+  const tg = $('monPopTags'); tg.innerHTML = '';
+  if (known) for (const t of monsterTraits(k)) tg.append(el('span', '', t));
+  $('monPopLore').textContent = known ? (LORE[k] || 'Nobody knows much about this one yet.') : 'Defeat one to read its story.';
+  $('monPop').hidden = false;
+  $('monPopClose').focus({ preventScroll: true });
+  cancelAnimationFrame(monPopRaf);
+  const cvs = $('monPopCanvas');
+  const loop = t => { if ($('monPop').hidden) return; drawMonsterPreview(cvs, k, known, reduceMotion ? 1000 : t); monPopRaf = requestAnimationFrame(loop); };
+  monPopRaf = requestAnimationFrame(loop);
+}
+function closeMonster() { $('monPop').hidden = true; cancelAnimationFrame(monPopRaf); const back = monPopKey; monPopKey = null; const cards = [...document.querySelectorAll('.mon')]; const c = cards.find(x => x.dataset.k === back); if (c) c.focus({ preventScroll: true }); }
+$('monPopClose').onclick = closeMonster;
+$('monPop').addEventListener('click', ev => { if (ev.target === $('monPop')) closeMonster(); });
+addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('monPop').hidden) closeMonster(); });
 function monsterList(includeBosses = true) {
   const out = [];
   for (const b of BIOMES) {
@@ -1947,11 +2059,12 @@ function monsterTraits(k) {
   if (d.summon) t.push(`Calls ${E[d.summon].name}`);
   return t;
 }
-function drawMonsterPreview(cvs, k, known) {
+function drawMonsterPreview(cvs, k, known, time = 1000) {
   const d = E[k], pc = cvs.getContext('2d'), W = cvs.width, H = cvs.height;
   pc.clearRect(0, 0, W, H);
   const r = d.r, wide = d.shape === 'snake' ? 3 : d.shape === 'quad' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
-  const sc = Math.min(H * .7 / (r * 2.2), W * .8 / (r * wide), 3.2);
+  const tall = d.shape === 'bat' ? 6 : d.shape === 'bird' ? 4.8 : d.shape === 'spider' ? 3.4 : 2.4;
+  const sc = Math.min(H * .8 / (r * tall), W * .8 / (r * wide), W / 100);
   const e = Object.assign({}, d, { k, x: 0, y: 0, hp: 1, max: 1, flash: 0, ph: 1, mode: 'in', trail: [], stun: 0, frozen: 0, under: false, ghostly: false, lungeT: 0, elite: false, stolen: 0, armor: d.armor || 0 });
   if (!known) e.col = ['#2a2f28', '#232720', '#2a2f28'];
   if (d.shape === 'snake') for (let i = 1; i <= 8; i++) e.trail.push({ x: -i * r * .35, y: Math.sin(i * .9) * r * .35 });
@@ -1959,7 +2072,7 @@ function drawMonsterPreview(cvs, k, known) {
   const keep = ctx; ctx = pc;
   pc.setTransform(sc, 0, 0, sc, W / 2 + (d.shape === 'snake' ? r * 1.1 * sc : 0), H / 2);
   pc.globalAlpha = 1;
-  try { drawEnemy(e, 1000); } catch (err) {}
+  try { drawEnemy(e, time); } catch (err) {}
   pc.setTransform(1, 0, 0, 1, 0, 0);
   pc.shadowBlur = 0; pc.globalAlpha = 1;
   if (!known) { pc.globalCompositeOperation = 'source-atop'; pc.fillStyle = '#2c322a'; pc.fillRect(0, 0, W, H); pc.globalCompositeOperation = 'source-over'; }
@@ -1974,6 +2087,9 @@ function renderMonsters() {
   const card = k => {
     const d = E[k], known = !!save.seen[k];
     const c = el('div', 'card mon' + (known ? '' : ' unknown'));
+    c.dataset.k = k; c.tabIndex = 0; c.setAttribute('role', 'button'); c.setAttribute('aria-label', (known ? d.name : 'Unknown monster') + ', show details');
+    c.onclick = () => openMonster(k);
+    c.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openMonster(k); } };
     const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 220;
     c.append(cvs, el('span', 'nm', known ? d.name : '???'));
     if (known) {
