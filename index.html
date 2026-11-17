@@ -96,6 +96,12 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .card .pr { font-family: var(--mono); color: var(--shine); font-size: 14px; margin-top: auto; }
 .card .pr.coinc { color: var(--coin); }
 .swatch { height: 8px; border-radius: 4px; }
+.feathers { display: flex; gap: 4px; margin-top: 2px; }
+.feathers svg { width: 22px; height: 22px; display: block; }
+.feathers .gold path { fill: var(--shine); }
+.feathers .gold .quill { stroke: #8a5a10; fill: none; }
+.feathers .grey path { fill: #4a5046; }
+.feathers .grey .quill { stroke: #2a2e28; fill: none; }
 .skinc canvas { width: 100%; height: 96px; display: block; border-radius: 8px; background: var(--night); }
 
 .list { display: grid; gap: 8px; }
@@ -1714,6 +1720,17 @@ function renderFly() {
     const sw = el('div', 'swatch'); sw.style.background = `linear-gradient(90deg, ${b.ground[0]}, ${b.blade[0]}, ${b.ground[1]})`;
     c.append(sw, el('span', 'rar', (b.dlc ? 'DLC · ' : '') + (st.unlocked ? (st.cleared ? 'Cleared' : 'Unlocked') : 'Locked')), el('span', 'nm', b.name),
       el('span', 'ds', st.unlocked ? `Best wave ${st.best || '-'} · coins x${b.coin}` : b.dlc ? 'Secret DLC map. Unlock it with a code.' : i > 0 ? `Defeat ${E[BIOMES[i - 1].boss].name} to unlock.` : ''));
+    const fr = el('span', 'feathers');
+    const got = CHALLENGES.filter(ch => st.ch && st.ch[ch.id]).length;
+    fr.setAttribute('aria-label', `${got} of 3 challenges completed`);
+    for (const ch of CHALLENGES) {
+      const ok = !!(st.ch && st.ch[ch.id]);
+      const w = el('span', ok ? 'gold' : 'grey');
+      w.title = `${ch.name}: ${ok ? 'completed' : 'not done yet'}`;
+      w.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 2.5C12.5 3.2 6.2 8.4 4.6 19.2l1.9.9c.8-2.3 1.9-4.2 3.3-5.6 5.6.3 9.8-4.6 10.7-12z"/><path class="quill" d="M3.8 21.6 15.6 8.4" stroke-width="1.4" stroke-linecap="round"/></svg>';
+      fr.append(w);
+    }
+    c.append(fr);
     if (st.unlocked) c.onclick = () => { save.biome = i; persist(); B = null; makeDeco(); renderFly(); };
     else c.disabled = true;
     box.append(c);
