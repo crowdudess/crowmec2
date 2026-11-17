@@ -23,14 +23,12 @@ The installers are not code-signed. On Windows, click **More info → Run anyway
 
 ## Make a release
 
-Push a version tag. GitHub Actions builds the three installers and publishes them on a new release:
+GitHub Actions builds the three installers and publishes them on a release by itself whenever the game or the desktop app changes on `main`. The release is named after the `version` in `desktop/package.json` (for example `v1.0.0`):
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
+- Change that version (to `1.0.1`, `1.1.0` and so on) to make a new release.
+- Leave it the same and the existing release gets the new installers.
 
-You can also run the **Nestguard installers** workflow by hand from the Actions tab to get the installers without making a release.
+Pushing a tag such as `v1.2.0` also builds a release with that name. You can run the **Nestguard installers** workflow by hand from the Actions tab to get the installers without making a release.
 
 ## Project layout
 
