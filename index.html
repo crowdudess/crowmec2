@@ -437,6 +437,46 @@ const music = {
   },
 };
 let lastHit = 0, lastDeath = 0;
+const CAWS = {
+  classic: { p: 1, w: 'sawtooth' }, ash: { p: .9, w: 'sawtooth', layer: 'rasp' }, albino: { p: 1.25, w: 'triangle', layer: 'shimmer' },
+  bog: { p: .7, w: 'square', layer: 'croak' }, frost: { p: 1.15, w: 'triangle', layer: 'shimmer' }, ember: { p: .95, w: 'sawtooth', layer: 'roar' },
+  golden: { p: 1.1, w: 'triangle', layer: 'ding' }, dune: { p: .9, w: 'sawtooth', layer: 'hiss' }, widow: { p: .8, w: 'sawtooth', layer: 'hiss', ring: 'web' },
+  bandito: { p: 1.3, w: 'square', layer: 'triple' }, phoenix: { p: 1.35, w: 'sawtooth', layer: 'roar' }, fae: { p: 1.4, w: 'sine', layer: 'chime' },
+  blossom: { p: 1.2, w: 'sine', layer: 'flute' }, eclipse: { p: .6, w: 'sawtooth', layer: 'deep', ring: 'void' }, suitbandito: { p: 1.1, w: 'square', layer: 'brass' },
+  bananacrow: { p: 1.2, w: 'triangle', layer: 'hoot' }, royal: { p: 1, w: 'triangle', layer: 'fanfare', ring: 'double' },
+  'ch-forest': { p: .95, w: 'sawtooth', layer: 'rustle' }, 'ch-marsh': { p: .75, w: 'square', layer: 'croak' }, 'ch-snow': { p: 1.2, w: 'sine', layer: 'shimmer' },
+  'ch-city': { p: 1, w: 'square', layer: 'horn' }, 'ch-dunes': { p: .9, w: 'triangle', layer: 'ding' }, 'ch-spider': { p: .85, w: 'sawtooth', layer: 'hiss', ring: 'web' },
+  'ch-volcano': { p: .75, w: 'sawtooth', layer: 'boom' }, 'ch-fairy': { p: 1.45, w: 'sine', layer: 'chime' }, 'ch-sakura': { p: 1.05, w: 'triangle', layer: 'flute' },
+  'ch-void': { p: .55, w: 'sine', layer: 'deep', ring: 'void' }, 'ch-office': { p: 1.1, w: 'square', layer: 'trill' }, 'ch-jungle': { p: 1.15, w: 'triangle', layer: 'hoot' },
+};
+function cawSound(id) {
+  if (api.sim || !actx || muted) return;
+  const c = CAWS[id] || CAWS.classic, t = actx.currentTime + .01, out = actx.createGain(); out.gain.value = 1; out.connect(sfxBus);
+  const osc = (type, f0, f1, st, dur, v) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t + st); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + st + dur); g.gain.setValueAtTime(0, t + st); g.gain.linearRampToValueAtTime(v, t + st + .01); g.gain.exponentialRampToValueAtTime(.0001, t + st + dur); o.connect(g).connect(out); o.start(t + st); o.stop(t + st + dur + .02); };
+  const nz = (st, dur, v, hp) => { const n = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(); n.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = hp; g.gain.setValueAtTime(v, t + st); g.gain.exponentialRampToValueAtTime(.0001, t + st + dur); n.connect(f).connect(g).connect(out); n.start(t + st); n.stop(t + st + dur + .02); };
+  const p = c.p, w = c.w;
+  if (c.layer === 'triple') { for (let i = 0; i < 3; i++) osc(w, 1000 * p - i * 60, 420 * p, i * .11, .1, .07); osc('sine', 1600, 2600, .36, .14, .03); }
+  else { osc(w, 900 * p, 380 * p, 0, .18, .09); osc(w, 820 * p, 340 * p, .14, .2, .08); }
+  switch (c.layer) {
+    case 'rasp': nz(0, .32, .05, 2500); break;
+    case 'shimmer': for (let i = 0; i < 6; i++) osc('sine', 2200 + i * 260, 2600 + i * 260, .05 + i * .04, .25, .02); break;
+    case 'croak': osc('square', 160, 120, .32, .14, .06); osc('square', 150, 110, .48, .14, .05); break;
+    case 'roar': nz(0, .5, .1, 300); osc('sawtooth', 120, 60, 0, .5, .05); break;
+    case 'ding': osc('triangle', 1800, 1800, .3, .3, .05); osc('triangle', 2400, 2400, .36, .35, .04); break;
+    case 'hiss': nz(0, .45, .06, 4500); break;
+    case 'chime': [0, 4, 7, 12].forEach((sm, i) => { const f = 1046 * Math.pow(2, sm / 12); osc('sine', f, f, .2 + i * .07, .4, .035); }); break;
+    case 'flute': osc('sine', 880, 990, .3, .4, .05); osc('sine', 1320, 1180, .5, .35, .03); break;
+    case 'deep': osc('sine', 70, 140, 0, .7, .14); osc('sawtooth', 200, 600, .1, .5, .02); break;
+    case 'brass': osc('square', 349, 349, .32, .2, .04); osc('square', 523, 523, .32, .2, .03); osc('square', 440, 440, .52, .25, .04); break;
+    case 'hoot': osc('triangle', 400, 700, .32, .15, .06); osc('triangle', 500, 900, .48, .18, .06); break;
+    case 'fanfare': [523, 659, 784, 1046].forEach((f, i) => osc('triangle', f, f, .3 + i * .08, .3, .045)); break;
+    case 'rustle': nz(.05, .3, .05, 3000); nz(.2, .25, .04, 5000); break;
+    case 'horn': osc('square', 440, 440, .32, .15, .05); osc('square', 554, 554, .32, .15, .04); osc('square', 440, 440, .5, .2, .05); break;
+    case 'boom': osc('sine', 110, 35, 0, .8, .2); nz(0, .5, .12, 150); break;
+    case 'trill': for (let i = 0; i < 6; i++) osc('square', i % 2 ? 1400 : 1100, i % 2 ? 1400 : 1100, .3 + i * .06, .05, .03); break;
+  }
+}
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return h.length === 4 ? [(n >> 8 & 15) * 17, (n >> 4 & 15) * 17, (n & 15) * 17].join(',') : [n >> 16 & 255, n >> 8 & 255, n & 255].join(','); };
 function hashStr(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967295; }
 function deathSfx(k, boss, preview, mode) {
   if (api.sim || !actx || muted) return;
@@ -926,7 +966,9 @@ function addCoins(n) { run.coins += n; }
 function caw() {
   if (state !== 'wave' || paused || cawT > 0) return;
   cawT = P.cawCd;
-  rings.push({ x: 0, y: 0, r: 20, max: P.cawR, t: 0, c: '236,230,214' });
+  { const [kind, col] = projOf(save.skin), cw = CAWS[save.skin] || {};
+    rings.push({ x: 0, y: 0, r: 20, max: P.cawR, t: 0, c: save.skin === 'classic' ? '236,230,214' : hexRgb(col), style: cw.ring });
+    if (!api.sim) for (let i = 0; i < 22; i++) { const a = i / 22 * TAU + rnd(-.1, .1), sp = rnd(240, 400) * (P.cawR / 170); parts.push({ x: Math.cos(a) * 30, y: Math.sin(a) * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: rnd(.45, .7), proj: kind, col, rot: a }); } }
   let n = 0;
   for (const e of enemies) {
     if (e.dead) continue;
@@ -944,7 +986,7 @@ function caw() {
   }
   if (n >= 10) grant('caw10');
   shake = Math.max(shake, 5);
-  sfx.caw();
+  cawSound(save.skin);
 }
 
 // ---------- spells ----------
@@ -1408,8 +1450,14 @@ function draw(time) {
   drawCrow(skinOf(save.skin), crowAng, flap, Math.sin(time / 300) * 1.2, time);
   if (run && run.webT > 0) { ctx.strokeStyle = 'rgba(235,230,245,.75)'; ctx.lineWidth = 1.5; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 6, Math.sin(a) * 6); ctx.lineTo(Math.cos(a + .3) * 30, Math.sin(a + .3) * 30); ctx.stroke(); } ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.stroke(); }
   if (run && run.poisonT > 0) { ctx.strokeStyle = `rgba(120,220,80,${.3 + .2 * Math.sin(time / 120)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 8, 0, TAU); ctx.stroke(); }
-  for (const r of rings) { ctx.strokeStyle = `rgba(${r.c},${.7 * (1 - r.t / .45)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke(); }
-  for (const p of parts) { ctx.globalAlpha = Math.min(1, p.t * 3); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
+  for (const r of rings) {
+    const al = .7 * (1 - r.t / .45);
+    if (r.style === 'void') { const rr = r.max * (1 - r.t / .45) + 10; ctx.fillStyle = `rgba(10,0,20,${al * .5})`; ctx.beginPath(); ctx.arc(r.x, r.y, rr, 0, TAU); ctx.fill(); ctx.strokeStyle = `rgba(${r.c},${al})`; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(r.x, r.y, rr, 0, TAU); ctx.stroke(); continue; }
+    ctx.strokeStyle = `rgba(${r.c},${al})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke();
+    if (r.style === 'web') { ctx.lineWidth = 1.5; for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.x + Math.cos(a) * r.r, r.y + Math.sin(a) * r.r); ctx.stroke(); } for (const f of [.4, .7]) { ctx.beginPath(); for (let i = 0; i <= 12; i++) { const a = i / 12 * TAU; i ? ctx.lineTo(r.x + Math.cos(a) * r.r * f, r.y + Math.sin(a) * r.r * f) : ctx.moveTo(r.x + r.r * f, r.y); } ctx.stroke(); } }
+    if (r.style === 'double') { ctx.strokeStyle = `rgba(232,184,74,${al})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * .75, 0, TAU); ctx.stroke(); }
+  }
+  for (const p of parts) { ctx.globalAlpha = Math.min(1, p.t * 3); if (p.proj) { ctx.save(); ctx.translate(p.x, p.y); drawProj(p.proj, p.col, p.rot, .9, time + p.rot * 300); ctx.restore(); continue; } ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
   ctx.globalAlpha = 1;
   for (const c of coinsFx) { const k = c.t * c.t; ctx.fillStyle = C.shine; ctx.beginPath(); ctx.arc(c.x * (1 - k), c.y * (1 - k), 4, 0, TAU); ctx.fill(); }
   if (biome.id === 'sakura' || biome.id === 'fairy' || biome.id === 'volcano') {
@@ -2403,7 +2451,7 @@ function renderSkins() {
     const has = s.has(save), c = el('button', 'card skinc' + (save.skin === s.id ? ' sel' : '') + (has ? '' : ' locked')); c.type = 'button';
     const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 192;
     c.append(cvs, el('span', 'nm', s.name), el('span', 'ds', has ? (save.skin === s.id ? T('wearing') : T('tap_wear')) : s.cond), el('span', 'ds', T('shoots', has ? projOf(s.id)[2] : '???')));
-    if (has) c.onclick = () => { save.skin = s.id; persist(); renderSkins(); };
+    if (has) c.onclick = () => { save.skin = s.id; persist(); initAudio(); cawSound(s.id); renderSkins(); };
     else c.disabled = true;
     box.append(c);
     const pc = cvs.getContext('2d'); pc.setTransform(2.2, 0, 0, 2.2, 160, 96);
