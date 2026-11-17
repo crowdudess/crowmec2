@@ -1,0 +1,1574 @@
+<title>Nestguard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@600;800&family=Chivo:wght@400;600;800&family=Chivo+Mono:wght@500&display=swap">
+<style>
+/* Layout: one full-screen canvas field; HUD pinned to the corners; menus, shop and results float as one panel over a dimmed field. Single dark "dusk forest" look by choice. */
+:root {
+  color-scheme: dark;
+  --night: #121611;      /* page ground */
+  --moss: #1d261b;       /* panel fill */
+  --moss-2: #2a3626;     /* raised fill */
+  --moss-3: #36452f;     /* hover fill */
+  --bone: #ece6d6;       /* text */
+  --bone-dim: #a9a593;   /* secondary text */
+  --shine: #e8b84a;      /* shinies (in-run gold) */
+  --coin: #9fd0a8;       /* coins (kept between runs) */
+  --blood: #d2543f;      /* danger */
+  --sky: #7fb2c9;        /* rare */
+  --amethyst: #b88ae0;   /* epic */
+  --display: "Grenze Gotisch", "Georgia", serif;
+  --body: "Chivo", system-ui, sans-serif;
+  --mono: "Chivo Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--night); color: var(--bone); font-family: var(--body); overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation; margin: 0; }
+#game { position: fixed; inset: 0; display: block; width: 100%; height: 100%; cursor: crosshair; }
+#game.aiming { cursor: copy; }
+
+.hud { position: fixed; inset: 0; pointer-events: none; padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; grid-template-rows: auto 1fr auto; }
+.hud-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 12px; }
+.stat { font-family: var(--mono); font-size: 13px; color: var(--bone-dim); line-height: 1.5; font-variant-numeric: tabular-nums; }
+.stat b { font-family: var(--display); font-size: 26px; color: var(--bone); font-weight: 800; letter-spacing: .02em; display: block; line-height: 1; }
+.gold { text-align: right; }
+.gold b { color: var(--shine); }
+.coin b, .coinc { color: var(--coin); }
+.hpwrap { width: min(42vw, 280px); text-align: center; }
+.hpwrap span { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone-dim); }
+.hpbar { margin-top: 4px; height: 12px; border-radius: 6px; background: var(--moss); border: 1px solid var(--moss-2); overflow: hidden; }
+.hpbar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--blood), var(--shine)); transition: width .15s; }
+.hpnum { font-family: var(--mono); font-size: 12px; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.bossbar { margin-top: 10px; }
+.bossbar i { background: linear-gradient(90deg, #8a2a1c, var(--blood)); }
+.hud-bottom { display: flex; flex-wrap: wrap; justify-content: center; align-items: end; gap: 8px; }
+.spells { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.btn { pointer-events: auto; font: 800 15px var(--body); color: var(--night); background: var(--shine); border: 0; border-radius: 10px; padding: 12px 20px; cursor: pointer; letter-spacing: .02em; }
+.btn:focus-visible, .ghost:focus-visible, .card:focus-visible, .tab:focus-visible, .sp:focus-visible { outline: 3px solid var(--bone); outline-offset: 2px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.ghost { pointer-events: auto; font: 600 14px var(--body); color: var(--bone); background: var(--moss); border: 1px solid var(--moss-2); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+.ghost:hover:not(:disabled) { background: var(--moss-2); }
+.ghost:disabled { opacity: .45; cursor: not-allowed; }
+#cawBtn { position: relative; overflow: hidden; min-width: 132px; background: var(--bone); }
+.fill { position: absolute; inset: 0; background: rgba(0,0,0,.35); transform-origin: left; pointer-events: none; }
+#cawBtn .fill { background: var(--bone-dim); }
+.lbl { position: relative; }
+.kbd { font-family: var(--mono); font-size: 11px; opacity: .7; margin-left: 6px; }
+.sp { pointer-events: auto; position: relative; overflow: hidden; font: 700 13px var(--body); color: var(--bone); background: var(--moss-2); border: 2px solid var(--moss-3); border-radius: 10px; padding: 10px 12px; cursor: pointer; min-width: 92px; }
+.sp.armed { border-color: var(--shine); background: var(--moss-3); }
+.sp:disabled { cursor: not-allowed; }
+
+.overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(10, 13, 9, .74); padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); overflow-y: auto; }
+.panel { width: min(780px, 100%); background: var(--moss); border: 1px solid var(--moss-2); border-radius: 16px; padding: 24px; display: grid; gap: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.5); min-width: 0; }
+.panel h1, .panel h2, .panel h3 { font-family: var(--display); font-weight: 800; margin: 0; line-height: .95; text-wrap: balance; }
+.panel h1 { font-size: clamp(52px, 11vw, 88px); color: var(--bone); }
+.panel h2 { font-size: clamp(34px, 7vw, 46px); }
+.panel h3 { font-size: 26px; }
+.panel p { margin: 0; color: var(--bone-dim); line-height: 1.55; max-width: 62ch; }
+.eyebrow { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--shine); font-weight: 800; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.row.spread { justify-content: space-between; }
+.muted { color: var(--bone-dim); font-size: 13px; }
+.codein { font: 600 14px var(--mono); color: var(--bone); background: var(--night); border: 1px solid var(--moss-3); border-radius: 10px; padding: 10px 12px; width: 140px; user-select: text; -webkit-user-select: text; }
+.codein:focus-visible { outline: 3px solid var(--bone); outline-offset: 2px; }
+.testmode { color: var(--shine); font-weight: 700; }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--moss-2); }
+.tab { font: 700 14px var(--body); color: var(--bone-dim); background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 12px; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--bone); border-bottom-color: var(--shine); }
+.tab .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--shine); margin-left: 6px; vertical-align: middle; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.card { text-align: left; font: inherit; color: var(--bone); background: var(--moss-2); border: 2px solid transparent; border-radius: 12px; padding: 14px; display: grid; align-content: start; gap: 6px; cursor: pointer; min-width: 0; transition: transform .12s, border-color .12s; }
+.card:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--bone-dim); }
+.card:disabled { opacity: .45; cursor: not-allowed; }
+.card.sold { opacity: .3; }
+.card.sel { border-color: var(--shine); }
+.card.locked { cursor: default; opacity: .6; }
+.card .rar { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; color: var(--bone-dim); }
+.card[data-rar="1"] { border-color: color-mix(in srgb, var(--sky) 45%, transparent); }
+.card[data-rar="1"] .rar { color: var(--sky); }
+.card[data-rar="2"] { border-color: color-mix(in srgb, var(--amethyst) 55%, transparent); }
+.card[data-rar="2"] .rar { color: var(--amethyst); }
+.card .nm { font-weight: 800; font-size: 16px; }
+.card .ds { font-size: 13px; color: var(--bone-dim); line-height: 1.4; }
+.card .pr { font-family: var(--mono); color: var(--shine); font-size: 14px; margin-top: auto; }
+.card .pr.coinc { color: var(--coin); }
+.swatch { height: 8px; border-radius: 4px; }
+.skinc canvas { width: 100%; height: 96px; display: block; border-radius: 8px; background: var(--night); }
+
+.list { display: grid; gap: 8px; }
+.li { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: center; background: var(--moss-2); border-radius: 10px; padding: 12px 14px; }
+.li .nm { font-weight: 800; }
+.li .ds { font-size: 13px; color: var(--bone-dim); }
+.pips { display: flex; gap: 3px; margin-top: 4px; }
+.pips i { width: 14px; height: 6px; border-radius: 3px; background: var(--moss); }
+.pips i.on { background: var(--coin); }
+.li.done { outline: 1px solid color-mix(in srgb, var(--coin) 50%, transparent); }
+.badge { font: 700 11px var(--mono); padding: 3px 8px; border-radius: 999px; background: var(--night); color: var(--bone-dim); white-space: nowrap; }
+.badge.ok { color: var(--coin); }
+
+.owned { display: flex; flex-wrap: wrap; gap: 6px; }
+.owned span { font-size: 12px; background: var(--night); border-radius: 999px; padding: 4px 10px; color: var(--bone-dim); }
+.owned em { font-style: normal; color: var(--shine); font-family: var(--mono); }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.summary div { background: var(--moss-2); border-radius: 10px; padding: 12px; font-size: 12px; color: var(--bone-dim); text-transform: uppercase; letter-spacing: .12em; }
+.summary b { display: block; font-family: var(--display); font-size: 32px; color: var(--bone); letter-spacing: 0; text-transform: none; }
+.unlocks { display: grid; gap: 6px; }
+.unlocks div { background: var(--night); border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+.unlocks b { color: var(--coin); }
+
+.toast { position: fixed; left: 50%; top: 30%; transform: translate(-50%, -50%); font-family: var(--display); font-size: clamp(40px, 9vw, 72px); color: var(--bone); pointer-events: none; text-shadow: 0 4px 24px rgba(0,0,0,.7); opacity: 0; transition: opacity .3s; white-space: nowrap; text-align: center; }
+.toast.show { opacity: 1; }
+.toast small { display: block; font-family: var(--body); font-size: 15px; color: var(--shine); letter-spacing: .14em; text-transform: uppercase; }
+.ach { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateY(12px); background: var(--moss); border: 1px solid var(--coin); border-radius: 12px; padding: 10px 16px; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity .25s, transform .25s; z-index: 50; max-width: min(320px, calc(100% - 32px)); }
+.ach.show { opacity: 1; transform: none; }
+.ach b { color: var(--coin); display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+@media (max-width: 560px) { .panel { padding: 18px; } .stat b { font-size: 22px; } #cawBtn { min-width: 110px; } .sp { min-width: 0; padding: 9px 10px; } .hide-sm { display: none; } }
+@media (prefers-reduced-motion: reduce) { .card, .hpbar i, .toast, .ach { transition: none; } }
+</style>
+
+<canvas id="game" aria-label="Game field: the crow defends its nest at the centre"></canvas>
+
+<div class="hud" id="hud" hidden>
+  <div class="hud-top">
+    <div class="stat">Wave<b id="hWave">1</b><span id="hLeft"></span></div>
+    <div class="hpwrap">
+      <span>Nest</span><div class="hpbar"><i id="hHp"></i></div><div class="hpnum" id="hHpNum"></div>
+      <div id="bossWrap" hidden><span id="bossName">Boss</span><div class="hpbar bossbar"><i id="hBoss"></i></div></div>
+    </div>
+    <div class="stat gold">Shinies<b id="hGold">0</b><span class="coinc" id="hCoins"></span></div>
+  </div>
+  <div></div>
+  <div class="hud-bottom">
+    <button class="ghost" id="pauseBtn" type="button">Pause</button>
+    <div class="spells" id="spellBar"></div>
+    <button class="btn" id="cawBtn" type="button"><span class="fill" id="cawFill"></span><span class="lbl">CAW!<span class="kbd hide-sm">Space</span></span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="ach" id="ach" role="status"></div>
+
+<div class="overlay" id="menu">
+  <div class="panel">
+    <div class="row spread">
+      <div><div class="eyebrow">A roguelike nest defence</div><h1>Nestguard</h1></div>
+      <div class="stat gold coin">Coins<b id="mCoins">0</b></div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="fly" type="button">Fly</button>
+      <button class="tab" role="tab" data-tab="roost" type="button">Roost</button>
+      <button class="tab" role="tab" data-tab="spells" type="button">Spells</button>
+      <button class="tab" role="tab" data-tab="skins" type="button">Skins</button>
+      <button class="tab" role="tab" data-tab="feats" type="button">Achievements</button>
+    </div>
+    <section id="tab-fly" class="tabpane">
+      <div class="grid" id="biomes"></div>
+      <p id="biomeInfo" style="margin-top:14px"></p>
+      <div class="row spread" style="margin-top:16px">
+        <button class="btn" id="startBtn" type="button">Defend the nest</button>
+        <button class="ghost" id="muteBtn" type="button">Sound on</button>
+      </div>
+      <p class="muted" style="margin-top:14px">Your crow shoots by itself. Press Space or tap the field to caw. Press 1 to 7 or tap a spell, then tap the field to place it. Shop after every wave. Beat the boss on wave 10 to unlock the next biome, then fly home with your coins or stay for endless waves.</p>
+      <form class="row" id="codeForm" style="margin-top:14px" autocomplete="off">
+        <label class="muted" for="codeInput">Code</label>
+        <input class="codein" id="codeInput" type="text" spellcheck="false" autocapitalize="off" placeholder="Enter code">
+        <button class="ghost" type="submit">Enter</button>
+        <span class="muted" id="codeMsg" role="status"></span>
+      </form>
+    </section>
+    <section id="tab-roost" class="tabpane" hidden>
+      <p>Spend coins on permanent upgrades. They apply to every run.</p>
+      <div class="list" id="roost" style="margin-top:14px"></div>
+    </section>
+    <section id="tab-spells" class="tabpane" hidden>
+      <p>Spells are placed on the field during a wave. Every spell you unlock comes with you on every run.</p>
+      <div class="grid" id="spellList" style="margin-top:14px"></div>
+    </section>
+    <section id="tab-skins" class="tabpane" hidden>
+      <p>Win to unlock new feathers. Tap a skin to wear it.</p>
+      <div class="grid" id="skinList" style="margin-top:14px"></div>
+    </section>
+    <section id="tab-feats" class="tabpane" hidden>
+      <p id="achCount"></p>
+      <div class="list" id="achList" style="margin-top:14px"></div>
+    </section>
+  </div>
+</div>
+
+<div class="overlay" id="shop" hidden>
+  <div class="panel">
+    <div class="row spread">
+      <div><div class="eyebrow" id="shopEyebrow">Wave cleared</div><h2>The Magpie's Stall</h2></div>
+      <div class="row">
+        <div class="stat gold">Shinies<b id="sGold">0</b></div>
+        <div class="stat gold coin">Coins<b id="sCoins">0</b></div>
+      </div>
+    </div>
+    <p id="shopNote"></p>
+    <div class="grid" id="cards"></div>
+    <div class="row">
+      <button class="ghost" id="rerollBtn" type="button">Reroll</button>
+      <button class="ghost" id="healBtn" type="button">Patch nest</button>
+      <button class="ghost" id="homeBtn" type="button" hidden>Fly home</button>
+    </div>
+    <div class="owned" id="owned"></div>
+    <div class="row spread">
+      <span class="stat" id="nextInfo"></span>
+      <button class="btn" id="nextBtn" type="button">Start next wave</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="choice" hidden>
+  <div class="panel">
+    <div class="eyebrow">Boss defeated</div>
+    <h2 id="choiceTitle">The boss is beaten</h2>
+    <p id="choiceText"></p>
+    <div class="unlocks" id="choiceUnlocks"></div>
+    <div class="row">
+      <button class="btn" id="leaveBtn" type="button">Fly home</button>
+      <button class="ghost" id="stayBtn" type="button">Stay for endless waves</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="over" hidden>
+  <div class="panel">
+    <div class="eyebrow" id="overEyebrow">The eggs are gone</div>
+    <h2 id="overTitle">The nest has fallen</h2>
+    <div class="summary" id="summary"></div>
+    <p id="overCoins"></p>
+    <div class="unlocks" id="overUnlocks"></div>
+    <div class="owned" id="overOwned"></div>
+    <div class="row"><button class="btn" id="againBtn" type="button">Fly again</button><button class="ghost" id="roostBtn" type="button">Back to the roost</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="pause" hidden>
+  <div class="panel">
+    <h2>Paused</h2>
+    <p id="pauseInfo"></p>
+    <div class="row"><button class="btn" id="resumeBtn" type="button">Resume</button><button class="ghost" id="quitBtn" type="button">Give up run</button><button class="ghost" id="muteBtn2" type="button">Sound on</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const cv = $('game'), mainCtx = cv.getContext('2d');
+let ctx = mainCtx;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C = { shine: css('--shine'), blood: css('--blood'), bone: css('--bone'), coin: css('--coin') };
+const rnd = (a, b) => a + Math.random() * (b - a);
+const TAU = Math.PI * 2;
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+// ---------- view ----------
+let vw = 0, vh = 0, dpr = 1, scale = 1, spawnR = 600;
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  vw = innerWidth; vh = innerHeight;
+  cv.width = vw * dpr; cv.height = vh * dpr;
+  scale = Math.min(vw, vh) / 740;
+  spawnR = Math.min(Math.hypot(vw, vh) / 2 / scale + 40, 900);
+}
+addEventListener('resize', resize); resize();
+
+// ---------- audio ----------
+let actx = null, muted = false;
+function tone(f0, f1, dur, type = 'square', vol = .06) {
+  if (muted || api.sim) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur);
+  } catch (e) {}
+}
+let lastHit = 0;
+const sfx = {
+  caw: () => { tone(900, 380, .18, 'sawtooth', .09); setTimeout(() => tone(820, 340, .2, 'sawtooth', .08), 140); },
+  hit: () => { const n = performance.now(); if (n - lastHit > 45) { lastHit = n; tone(320, 120, .06, 'square', .02); } },
+  kill: () => tone(660, 990, .07, 'triangle', .035),
+  hurt: () => tone(160, 60, .2, 'sawtooth', .08),
+  buy: () => { tone(880, 1320, .08, 'triangle', .06); setTimeout(() => tone(1320, 1760, .1, 'triangle', .05), 70); },
+  spell: () => tone(300, 900, .25, 'sine', .08),
+  bolt: () => tone(1800, 60, .35, 'sawtooth', .07),
+  ach: () => { tone(660, 660, .1, 'triangle', .06); setTimeout(() => tone(990, 990, .18, 'triangle', .06), 110); },
+};
+
+// ---------- data: biomes & enemies ----------
+const BIOMES = [
+  { id: 'forest', name: 'Whispering Wood', hp: 1, dmg: 1, coin: 1, boss: 'cat', elite: 'raccoon',
+    enemies: ['beetle', 'squirrel', 'snake', 'hawk', 'raccoon'], ground: ['#2b3824', '#1b2318', '#121611'], blade: ['#2c3a26', '#25311f'], stone: '#262c22',
+    blurb: 'Beetles, squirrels, snakes, hawks and raccoons. The Alley Cat waits on wave 10.' },
+  { id: 'marsh', name: 'Murkwater Marsh', hp: 1.65, dmg: 1.25, coin: 1.6, boss: 'gator', elite: 'turtle',
+    enemies: ['frog', 'mosquito', 'leech', 'turtle', 'heron'], ground: ['#21362f', '#15231e', '#0d1613'], blade: ['#2a4038', '#1f3029'], stone: '#1c2b26',
+    blurb: 'Hopping frogs, mosquito swarms, leeches that heal when they bite, armoured turtles and herons. Old Gator rules the water.' },
+  { id: 'snow', name: 'Frostfang Pass', hp: 2.5, dmg: 1.5, coin: 2.3, boss: 'bear', elite: 'elk',
+    enemies: ['hare', 'fox', 'wolf', 'owl', 'elk'], ground: ['#3a4450', '#252c35', '#161a20'], blade: ['#4a5664', '#3a4450'], stone: '#2e3640',
+    blurb: 'Hares, foxes, wolf packs, owls and armoured elk. The Frost Bear shrugs off weak hits.' },
+  { id: 'city', name: 'Ashen Alleys', hp: 3.6, dmg: 1.8, coin: 3.2, boss: 'ratking', elite: 'binbandit',
+    enemies: ['rat', 'roach', 'pigeon', 'dog', 'binbandit'], ground: ['#35302a', '#221f1b', '#141211'], blade: ['#3c3630', '#2e2924'], stone: '#2a2622',
+    blurb: 'Rat swarms, roaches that split, pigeons that steal your shinies, stray dogs and bin raccoons. The Rat King calls his subjects.' },
+  { id: 'dunes', name: 'Sunscorch Dunes', hp: 5.8, dmg: 2.1, coin: 4.2, boss: 'emperor', elite: 'worm',
+    enemies: ['scarab', 'lizard', 'scorpion', 'vulture', 'worm'], ground: ['#6e5c3c', '#4a3d27', '#2a2217'], blade: ['#8a7550', '#5e4f34'], stone: '#5a4a30',
+    blurb: 'Armoured scarabs, darting lizards, scorpions whose sting poisons the nest, vultures and sandworms that stay underground until they are close. The Emperor Scorpion guards the sand.' },
+  { id: 'spider', name: 'Silkshade Hollow', hp: 8.2, dmg: 2.4, coin: 5.5, boss: 'queen', elite: 'tarantula',
+    enemies: ['spiderling', 'jumper', 'weaver', 'moth', 'tarantula'], ground: ['#2c2433', '#1b1621', '#0e0b12'], blade: ['#3e3446', '#2e2636'], stone: '#251f2b',
+    blurb: 'Spiderling swarms, jumping spiders, weavers that spit webs to slow your crow, moths, and tarantulas that burst into spiderlings. The Spider Queen waits in the dark.' },
+];
+const E = {
+  beetle:   { name: 'Beetle', shape: 'bug', col: ['#2f5a4a', '#11140f', '#000'], hp: 16, spd: 48, dmg: 4, gold: 2, r: 11, cost: 1, from: 1 },
+  squirrel: { name: 'Squirrel', shape: 'quad', tail: 'bushy', col: ['#c06c34', '#a3582c', '#000'], hp: 13, spd: 92, dmg: 3, gold: 2, r: 11, cost: 1, from: 1, zig: .9 },
+  snake:    { name: 'Snake', shape: 'snake', col: ['#6f8a3a', '#4c6326', '#e8d24a'], hp: 44, spd: 34, dmg: 9, gold: 4, r: 13, cost: 2, from: 2, zig: .6 },
+  hawk:     { name: 'Hawk', shape: 'bird', col: ['#6a4a30', '#8b6640', '#e8c860'], hp: 26, spd: 165, dmg: 6, gold: 5, r: 14, cost: 2, from: 3, fly: true },
+  raccoon:  { name: 'Raccoon', shape: 'quad', tail: 'striped', mask: true, col: ['#7d7b77', '#5a5856', '#eee'], hp: 90, spd: 38, dmg: 15, gold: 8, r: 19, cost: 4, from: 4 },
+  cat:      { name: 'Alley Cat', shape: 'quad', tail: 'thin', ears: true, stripes: true, col: ['#d27a2c', '#e08a3c', '#c8e05a'], hp: 480, spd: 30, dmg: 28, gold: 40, r: 32, boss: true, lunge: true, summon: 'squirrel' },
+
+  frog:     { name: 'Frog', shape: 'frog', col: ['#5c8a3a', '#3f6528', '#f0d040'], hp: 22, spd: 70, dmg: 5, gold: 2, r: 12, cost: 1, from: 1, hop: true },
+  mosquito: { name: 'Mosquitoes', shape: 'bug', wings: true, col: ['#6a5a4a', '#2a2018', '#c33'], hp: 7, spd: 115, dmg: 2, gold: 1, r: 7, cost: 2, from: 1, pack: 3, fly: true },
+  leech:    { name: 'Leech', shape: 'snake', col: ['#4a2e4a', '#6a426a', '#e55'], hp: 38, spd: 42, dmg: 7, gold: 4, r: 11, cost: 2, from: 2, drain: true, zig: .4 },
+  turtle:   { name: 'Snapping Turtle', shape: 'shell', col: ['#4a5a30', '#2e3a1c', '#e8d24a'], hp: 70, spd: 26, dmg: 12, gold: 6, r: 17, cost: 3, from: 3, armor: 4 },
+  heron:    { name: 'Heron', shape: 'bird', col: ['#8a94a0', '#c0c8d0', '#e8c860'], hp: 40, spd: 150, dmg: 9, gold: 6, r: 16, cost: 3, from: 4, fly: true },
+  gator:    { name: 'Old Gator', shape: 'gator', col: ['#3c5a30', '#2a4020', '#e8d24a'], hp: 520, spd: 26, dmg: 36, gold: 50, r: 34, boss: true, lunge: true, armor: 4, summon: 'frog' },
+
+  hare:     { name: 'Snow Hare', shape: 'quad', tail: 'puff', ears: 'long', col: ['#e6e8ec', '#c8ccd4', '#c33'], hp: 20, spd: 80, dmg: 4, gold: 2, r: 11, cost: 1, from: 1, hop: true },
+  fox:      { name: 'Arctic Fox', shape: 'quad', tail: 'bushy', ears: true, col: ['#dfe6ee', '#b8c4d0', '#222'], hp: 32, spd: 100, dmg: 6, gold: 3, r: 13, cost: 2, from: 1, zig: .7 },
+  wolf:     { name: 'Wolf Pack', shape: 'quad', tail: 'thin', ears: true, col: ['#7a828c', '#5a6068', '#e8d24a'], hp: 36, spd: 78, dmg: 7, gold: 3, r: 14, cost: 4, from: 2, pack: 3 },
+  owl:      { name: 'Snowy Owl', shape: 'bird', col: ['#d8dce2', '#f0f2f4', '#e8c860'], hp: 42, spd: 140, dmg: 8, gold: 5, r: 15, cost: 2, from: 3, fly: true },
+  elk:      { name: 'Elk', shape: 'quad', tail: 'none', antlers: true, col: ['#7a5a3a', '#5a3f28', '#111'], hp: 150, spd: 32, dmg: 20, gold: 10, r: 21, cost: 5, from: 4, armor: 6 },
+  bear:     { name: 'Frost Bear', shape: 'quad', tail: 'none', ears: true, col: ['#cfd8e2', '#aab6c4', '#111'], hp: 560, spd: 24, dmg: 44, gold: 70, r: 38, boss: true, armor: 8, summon: 'wolf' },
+
+  rat:      { name: 'Rats', shape: 'quad', tail: 'thin', ears: true, col: ['#5a504a', '#3a3430', '#e33'], hp: 13, spd: 92, dmg: 3, gold: 1, r: 9, cost: 2, from: 1, pack: 4 },
+  roach:    { name: 'Roach', shape: 'bug', col: ['#5a3018', '#2a1408', '#000'], hp: 26, spd: 62, dmg: 4, gold: 2, r: 11, cost: 1, from: 1, armor: 2, split: 'roachling' },
+  roachling:{ name: 'Roachling', shape: 'bug', col: ['#6a3a20', '#2a1408', '#000'], hp: 8, spd: 85, dmg: 2, gold: 1, r: 7, cost: 0, from: 99 },
+  pigeon:   { name: 'Thief Pigeon', shape: 'bird', col: ['#6a7080', '#8a90a0', '#e0a040'], hp: 30, spd: 150, dmg: 3, gold: 4, r: 13, cost: 2, from: 2, fly: true, thief: true },
+  dog:      { name: 'Stray Dog', shape: 'quad', tail: 'thin', ears: true, col: ['#8a6a48', '#6a4f34', '#111'], hp: 80, spd: 85, dmg: 11, gold: 7, r: 17, cost: 3, from: 3 },
+  binbandit:{ name: 'Bin Raccoon', shape: 'quad', tail: 'striped', mask: true, col: ['#4a4844', '#33312e', '#eee'], hp: 160, spd: 38, dmg: 20, gold: 12, r: 21, cost: 5, from: 4, armor: 5 },
+  scarab:   { name: 'Scarab', shape: 'bug', col: ['#3a6a7a', '#1a2a30', '#000'], hp: 30, spd: 55, dmg: 5, gold: 2, r: 12, cost: 1, from: 1, armor: 3 },
+  lizard:   { name: 'Sand Lizard', shape: 'gator', col: ['#c8a060', '#a07a40', '#222'], hp: 24, spd: 110, dmg: 4, gold: 2, r: 10, cost: 1, from: 1, zig: .8 },
+  scorpion: { name: 'Scorpion', shape: 'scorpion', col: ['#8a5a2a', '#5a3818', '#e33'], hp: 55, spd: 46, dmg: 8, gold: 4, r: 14, cost: 3, from: 2, poison: true, armor: 2 },
+  vulture:  { name: 'Vulture', shape: 'bird', col: ['#3a3028', '#5a4a3a', '#d8b0a0'], hp: 48, spd: 130, dmg: 9, gold: 5, r: 16, cost: 2, from: 3, fly: true },
+  worm:     { name: 'Sandworm', shape: 'snake', col: ['#b08858', '#8a6a40', '#300'], hp: 120, spd: 52, dmg: 18, gold: 9, r: 17, cost: 4, from: 4, burrow: true, armor: 3 },
+  emperor:  { name: 'Emperor Scorpion', shape: 'scorpion', col: ['#3a2a40', '#22182a', '#f44'], hp: 640, spd: 26, dmg: 50, gold: 110, r: 40, boss: true, armor: 7, poison: true, summon: 'scarab', lunge: true },
+
+  spiderling: { name: 'Spiderlings', shape: 'spider', col: ['#4a3a50', '#2a2030', '#e33'], hp: 11, spd: 100, dmg: 3, gold: 1, r: 8, cost: 2, from: 1, pack: 4 },
+  jumper:   { name: 'Jumping Spider', shape: 'spider', col: ['#2a2a2a', '#5a5a5a', '#6cf'], hp: 34, spd: 85, dmg: 6, gold: 3, r: 12, cost: 2, from: 1, hop: true },
+  weaver:   { name: 'Web Weaver', shape: 'spider', col: ['#c8c0a8', '#8a8070', '#222'], hp: 50, spd: 50, dmg: 0, gold: 6, r: 13, cost: 3, from: 2, ranged: true },
+  moth:     { name: 'Moth', shape: 'bug', wings: true, col: ['#8a7a6a', '#5a4a3a', '#000'], hp: 36, spd: 120, dmg: 6, gold: 4, r: 13, cost: 2, from: 3, fly: true },
+  tarantula:{ name: 'Tarantula', shape: 'spider', col: ['#3a2418', '#c86a2a', '#e33'], hp: 190, spd: 32, dmg: 22, gold: 12, r: 20, cost: 5, from: 4, armor: 6, split: 'spiderling' },
+  queen:    { name: 'Spider Queen', shape: 'spider', col: ['#1a1220', '#a01828', '#f44'], hp: 680, spd: 26, dmg: 55, gold: 130, r: 42, boss: true, armor: 5, summon: 'spiderling', weave: true, crown: true },
+  ratking:  { name: 'Rat King', shape: 'quad', tail: 'thin', ears: true, crown: true, col: ['#4a403a', '#2e2824', '#e33'], hp: 600, spd: 28, dmg: 48, gold: 90, r: 36, boss: true, summon: 'rat', lunge: true },
+};
+const BOSS_WAVE = 10;
+
+// ---------- data: items (bought during a run) ----------
+const RAR = ['Common', 'Rare', 'Epic'];
+const ITEMS = [
+  { id: 'sharp',  rar: 0, cost: 8,  name: 'Sharpened Quills', desc: '+25% feather damage.', max: 8, apply: () => P.dmg += P.baseDmg * .25 },
+  { id: 'wings',  rar: 0, cost: 8,  name: 'Quick Wings', desc: '+20% attack speed.', max: 8, apply: () => P.rate += P.baseRate * .2 },
+  { id: 'thorn',  rar: 0, cost: 6,  name: 'Thorny Twigs', desc: 'Anything that bites the nest takes 12 damage back.', max: 5, apply: () => P.thorns += 12 },
+  { id: 'mud',    rar: 0, cost: 7,  name: 'Mud Walls', desc: '+30 max nest HP, and heal 30.', max: 6, apply: () => { run.maxHp += 30; run.hp = Math.min(run.maxHp, run.hp + 30); } },
+  { id: 'eye',    rar: 0, cost: 7,  name: 'Hawk Eye', desc: '+8% critical hit chance.', max: 6, apply: () => P.crit += .08 },
+  { id: 'caps',   rar: 0, cost: 8,  name: 'Bottle Cap Hoard', desc: '+20% shinies from kills.', max: 3, apply: () => P.goldMult += .2 },
+  { id: 'lungs',  rar: 0, cost: 7,  name: 'Big Lungs', desc: 'Caw reaches 12% further and deals +15 damage.', max: 3, apply: () => { P.cawR *= 1.12; P.cawDmg += 15; } },
+  { id: 'iron',   rar: 0, cost: 8,  name: 'Iron Tips', desc: 'Feathers ignore 4 armour.', max: 4, apply: () => P.armorPen += 4 },
+  { id: 'twin',   rar: 1, cost: 15, name: 'Twin Feathers', desc: 'Throw +1 feather at another nearby enemy with every shot.', max: 4, apply: () => P.multi += 1 },
+  { id: 'needle', rar: 1, cost: 13, name: 'Needle Tips', desc: 'Feathers pierce through +1 enemy.', max: 3, apply: () => P.pierce += 1 },
+  { id: 'magpie', rar: 1, cost: 16, name: 'Magpie Friend', desc: 'A magpie circles the nest and pecks enemies too.', max: 4, apply: () => P.magpies += 1 },
+  { id: 'scare',  rar: 1, cost: 12, name: 'Scarecrow Rag', desc: 'Enemies close to the nest move 25% slower.', max: 2, apply: () => P.slow += .25 },
+  { id: 'ember',  rar: 1, cost: 14, name: 'Ember Feathers', desc: 'Hits set enemies on fire for 3s. Fire damage grows with your feather damage.', max: 3, apply: () => P.burn += .5 },
+  { id: 'moss',   rar: 1, cost: 13, name: 'Moss Lining', desc: 'The nest regrows 1.5 HP per second during waves.', max: 4, apply: () => P.regen += 1.5 },
+  { id: 'golden', rar: 1, cost: 13, name: 'Golden Egg', desc: 'Earn 10% interest on unspent shinies after each wave (up to 20).', max: 1, apply: () => P.interest = true },
+  { id: 'ink',    rar: 1, cost: 13, name: 'Hex Ink', desc: 'Spells recharge 20% faster.', max: 3, apply: () => P.spellCd *= .8 },
+  { id: 'rune',   rar: 1, cost: 14, name: 'Carved Rune', desc: 'Spells hit 35% harder and reach 10% further.', max: 4, apply: () => { P.spellPow += .35; P.spellR += .1; } },
+  { id: 'murder', rar: 2, cost: 22, name: 'Murder of Crows', desc: 'Critical hits deal 3x damage instead of 2x. +5% crit.', max: 1, apply: () => { P.critMult = 3; P.crit += .05; } },
+  { id: 'storm',  rar: 2, cost: 22, name: 'Storm Feathers', desc: 'Feathers bounce to 1 more enemy on hit.', max: 3, apply: () => P.chain += 1 },
+  { id: 'echo',   rar: 2, cost: 18, name: 'Echoing Caw', desc: 'Caw recharges 30% faster and stuns for longer.', max: 1, apply: () => { P.cawCd *= .7; P.stun += .4; } },
+  { id: 'wind',   rar: 2, cost: 18, name: 'Wind Whisper', desc: 'Feathers curve toward their target and fly faster. +15% damage.', max: 1, apply: () => { P.homing = true; P.dmg += P.baseDmg * .15; P.speed *= 1.2; } },
+  { id: 'slay',   rar: 0, cost: 8,  name: 'Giant Slayer', desc: '+20% damage to bosses and elites.', max: 4, apply: () => P.bossDmg += .2 },
+  { id: 'eagle',  rar: 0, cost: 7,  name: 'Eagle Sight', desc: 'Feathers fly 20% faster and the crow sees 15% further.', max: 2, apply: () => { P.speed *= 1.2; P.range *= 1.15; } },
+  { id: 'blood',  rar: 1, cost: 15, name: 'Blood Feathers', desc: 'Every kill mends the nest by 1 HP.', max: 3, apply: () => P.lifesteal += 1 },
+  { id: 'shell',  rar: 1, cost: 14, name: 'Exploding Eggshell', desc: 'When something bites the nest, shell shards hit every enemy close by.', max: 3, apply: () => P.burst += .8 },
+  { id: 'mana',   rar: 1, cost: 14, name: 'Mana Feathers', desc: 'Every kill takes 0.25s off all spell recharges.', max: 2, apply: () => P.killCdr += .25 },
+  { id: 'pecker', rar: 2, cost: 20, name: 'Woodpecker Rhythm', desc: 'Every 6th shot deals 5x damage.', max: 1, apply: () => P.pecker = true },
+  { id: 'judge',  rar: 2, cost: 22, name: "Raven's Judgement", desc: 'Enemies that drop under 15% HP are finished off. Bosses are immune.', max: 1, apply: () => P.execute = true },
+  { id: 'shrine', rar: 2, cost: 24, name: 'Old Crow Shrine', desc: '+40% damage and +15% attack speed.', max: 3, apply: () => { P.dmg += P.baseDmg * .4; P.rate += P.baseRate * .15; } },
+];
+
+// ---------- data: spells ----------
+const SPELLS = [
+  { id: 'bramble', name: 'Bramble Patch', short: 'Bramble', cd: 16, r: 85, cost: 0, req: null, col: '#7a9a4a',
+    desc: 'Thorny ground that cuts every walking enemy in it for 5 seconds.' },
+  { id: 'scare', name: 'Scarecrow', short: 'Scarecrow', cd: 18, r: 135, cost: 35, req: null, col: '#c9a36a',
+    desc: 'Everything near it moves at half speed for 10 seconds. Flying enemies too.' },
+  { id: 'totem', name: 'Feather Totem', short: 'Totem', cd: 22, r: 270, cost: 80, req: null, col: '#e6e1d2',
+    desc: 'A post that throws feathers at enemies in range for 12 seconds.' },
+  { id: 'bolt', name: 'Thunderclap', short: 'Thunder', cd: 15, r: 80, cost: 140, req: 'marsh', col: '#f2e27a',
+    desc: 'Lightning strikes the spot after half a second. Heavy damage and a short stun.' },
+  { id: 'frost', name: 'Frost Ring', short: 'Frost', cd: 24, r: 120, cost: 200, req: 'snow', col: '#a8d8f0',
+    desc: 'Freezes every enemy in the ring for 3 seconds. Frozen enemies take 25% more damage.' },
+  { id: 'sand', name: 'Sandstorm', short: 'Sandstorm', cd: 24, r: 110, cost: 260, req: 'dunes', col: '#d8b878',
+    desc: 'A whirlwind that scours everything inside and pushes it away from the nest for 5 seconds. Bosses stand their ground.' },
+  { id: 'web', name: 'Web Snare', short: 'Web', cd: 24, r: 110, cost: 330, req: 'spider', col: '#e8e4f0',
+    desc: 'A sticky web that lasts 6 seconds. Each enemy that walks in is stuck for 2.5 seconds and takes 20% more damage.' },
+];
+
+// ---------- data: roost (permanent) ----------
+const ROOST = [
+  { id: 'beak',  name: 'Sharp Beak', desc: '+8% feather damage per level.', base: 14, max: 10 },
+  { id: 'wings', name: 'Strong Wings', desc: '+6% attack speed per level.', base: 14, max: 10 },
+  { id: 'nest',  name: 'Sturdy Nest', desc: '+15 max nest HP per level.', base: 10, max: 10 },
+  { id: 'egg',   name: 'Nest Egg', desc: 'Start every run with +6 shinies per level.', base: 10, max: 8 },
+  { id: 'voice', name: 'Loud Voice', desc: 'Caw recharges 6% faster and hits 8 harder per level.', base: 12, max: 8 },
+  { id: 'eye',   name: 'Keen Eye', desc: '+2% critical hit chance per level.', base: 12, max: 8 },
+  { id: 'luck',  name: 'Lucky Find', desc: '+6% shinies from kills per level.', base: 12, max: 8 },
+  { id: 'focus', name: 'Spell Focus', desc: 'Spells recharge 6% faster and hit 8% harder per level.', base: 14, max: 8 },
+  { id: 'pen', name: 'Armour Breaker', desc: 'Feathers ignore 1 more armour per level.', base: 16, max: 6 },
+  { id: 'slayer', name: 'Giant Slayer', desc: '+7% damage to bosses and elites per level.', base: 16, max: 8 },
+  { id: 'thorns', name: 'Bramble Nest', desc: 'The nest hurts every biter for 6 damage per level.', base: 12, max: 8 },
+  { id: 'regen', name: 'Mending Moss', desc: 'The nest regrows 0.4 HP per second per level.', base: 14, max: 8 },
+  { id: 'haggle', name: 'Haggler', desc: 'Shop prices are 4% lower per level.', base: 16, max: 6 },
+  { id: 'pierce', name: 'Needle Beak', desc: 'Start every run with feathers that pierce +1 enemy.', base: 70, max: 2 },
+  { id: 'twin', name: 'Second Feather', desc: 'Start every run throwing +1 feather.', base: 90, max: 2 },
+  { id: 'magpie', name: 'Loyal Magpie', desc: 'Start every run with a magpie friend.', base: 80, max: 2 },
+  { id: 'favour', name: "Magpie's Favour", desc: 'The shop shows 5 upgrades instead of 4.', base: 120, max: 1 },
+];
+const roostCost = (u, lvl) => Math.round(u.base * Math.pow(1.42, lvl));
+
+// ---------- data: skins ----------
+const SKINS = [
+  { id: 'classic', name: 'Classic Crow', body: '#16181f', wing: '#0b0c10', sheen: 'rgba(120,130,190,.35)', beak: '#3d3a36', eye: '#f2e6b8', cond: 'Always yours.', has: () => true },
+  { id: 'ash', name: 'Ash Crow', body: '#55575e', wing: '#3a3c42', sheen: 'rgba(210,210,220,.3)', beak: '#2a2a2a', eye: '#f2e6b8', cond: 'Clear wave 5 in any biome.', has: s => !!s.ach.wave5 },
+  { id: 'albino', name: 'Albino Crow', body: '#ece8e0', wing: '#cfcac0', sheen: 'rgba(255,255,255,.5)', beak: '#e3b7a0', eye: '#d33', cond: 'Defeat the Alley Cat.', has: s => !!s.ach.cat },
+  { id: 'bog', name: 'Bog Crow', body: '#1f2e22', wing: '#142018', sheen: 'rgba(110,200,120,.45)', beak: '#5a4a2a', eye: '#e8d24a', cond: 'Defeat Old Gator.', has: s => !!s.ach.gator },
+  { id: 'frost', name: 'Frost Crow', body: '#8fb4d0', wing: '#6b93b3', sheen: 'rgba(235,248,255,.6)', beak: '#3b4a5a', eye: '#fff', cond: 'Defeat the Frost Bear.', has: s => !!s.ach.bear },
+  { id: 'ember', name: 'Ember Crow', body: '#2a1210', wing: '#1a0a08', sheen: 'rgba(255,120,40,.6)', beak: '#4a2a1a', eye: '#ffb040', glow: '#ff7a2a', cond: 'Defeat the Rat King.', has: s => !!s.ach.ratking },
+  { id: 'golden', name: 'Golden Crow', body: '#c99a2e', wing: '#a07820', sheen: 'rgba(255,240,180,.6)', beak: '#6a4a10', eye: '#fff6d0', glow: '#e8b84a', cond: 'Reach wave 20 in endless mode.', has: s => !!s.ach.endless20 },
+  { id: 'dune', name: 'Dune Crow', body: '#b08a50', wing: '#8a6a38', sheen: 'rgba(255,230,170,.55)', beak: '#4a3a20', eye: '#fff', cond: 'Defeat the Emperor Scorpion.', has: s => !!s.ach.emperor },
+  { id: 'widow', name: 'Widow Crow', body: '#0d0a10', wing: '#060408', sheen: 'rgba(210,30,45,.65)', beak: '#2a1a1a', eye: '#e33', glow: '#a01828', cond: 'Defeat the Spider Queen.', has: s => !!s.ach.queen },
+  { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
+];
+
+// ---------- data: achievements ----------
+const ACH = [
+  { id: 'first', name: 'First Flight', desc: 'Clear your first wave.', coins: 5 },
+  { id: 'wave5', name: 'Holding On', desc: 'Clear wave 5 in any biome.', coins: 15 },
+  { id: 'cat', name: 'Cat Nap', desc: 'Defeat the Alley Cat.', coins: 40 },
+  { id: 'gator', name: 'Swamp Thing', desc: 'Defeat Old Gator.', coins: 60 },
+  { id: 'bear', name: 'Cold Blooded', desc: 'Defeat the Frost Bear.', coins: 90 },
+  { id: 'ratking', name: 'Long Live the Crow', desc: 'Defeat the Rat King.', coins: 140 },
+  { id: 'emperor', name: 'Sting Operation', desc: 'Defeat the Emperor Scorpion.', coins: 190 },
+  { id: 'queen', name: 'Unravelled', desc: 'Defeat the Spider Queen.', coins: 260 },
+  { id: 'allbiomes', name: 'Six Nests', desc: 'Clear all six biomes.', coins: 300 },
+  { id: 'untouched', name: 'Not a Scratch', desc: 'Clear wave 5 or later without the nest taking damage.', coins: 25 },
+  { id: 'hoard', name: 'Hoarder', desc: 'Hold 150 shinies at once.', coins: 20 },
+  { id: 'shopper', name: 'Shopaholic', desc: 'Buy 12 upgrades in one run.', coins: 25 },
+  { id: 'murder', name: 'A Murder', desc: 'Have 3 magpie friends in one run.', coins: 30 },
+  { id: 'caw10', name: 'Loudmouth', desc: 'Hit 10 enemies with one caw.', coins: 20 },
+  { id: 'spells', name: 'Hedge Witch', desc: 'Cast 100 spells in total.', coins: 30 },
+  { id: 'kills', name: 'Pest Control', desc: 'Defeat 2,500 enemies in total.', coins: 50 },
+  { id: 'glass', name: 'By a Feather', desc: 'Defeat a boss with the nest under 15% HP.', coins: 40 },
+  { id: 'endless20', name: 'Long Night', desc: 'Reach wave 20 in endless mode.', coins: 75 },
+  { id: 'endless30', name: 'No Dawn', desc: 'Reach wave 30 in endless mode.', coins: 150 },
+  { id: 'fledged', name: 'Fully Fledged', desc: 'Max out one Roost upgrade.', coins: 40 },
+  { id: 'collector', name: 'Wardrobe', desc: 'Unlock 5 skins.', coins: 50 },
+  { id: 'tycoon', name: 'Tycoon', desc: 'Earn 1,000 coins in total.', coins: 60 },
+];
+
+// ---------- save ----------
+const SAVE_KEY = 'nestguard-save-v2';
+function freshSave() { return { coins: 0, earnedTotal: 0, up: {}, spells: ['bramble'], skin: 'classic', skinsSeen: ['classic'], biome: 0, biomes: { forest: { unlocked: true, cleared: false, best: 0 } }, ach: {}, stats: { kills: 0, casts: 0 }, muted: false }; }
+let save = freshSave();
+try { const raw = localStorage.getItem(SAVE_KEY); if (raw) save = Object.assign(freshSave(), JSON.parse(raw)); } catch (e) {}
+function persist() { if (api.sim) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+const biomeState = id => save.biomes[id] || (save.biomes[id] = { unlocked: false, cleared: false, best: 0 });
+muted = !!save.muted;
+
+// ---------- state ----------
+let P, run, B, enemies = [], shots = [], parts = [], texts = [], rings = [], coinsFx = [], zones = [], spawnQ = [], state = 'menu', paused = false;
+let fireT = 0, cawT = 0, shake = 0, crowAng = -Math.PI / 2, magpieA = 0, offers = [], rerollCost = 2, healCost = 6, healsLeft = 2;
+let armed = null, mouse = { x: 0, y: 0, in: false }, spellCds = {};
+const api = { sim: false };
+
+function newRun(biomeIdx) {
+  const u = id => save.up[id] || 0;
+  B = BIOMES[biomeIdx];
+  P = { dmg: 10 * (1 + .08 * u('beak')), rate: 2.2 * (1 + .06 * u('wings')), baseDmg: 10, baseRate: 2.2, speed: 560, multi: 1, pierce: 0, crit: .05 + .02 * u('eye'), critMult: 2,
+    range: 470, thorns: 0, goldMult: 1 + .06 * u('luck'), cawR: 170, cawDmg: 20 + 8 * u('voice'), cawCd: 9 * (1 - .06 * u('voice')), stun: .7,
+    magpies: 0, slow: 0, burn: 0, regen: 0, interest: false, chain: 0, homing: false, armorPen: 0,
+    spellCd: 1 - .06 * u('focus'), spellPow: 1 + .08 * u('focus'), spellR: 1,
+    bossDmg: 1 + .07 * u('slayer'), lifesteal: 0, pecker: false, execute: false, burst: 0, killCdr: 0, offers: 4 + u('favour'), haggle: 1 - .04 * u('haggle') };
+  P.armorPen = u('pen'); P.thorns = 6 * u('thorns'); P.regen = .4 * u('regen'); P.pierce = u('pierce'); P.multi = 1 + u('twin'); P.magpies = u('magpie');
+  const maxHp = 100 + 15 * u('nest');
+  run = { biome: biomeIdx, wave: 0, gold: 6 * u('egg'), hp: maxHp, maxHp, kills: 0, items: {}, bought: 0, earned: 0, coins: 0, endless: false, bossBeaten: false, waveDmg: 0, unlocks: [], boss: null, poisonT: 0, poisonD: 0, webT: 0 };
+  enemies = []; shots = []; parts = []; texts = []; rings = []; coinsFx = []; zones = []; spawnQ = []; webLines = [];
+  fireT = 0; cawT = 0; armed = null; spellCds = {};
+  for (const s of SPELLS) spellCds[s.id] = 0;
+}
+
+// ---------- waves ----------
+function hpMult(w) { const base = 1 + .17 * (Math.min(w, BOSS_WAVE) - 1) + .021 * (Math.min(w, BOSS_WAVE) - 1) ** 2; return base * Math.pow(1.17, Math.max(0, w - BOSS_WAVE)) * B.hp; }
+function startWave() {
+  run.wave++;
+  const w = run.wave;
+  let budget = 6 + w * 3.4 + (w > BOSS_WAVE ? (w - BOSS_WAVE) * 1.5 : 0);
+  const pool = B.enemies.filter(k => E[k].from <= w);
+  const list = [];
+  let guard = 0;
+  while (budget > 0 && guard++ < 500) {
+    const k = pool[Math.floor(Math.random() * pool.length)], d = E[k];
+    if (d.cost > budget && budget > 1) continue;
+    list.push(k); budget -= d.cost;
+  }
+  const isBoss = w % BOSS_WAVE === 0, isElite = !isBoss && w % 5 === 0;
+  const gap = Math.max(.2, 1.05 - w * .045);
+  spawnQ = list.map((k, i) => ({ k, t: .8 + i * gap * rnd(.6, 1.3) }));
+  const mid = spawnQ.length ? spawnQ[Math.floor(spawnQ.length * .4)].t : 2;
+  if (isBoss) spawnQ.push({ k: B.boss, t: mid, boss: true });
+  if (isElite) spawnQ.push({ k: B.elite, t: (spawnQ.length ? spawnQ[spawnQ.length - 1].t : 0) + 3, elite: true });
+  spawnQ.sort((a, b) => a.t - b.t);
+  run.waveClock = 0; run.waveDmg = 0; run.boss = null;
+  state = 'wave';
+  toast(`Wave ${w}`, isBoss ? `${E[B.boss].name} is coming` : isElite ? `An elite ${E[B.elite].name.toLowerCase()} leads them` : run.endless ? 'Endless' : B.name);
+}
+function spawn(q) {
+  const d = E[q.k], n = q.boss || q.elite ? 1 : (d.pack || 1), a0 = rnd(0, TAU);
+  for (let i = 0; i < n; i++) {
+    const a = a0 + (i - (n - 1) / 2) * .09, rr = spawnR + i * 14;
+    makeEnemy(q.k, Math.cos(a) * rr, Math.sin(a) * rr, q);
+  }
+}
+function makeEnemy(k, x, y, q = {}) {
+  const d = E[k], m = hpMult(run.wave);
+  const e = { k, ...d, x, y, hp: d.hp * m, dmg: d.dmg * B.dmg * (1 + .06 * (run.wave - 1)), armor: (d.armor || 0) * (1 + .05 * (run.wave - 1)),
+    kx: 0, ky: 0, stun: 0, frozen: 0, burn: 0, burnD: 0, bite: 0, flash: 0, ph: rnd(0, 7), mode: 'in', trail: [], dead: false, retreatA: 0, stolen: 0, timer: rnd(2, 4), lungeT: 0, under: !!d.burrow, shootT: rnd(1, 2) };
+  if (q.elite) { e.elite = true; e.hp *= 3; e.r *= 1.35; e.gold *= 5; e.dmg *= 1.25; e.name = 'Elite ' + d.name; }
+  if (d.boss) { run.boss = e; }
+  e.max = e.hp;
+  enemies.push(e);
+  return e;
+}
+
+// ---------- combat ----------
+function nearest(x, y, maxD, skip) {
+  let best = null, bd = maxD * maxD;
+  for (const e of enemies) { if (e.dead || e.under || (skip && skip.has(e))) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
+  return best;
+}
+function fire(x, y, tx, ty, dmg, opts = {}) {
+  const a = Math.atan2(ty - y, tx - x);
+  shots.push({ x, y, vx: Math.cos(a) * P.speed, vy: Math.sin(a) * P.speed, dmg, pierce: opts.pierce ?? P.pierce, chain: opts.chain ?? P.chain, hit: opts.hit || new Set(), life: 1.4, small: !!opts.small, big: !!opts.big, target: opts.target || null });
+}
+function hurt(e, dmg, o = {}) {
+  let crit = false;
+  if (o.crit !== false && Math.random() < P.crit) { dmg *= P.critMult; crit = true; }
+  if (e.under) return;
+  if (e.frozen > 0) dmg *= 1.25;
+  if (e.webbed) dmg *= 1.2;
+  if (e.boss || e.elite) dmg *= P.bossDmg;
+  if (!o.trueDmg && e.armor) dmg = Math.max(dmg * .2, dmg - Math.max(0, e.armor - (o.pen || 0)));
+  e.hp -= dmg; e.flash = .08;
+  if (P.execute && !e.boss && e.hp > 0 && e.hp < e.max * .15) e.hp = 0;
+  if (!api.sim && (o.text !== false)) texts.push({ x: e.x + rnd(-6, 6), y: e.y - e.r, v: Math.round(dmg), t: .7, crit });
+  if (e.hp <= 0 && !e.dead) kill(e);
+}
+function kill(e) {
+  e.dead = true; run.kills++; save.stats.kills++;
+  const g = Math.max(1, Math.round(e.gold * .6 * P.goldMult)) + e.stolen;
+  run.gold += g; run.earned += g;
+  if (P.lifesteal) run.hp = Math.min(run.maxHp, run.hp + P.lifesteal);
+  if (P.killCdr) for (const k in spellCds) spellCds[k] = Math.max(0, spellCds[k] - P.killCdr);
+  if (!api.sim) {
+    for (let i = 0; i < (e.boss ? 40 : 8); i++) parts.push({ x: e.x, y: e.y, vx: rnd(-140, 140), vy: rnd(-140, 140), t: rnd(.3, .7), c: e.col[0], r: rnd(2, 4) });
+    for (let i = 0; i < Math.min(g, 6); i++) coinsFx.push({ x: e.x + rnd(-8, 8), y: e.y + rnd(-8, 8), t: 0 });
+    sfx.kill();
+  }
+  if (e.split) for (let i = 0; i < 2; i++) makeEnemy(e.split, e.x + rnd(-10, 10), e.y + rnd(-10, 10));
+  if (e.elite) { addCoins(Math.round(6 * B.coin)); }
+  if (e.boss) {
+    shake = 12;
+    const c = Math.round(25 * B.coin); addCoins(c);
+    toast(`${e.name} defeated`, `+${g} shinies · +${c} coins`);
+    if (run.hp / run.maxHp < .15) grant('glass');
+    run.bossKilledThisWave = true;
+  }
+  if (run.gold >= 150) grant('hoard');
+  if (save.stats.kills >= 2500) grant('kills');
+}
+function addCoins(n) { run.coins += n; }
+function caw() {
+  if (state !== 'wave' || paused || cawT > 0) return;
+  cawT = P.cawCd;
+  rings.push({ x: 0, y: 0, r: 20, max: P.cawR, t: 0, c: '236,230,214' });
+  let n = 0;
+  for (const e of enemies) {
+    if (e.dead) continue;
+    const d = Math.hypot(e.x, e.y);
+    if (d < P.cawR + e.r) {
+      n++;
+      hurt(e, P.cawDmg, { crit: false, trueDmg: true });
+      if (e.cawImm > 0) continue;
+      e.cawImm = e.boss || e.elite ? 6 : 3.5;
+      const push = (e.boss ? 100 : e.elite ? 200 : 420) * (1 - d / (P.cawR + e.r) * .5);
+      e.kx += e.x / (d || 1) * push; e.ky += e.y / (d || 1) * push;
+      e.stun = Math.max(e.stun, P.stun * (e.boss ? .35 : 1));
+      e.bite = .5;
+    }
+  }
+  if (n >= 10) grant('caw10');
+  shake = Math.max(shake, 5);
+  sfx.caw();
+}
+
+// ---------- spells ----------
+const ownedSpells = () => SPELLS.filter(s => save.spells.includes(s.id));
+function armSpell(id) {
+  if (state !== 'wave' || paused) return;
+  if (armed === id || spellCds[id] > 0) { armed = null; } else armed = id;
+  cv.classList.toggle('aiming', !!armed);
+  renderSpellBar();
+}
+function cast(id, x, y) {
+  const s = SPELLS.find(q => q.id === id);
+  if (!s || spellCds[id] > 0) return false;
+  spellCds[id] = s.cd * P.spellCd;
+  const r = s.r * P.spellR;
+  save.stats.casts++;
+  if (save.stats.casts >= 100) grant('spells');
+  sfx.spell();
+  if (id === 'bramble') zones.push({ id, x, y, r, t: 5, tick: 0 });
+  else if (id === 'scare') zones.push({ id, x, y, r, t: 10 });
+  else if (id === 'totem') zones.push({ id, x, y, r, t: 12, cd: 0 });
+  else if (id === 'bolt') zones.push({ id, x, y, r, t: .8, delay: .45 });
+  else if (id === 'sand') zones.push({ id, x, y, r, t: 5, tick: 0 });
+  else if (id === 'web') zones.push({ id, x, y, r, t: 6 });
+  else if (id === 'frost') {
+    zones.push({ id, x, y, r, t: .7 });
+    for (const e of enemies) if (!e.dead && Math.hypot(e.x - x, e.y - y) < r + e.r) { const f = e.boss ? 1.2 : 3; e.frozen = Math.max(e.frozen, f); e.stun = Math.max(e.stun, f); hurt(e, P.dmg * P.spellPow, { crit: false }); }
+  }
+  armed = null; cv.classList.remove('aiming');
+  renderSpellBar();
+  return true;
+}
+function updateZones(dt) {
+  for (const z of zones) {
+    z.t -= dt;
+    if (z.id === 'bramble') {
+      z.tick -= dt;
+      if (z.tick <= 0) { z.tick = .3; for (const e of enemies) if (!e.dead && !e.fly && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) hurt(e, P.dmg * P.spellPow * .3, { crit: false, text: false }); }
+    } else if (z.id === 'totem') {
+      z.cd -= dt;
+      if (z.cd <= 0) { const t = nearest(z.x, z.y, z.r); if (t) { fire(z.x, z.y - 18, t.x, t.y, P.dmg * .9 * P.spellPow, { pierce: 0, chain: 0, small: true, target: t }); z.cd = 1 / 2.4; } else z.cd = .1; }
+    } else if (z.id === 'sand') {
+      z.tick -= dt;
+      if (z.tick <= 0) { z.tick = .25; for (const e of enemies) { if (e.dead || e.under) continue; const dx = e.x - z.x, dy = e.y - z.y, dd = Math.hypot(dx, dy); if (dd < z.r + e.r) { const d0 = Math.hypot(e.x, e.y) || 1, k = e.boss ? 0 : e.elite ? 6 : 16; e.x += e.x / d0 * k; e.y += e.y / d0 * k; hurt(e, P.dmg * P.spellPow * .3, { crit: false, text: false }); } } }
+    } else if (z.id === 'bolt' && z.delay > 0) {
+      z.delay -= dt;
+      if (z.delay <= 0) {
+        for (const e of enemies) if (!e.dead && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) { e.stun = Math.max(e.stun, e.boss ? .2 : .6); hurt(e, 7 * P.dmg * P.spellPow, { crit: true }); }
+        shake = Math.max(shake, 6); sfx.bolt();
+        if (!api.sim) for (let i = 0; i < 20; i++) parts.push({ x: z.x, y: z.y, vx: rnd(-220, 220), vy: rnd(-220, 220), t: rnd(.2, .5), c: '#f2e27a', r: 2 });
+      }
+    }
+  }
+  zones = zones.filter(z => z.t > 0);
+}
+function zoneSlow(e, dt) {
+  let f = 1; e.webbed = false;
+  if (e.webFree > 0) e.webFree -= dt;
+  for (const z of zones) {
+    if (z.id !== 'scare' && z.id !== 'web') continue;
+    if (Math.hypot(e.x - z.x, e.y - z.y) >= z.r + e.r) continue;
+    if (z.id === 'scare') f = Math.min(f, .5);
+    else if (!(e.webFree > 0)) {
+      e.webbed = true; f = Math.min(f, e.boss ? .4 : 0);
+      e.webHold = (e.webHold || 0) + dt;
+      if (e.webHold > 2.5) { e.webHold = 0; e.webFree = 5; }
+    }
+  }
+  return f;
+}
+
+// ---------- update ----------
+function update(dt) {
+  if (state !== 'wave') { updateFx(dt); return; }
+  run.waveClock += dt;
+  while (spawnQ.length && spawnQ[0].t <= run.waveClock) spawn(spawnQ.shift());
+  cawT = Math.max(0, cawT - dt);
+  for (const k in spellCds) spellCds[k] = Math.max(0, spellCds[k] - dt);
+  if (P.regen) run.hp = Math.min(run.maxHp, run.hp + P.regen * dt);
+  if (run.poisonT > 0) { run.poisonT -= dt; run.hp -= run.poisonD * dt; run.waveDmg += run.poisonD * dt; }
+  if (run.webT > 0) run.webT -= dt;
+
+  // crow
+  fireT -= dt;
+  const tgt = nearest(0, 0, P.range);
+  if (tgt) {
+    const want = Math.atan2(tgt.y, tgt.x);
+    const diff = ((want - crowAng + Math.PI * 3) % TAU) - Math.PI;
+    crowAng += diff * Math.min(1, dt * 14);
+    if (fireT <= 0) {
+      fireT = 1 / (P.rate * (run.webT > 0 ? .55 : 1));
+      const ox = Math.cos(want) * 16, oy = Math.sin(want) * 16, used = new Set([tgt]);
+      run.shotN = (run.shotN || 0) + 1;
+      const peck = P.pecker && run.shotN % 6 === 0;
+      fire(ox, oy, tgt.x, tgt.y, P.dmg * (peck ? 5 : 1), { target: tgt, big: peck });
+      for (let i = 1; i < P.multi; i++) {
+        const t2 = nearest(0, 0, P.range, used) || tgt; used.add(t2);
+        fire(ox, oy, t2.x, t2.y, P.dmg, { target: t2 });
+      }
+    }
+  }
+  // magpies
+  magpieA += dt * 1.6;
+  for (let i = 0; i < P.magpies; i++) {
+    const m = getMagpie(i);
+    m.cd = (m.cd ?? rnd(0, 1)) - dt;
+    if (m.cd <= 0) { const t = nearest(m.x, m.y, 360); if (t) { fire(m.x, m.y, t.x, t.y, P.dmg * .5, { pierce: 0, chain: 0, small: true, target: t }); m.cd = 1 / (P.rate * .75); } else m.cd = .1; }
+  }
+  updateZones(dt);
+
+  // shots
+  for (const s of shots) {
+    if (P.homing && s.target && !s.target.dead) {
+      const a = Math.atan2(s.target.y - s.y, s.target.x - s.x), cur = Math.atan2(s.vy, s.vx);
+      const d = ((a - cur + Math.PI * 3) % TAU) - Math.PI;
+      const na = cur + Math.max(-1, Math.min(1, d)) * dt * 8;
+      s.vx = Math.cos(na) * P.speed; s.vy = Math.sin(na) * P.speed;
+    }
+    s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
+    for (const e of enemies) {
+      if (e.dead || s.hit.has(e)) continue;
+      if ((e.x - s.x) ** 2 + (e.y - s.y) ** 2 < (e.r + 5) ** 2) {
+        s.hit.add(e);
+        hurt(e, s.dmg, { pen: P.armorPen }); sfx.hit();
+        if (P.burn) { e.burn = 3; e.burnD = Math.max(e.burnD, P.burn * P.dmg); }
+        if (!api.sim) for (let i = 0; i < 3; i++) parts.push({ x: s.x, y: s.y, vx: rnd(-80, 80), vy: rnd(-80, 80), t: .25, c: '#d8d2c0', r: 1.6 });
+        if (s.chain > 0) {
+          const n = nearest(s.x, s.y, 230, s.hit);
+          if (n) fire(s.x, s.y, n.x, n.y, s.dmg * .75, { pierce: 0, chain: s.chain - 1, hit: new Set(s.hit), target: n });
+          s.chain = 0;
+        }
+        if (s.pierce > 0) s.pierce--; else { s.life = 0; break; }
+      }
+    }
+  }
+  shots = shots.filter(s => s.life > 0);
+
+  // enemies
+  for (const e of enemies) {
+    if (e.dead) continue;
+    e.flash = Math.max(0, e.flash - dt);
+    e.frozen = Math.max(0, e.frozen - dt);
+    if (e.cawImm > 0) e.cawImm -= dt;
+    if (e.burn > 0) {
+      e.burn -= dt; e.hp -= e.burnD * dt;
+      if (!api.sim && Math.random() < dt * 8) parts.push({ x: e.x + rnd(-e.r, e.r), y: e.y, vx: 0, vy: -40, t: .4, c: '#f08a3a', r: 2 });
+      if (e.hp <= 0) { kill(e); continue; }
+    }
+    e.x += e.kx * dt; e.y += e.ky * dt; const damp = Math.pow(.02, dt); e.kx *= damp; e.ky *= damp;
+    if (e.stun > 0) { e.stun -= dt; continue; }
+    const d = Math.hypot(e.x, e.y), ux = -e.x / (d || 1), uy = -e.y / (d || 1);
+    let spd = e.spd * zoneSlow(e, dt) * (P.slow && d < 230 ? 1 - P.slow : 1);
+    e.ph += dt;
+    // boss abilities
+    if (e.boss) {
+      e.timer -= dt;
+      if (e.timer <= 0) {
+        e.timer = rnd(6, 8);
+        if (e.summon) { const n = e.k === 'ratking' ? 2 : 2; for (let i = 0; i < n; i++) spawn({ k: e.summon }); }
+        if (e.lunge) e.lungeT = .9;
+        if (e.weave) webCrow(e, 4);
+      }
+      if (e.lungeT > 0) { e.lungeT -= dt; spd *= e.lungeT > .6 ? 0 : 4.5; }
+    }
+    if (e.fly) {
+      if (e.mode === 'out') {
+        e.x += Math.cos(e.retreatA) * spd * dt; e.y += Math.sin(e.retreatA) * spd * dt;
+        if (e.thief && e.stolen && d > spawnR) { e.dead = true; toastSmall(`A pigeon got away with ${e.stolen} shinies`); continue; }
+        if (!e.thief && d > 360) e.mode = 'in';
+      } else {
+        const wob = Math.sin(e.ph * 3) * .5;
+        e.x += (ux * Math.cos(wob) - uy * Math.sin(wob)) * spd * dt; e.y += (uy * Math.cos(wob) + ux * Math.sin(wob)) * spd * dt;
+        if (d < NEST_R + e.r) {
+          if (e.thief) { const s = Math.min(run.gold, 4 + run.wave); run.gold -= s; e.stolen += s; texts.push({ x: 0, y: -NEST_R - 10, v: `-${s} shinies`, t: 1.1, bad: true }); }
+          biteNest(e); e.mode = 'out'; e.retreatA = Math.atan2(e.y, e.x) + rnd(-.8, .8);
+        }
+      }
+      continue;
+    }
+    if (e.under && d < 210) { e.under = false; if (!api.sim) for (let i = 0; i < 14; i++) parts.push({ x: e.x, y: e.y, vx: rnd(-120, 120), vy: rnd(-120, 120), t: rnd(.3, .6), c: '#c8a870', r: 3 }); }
+    if (e.ranged && d < 240) {
+      e.shootT -= dt;
+      if (e.shootT <= 0) { e.shootT = rnd(3.5, 4.5); webCrow(e, 3); }
+      continue;
+    }
+    if (d > NEST_R + e.r - 4) {
+      let mx = ux, my = uy;
+      if (e.zig) { const s = Math.sin(e.ph * (e.k === 'squirrel' ? 6 : 4)) * e.zig; mx = ux - uy * s; my = uy + ux * s; }
+      let sp = spd;
+      if (e.hop) { const c = (e.ph % .8); sp = c < .35 ? spd * 2.2 : 0; }
+      const ml = Math.hypot(mx, my);
+      e.x += mx / ml * sp * dt; e.y += my / ml * sp * dt;
+      e.bite = Math.max(e.bite, .35);
+    } else {
+      e.bite -= dt;
+      if (e.bite <= 0) { biteNest(e); e.bite = 1; }
+    }
+    if (e.shape === 'snake' || e.shape === 'gator') { const l = e.trail[0]; if (!l || Math.hypot(l.x - e.x, l.y - e.y) > 5) { e.trail.unshift({ x: e.x, y: e.y }); e.trail.length = Math.min(e.trail.length, e.shape === 'gator' ? 6 : 9); } }
+  }
+  enemies = enemies.filter(e => !e.dead);
+  updateFx(dt);
+
+  if (run.hp <= 0) return endRun(false);
+  if (!spawnQ.length && !enemies.length) waveCleared();
+}
+const NEST_R = 50;
+function webCrow(e, secs) {
+  run.webT = Math.max(run.webT, secs);
+  if (!api.sim) { webLines.push({ x: e.x, y: e.y, t: .5 }); texts.push({ x: 0, y: -NEST_R - 24, v: 'Webbed!', t: 1, bad: true }); }
+}
+let webLines = [];
+function biteNest(e) {
+  run.hp -= e.dmg; run.waveDmg += e.dmg; shake = Math.max(shake, e.boss ? 10 : 4); sfx.hurt();
+  if (!api.sim) texts.push({ x: rnd(-20, 20), y: -NEST_R, v: '-' + Math.round(e.dmg), t: .9, bad: true });
+  if (e.drain) e.hp = Math.min(e.max, e.hp + e.dmg * 2);
+  if (e.poison) { run.poisonD = run.poisonT > 0 ? Math.max(run.poisonD, e.dmg * .5) : e.dmg * .5; run.poisonT = 4; }
+  if (P.thorns) hurt(e, P.thorns, { crit: false, trueDmg: true });
+  if (P.burst) { for (const o of enemies) if (!o.dead && !o.under && Math.hypot(o.x, o.y) < NEST_R + 70) hurt(o, P.dmg * P.burst, { crit: false, text: false }); if (!api.sim) rings.push({ x: 0, y: 0, r: NEST_R, max: NEST_R + 70, t: .2, c: '159,198,194' }); }
+}
+const magpies = [];
+function getMagpie(i) {
+  const m = magpies[i] || (magpies[i] = {});
+  const a = magpieA + i / Math.max(1, P.magpies) * TAU;
+  m.x = Math.cos(a) * 92; m.y = Math.sin(a) * 92; m.a = a + Math.PI / 2;
+  return m;
+}
+function updateFx(dt) {
+  for (const p of parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .9; p.vy *= .9; p.t -= dt; }
+  parts = parts.filter(p => p.t > 0);
+  for (const t of texts) { t.y -= 30 * dt; t.t -= dt; }
+  texts = texts.filter(t => t.t > 0);
+  for (const r of rings) { r.t += dt; r.r += (r.max - r.r) * Math.min(1, dt * 12); }
+  rings = rings.filter(r => r.t < .45);
+  for (const w of webLines) w.t -= dt;
+  webLines = webLines.filter(w => w.t > 0);
+  for (const c of coinsFx) c.t += dt * 1.6;
+  coinsFx = coinsFx.filter(c => c.t < 1);
+  shake = Math.max(0, shake - dt * 30);
+}
+
+// ---------- draw ----------
+const deco = { blades: [], stones: [] };
+function makeDeco() {
+  deco.blades = Array.from({ length: 260 }, () => { const a = rnd(0, 7), d = rnd(70, 900); return { x: Math.cos(a) * d, y: Math.sin(a) * d, h: rnd(5, 12), t: rnd(-.4, .4), c: Math.random() < .5 ? 0 : 1 }; });
+  deco.stones = Array.from({ length: 24 }, () => { const a = rnd(0, 7), d = rnd(160, 800); return { x: Math.cos(a) * d, y: Math.sin(a) * d, r: rnd(6, 16) }; });
+}
+makeDeco();
+const twigs = Array.from({ length: 34 }, (_, i) => ({ a: i / 34 * TAU + rnd(-.1, .1), l: rnd(18, 30), o: rnd(-.6, .6) }));
+const snowflakes = Array.from({ length: 70 }, () => ({ x: rnd(-900, 900), y: rnd(-900, 900), s: rnd(20, 50), r: rnd(1, 2.5) }));
+
+function draw(time) {
+  ctx = mainCtx;
+  const biome = B || BIOMES[save.biome];
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = biome.ground[2]; ctx.fillRect(0, 0, vw, vh);
+  const sx = reduceMotion ? 0 : rnd(-shake, shake), sy = reduceMotion ? 0 : rnd(-shake, shake);
+  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, (vw / 2 + sx) * dpr, (vh / 2 + sy) * dpr);
+
+  const g = ctx.createRadialGradient(0, 0, 40, 0, 0, 520);
+  g.addColorStop(0, biome.ground[0]); g.addColorStop(.6, biome.ground[1]); g.addColorStop(1, biome.ground[2]);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1200, 0, TAU); ctx.fill();
+  if (biome.id === 'marsh') { ctx.fillStyle = 'rgba(40,80,90,.25)'; for (const s of deco.stones) { ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r * 4, s.r * 2.4, 0, 0, TAU); ctx.fill(); } }
+  if (biome.id === 'dunes') { ctx.strokeStyle = 'rgba(255,230,170,.08)'; ctx.lineWidth = 3; for (let i = -900; i < 900; i += 46) { ctx.beginPath(); for (let x = -900; x <= 900; x += 30) { const y = i + Math.sin(x / 90 + i) * 14; x === -900 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); } }
+  if (biome.id === 'spider') {
+    ctx.strokeStyle = 'rgba(220,210,235,.09)'; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 70, Math.sin(a) * 70); ctx.lineTo(Math.cos(a) * 1100, Math.sin(a) * 1100); ctx.stroke(); }
+    for (let r = 120; r < 1100; r += 70) { ctx.beginPath(); for (let i = 0; i <= 16; i++) { const a = i / 16 * TAU, rr = r * (i % 2 ? .96 : 1); i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.stroke(); }
+  }
+  if (biome.id === 'city') { ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 2; for (let i = -900; i < 900; i += 120) { ctx.beginPath(); ctx.moveTo(i, -900); ctx.lineTo(i, 900); ctx.moveTo(-900, i); ctx.lineTo(900, i); ctx.stroke(); } }
+  for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
+  ctx.lineWidth = 2; ctx.lineCap = 'round';
+  for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
+
+  if (state === 'wave' && P && cawT <= 0) { ctx.strokeStyle = 'rgba(236,230,214,.07)'; ctx.setLineDash([6, 10]); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, P.cawR, 0, TAU); ctx.stroke(); ctx.setLineDash([]); }
+  if (P && P.slow) { ctx.fillStyle = 'rgba(127,178,201,.05)'; ctx.beginPath(); ctx.arc(0, 0, 230, 0, TAU); ctx.fill(); }
+  for (const z of zones) drawZone(z, time, true);
+
+  drawNest();
+  for (const e of enemies) drawEnemy(e, time);
+  for (const z of zones) drawZone(z, time, false);
+  for (const s of shots) drawFeather(s);
+  ctx.strokeStyle = 'rgba(235,230,245,.7)'; ctx.lineWidth = 2;
+  for (const w of webLines) { ctx.globalAlpha = w.t * 2; ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.quadraticCurveTo(w.x * .4 + 20, w.y * .4 - 20, 0, 0); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  for (let i = 0; i < (P ? P.magpies : 0); i++) drawMagpie(getMagpie(i));
+  const flap = P && cawT > P.cawCd - .3 ? 1 : 0;
+  drawCrow(skinOf(save.skin), crowAng, flap, Math.sin(time / 300) * 1.2, time);
+  if (run && run.webT > 0) { ctx.strokeStyle = 'rgba(235,230,245,.75)'; ctx.lineWidth = 1.5; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 6, Math.sin(a) * 6); ctx.lineTo(Math.cos(a + .3) * 30, Math.sin(a + .3) * 30); ctx.stroke(); } ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.stroke(); }
+  if (run && run.poisonT > 0) { ctx.strokeStyle = `rgba(120,220,80,${.3 + .2 * Math.sin(time / 120)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 8, 0, TAU); ctx.stroke(); }
+  for (const r of rings) { ctx.strokeStyle = `rgba(${r.c},${.7 * (1 - r.t / .45)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke(); }
+  for (const p of parts) { ctx.globalAlpha = Math.min(1, p.t * 3); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  for (const c of coinsFx) { const k = c.t * c.t; ctx.fillStyle = C.shine; ctx.beginPath(); ctx.arc(c.x * (1 - k), c.y * (1 - k), 4, 0, TAU); ctx.fill(); }
+  if (biome.id === 'snow') { ctx.fillStyle = 'rgba(255,255,255,.6)'; for (const f of snowflakes) { const y = ((f.y + time / 1000 * f.s + 900) % 1800) - 900; ctx.beginPath(); ctx.arc(f.x + Math.sin(time / 1000 + f.s) * 10, y, f.r, 0, TAU); ctx.fill(); } }
+  ctx.textAlign = 'center';
+  for (const t of texts) {
+    ctx.globalAlpha = Math.min(1, t.t * 2);
+    ctx.fillStyle = t.bad ? C.blood : t.crit ? C.shine : C.bone;
+    ctx.font = t.crit ? '800 20px Chivo, sans-serif' : '700 14px Chivo, sans-serif';
+    ctx.fillText(t.v, t.x, t.y);
+  }
+  ctx.globalAlpha = 1;
+  // spell aim preview
+  if (armed && mouse.in) {
+    const s = SPELLS.find(q => q.id === armed), r = s.r * P.spellR;
+    ctx.strokeStyle = s.col; ctx.globalAlpha = .8; ctx.lineWidth = 3; ctx.setLineDash([8, 8]);
+    ctx.beginPath(); ctx.arc(mouse.x, mouse.y, s.id === 'totem' ? 22 : r, 0, TAU); ctx.stroke();
+    if (s.id === 'totem') { ctx.globalAlpha = .25; ctx.beginPath(); ctx.arc(mouse.x, mouse.y, r, 0, TAU); ctx.stroke(); }
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+}
+function drawZone(z, time, under) {
+  const s = SPELLS.find(q => q.id === z.id);
+  if (under) {
+    if (z.id === 'bramble') {
+      ctx.fillStyle = 'rgba(70,90,40,.35)'; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#5a7a2a'; ctx.lineWidth = 3;
+      for (let i = 0; i < 14; i++) { const a = i * 2.4, d = (i * 37 % 10) / 10 * z.r * .85; const x = z.x + Math.cos(a) * d, y = z.y + Math.sin(a) * d; ctx.beginPath(); ctx.moveTo(x - 7, y + 4); ctx.lineTo(x, y - 6); ctx.lineTo(x + 7, y + 4); ctx.stroke(); }
+    } else if (z.id === 'scare') {
+      ctx.fillStyle = 'rgba(201,163,106,.12)'; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+    } else if (z.id === 'totem') {
+      ctx.strokeStyle = 'rgba(230,225,210,.1)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke();
+    } else if (z.id === 'bolt') {
+      ctx.strokeStyle = z.delay > 0 ? 'rgba(242,226,122,.6)' : 'rgba(242,226,122,.3)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke();
+    } else if (z.id === 'frost') {
+      ctx.fillStyle = `rgba(168,216,240,${.35 * z.t / .7})`; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+    } else if (z.id === 'web') {
+      ctx.strokeStyle = `rgba(232,228,240,${Math.min(.6, z.t / 2)})`; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; ctx.beginPath(); ctx.moveTo(z.x, z.y); ctx.lineTo(z.x + Math.cos(a) * z.r, z.y + Math.sin(a) * z.r); ctx.stroke(); }
+      for (let rr = z.r / 4; rr <= z.r; rr += z.r / 4) { ctx.beginPath(); for (let i = 0; i <= 10; i++) { const a = i / 10 * TAU; i ? ctx.lineTo(z.x + Math.cos(a) * rr, z.y + Math.sin(a) * rr) : ctx.moveTo(z.x + Math.cos(a) * rr, z.y + Math.sin(a) * rr); } ctx.stroke(); }
+    } else if (z.id === 'sand') {
+      ctx.fillStyle = 'rgba(216,184,120,.18)'; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(232,206,150,.55)'; ctx.lineWidth = 3;
+      for (let i = 0; i < 4; i++) { const a0 = time / 150 + i * 1.57; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (.3 + i * .18), a0, a0 + 2.2); ctx.stroke(); }
+    }
+    return;
+  }
+  if (z.id === 'scare') {
+    ctx.save(); ctx.translate(z.x, z.y); ctx.rotate(Math.sin(time / 400) * .08);
+    ctx.strokeStyle = '#6b4a2e'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(0, -16); ctx.moveTo(-16, -6); ctx.lineTo(16, -6); ctx.stroke();
+    ctx.fillStyle = '#c9a36a'; ctx.beginPath(); ctx.arc(0, -20, 8, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.moveTo(-12, -24); ctx.lineTo(0, -36); ctx.lineTo(12, -24); ctx.fill();
+    ctx.restore();
+  } else if (z.id === 'totem') {
+    ctx.fillStyle = '#6b4a2e'; ctx.fillRect(z.x - 5, z.y - 20, 10, 30);
+    ctx.fillStyle = s.col; ctx.beginPath(); ctx.moveTo(z.x, z.y - 34); ctx.lineTo(z.x - 9, z.y - 18); ctx.lineTo(z.x + 9, z.y - 18); ctx.fill();
+  } else if (z.id === 'bolt' && z.delay <= 0) {
+    ctx.strokeStyle = `rgba(255,250,200,${z.t / .35})`; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(z.x + 30, z.y - 400);
+    let x = z.x + 30; for (let y = z.y - 400; y < z.y; y += 40) { x += rnd(-20, 20) - (x - z.x) * .2; ctx.lineTo(x, y); } ctx.lineTo(z.x, z.y); ctx.stroke();
+  }
+}
+function drawNest() {
+  ctx.fillStyle = '#3a2817'; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 4, 0, TAU); ctx.fill();
+  ctx.lineWidth = 4; ctx.lineCap = 'round';
+  for (const t of twigs) {
+    ctx.strokeStyle = t.o > 0 ? '#7a5634' : '#5e4026';
+    const r0 = NEST_R - 14, r1 = NEST_R + 6;
+    ctx.beginPath(); ctx.moveTo(Math.cos(t.a) * r0, Math.sin(t.a) * r0); ctx.lineTo(Math.cos(t.a + t.o * .4) * r1 + Math.cos(t.a + 1.6) * t.l * .4, Math.sin(t.a + t.o * .4) * r1 + Math.sin(t.a + 1.6) * t.l * .4); ctx.stroke();
+  }
+  if (P && P.thorns) { ctx.fillStyle = '#8a9a5a'; for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a - .06) * (NEST_R + 4), Math.sin(a - .06) * (NEST_R + 4)); ctx.lineTo(Math.cos(a) * (NEST_R + 14), Math.sin(a) * (NEST_R + 14)); ctx.lineTo(Math.cos(a + .06) * (NEST_R + 4), Math.sin(a + .06) * (NEST_R + 4)); ctx.fill(); } }
+  ctx.fillStyle = '#24180d'; ctx.beginPath(); ctx.arc(0, 0, NEST_R - 16, 0, TAU); ctx.fill();
+  const eggs = run && state !== 'menu' ? Math.max(0, Math.ceil(run.hp / run.maxHp * 3)) : 3;
+  const pos = [[-14, 10], [14, 10], [0, -14]];
+  for (let i = 0; i < eggs; i++) { const [x, y] = pos[i]; ctx.fillStyle = '#9fc6c2'; ctx.beginPath(); ctx.ellipse(x, y + 4, 8, 10, .3 * (i - 1), 0, TAU); ctx.fill(); ctx.fillStyle = '#5e7c78'; ctx.beginPath(); ctx.arc(x - 2, y + 2, 1.4, 0, TAU); ctx.arc(x + 3, y + 7, 1.2, 0, TAU); ctx.fill(); }
+}
+const skinOf = id => SKINS.find(s => s.id === id) || SKINS[0];
+function drawCrow(S, a, flap, bob, time) {
+  ctx.save(); ctx.rotate(a);
+  if (S.glow) { ctx.shadowColor = S.glow; ctx.shadowBlur = 18 + Math.sin(time / 200) * 6; }
+  ctx.fillStyle = S.wing;
+  ctx.beginPath(); ctx.ellipse(-4, -14 - flap * 8, 18, 7 + flap * 4, -.3 - flap * .4, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-4, 14 + flap * 8, 18, 7 + flap * 4, .3 + flap * .4, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(-32, -8); ctx.lineTo(-34, 0); ctx.lineTo(-32, 8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = S.body; ctx.beginPath(); ctx.ellipse(0, bob * .3, 18, 13, 0, 0, TAU); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = S.sheen; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, 0, 13, 8, 0, 2.2, 4.1); ctx.stroke();
+  ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(16, 0, 10, 0, TAU); ctx.fill();
+  ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
+  if (flap) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
+  ctx.fillStyle = S.eye; ctx.beginPath(); ctx.arc(19, -5, 2.2, 0, TAU); ctx.arc(19, 5, 2.2, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.6, -5, 1.1, 0, TAU); ctx.arc(19.6, 5, 1.1, 0, TAU); ctx.fill();
+  if (S.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(10, -8); ctx.lineTo(6, -12); ctx.lineTo(12, -10); ctx.lineTo(14, -15); ctx.lineTo(16, -10); ctx.lineTo(22, -12); ctx.lineTo(18, -7); ctx.closePath(); ctx.fill(); ctx.fillRect(9, -8, 10, 3); }
+  ctx.restore();
+}
+function drawMagpie(m) {
+  ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.a);
+  ctx.fillStyle = '#101216'; ctx.beginPath(); ctx.ellipse(0, 0, 9, 6, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#e9e6dc'; ctx.beginPath(); ctx.ellipse(-1, 0, 5, 3, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#1e3a5a'; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-18, -3); ctx.lineTo(-18, 3); ctx.fill();
+  ctx.fillStyle = '#101216'; ctx.beginPath(); ctx.arc(8, 0, 4, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+function drawFeather(s) {
+  const a = Math.atan2(s.vy, s.vx), l = s.small ? 7 : s.big ? 16 : 11;
+  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(a);
+  ctx.fillStyle = s.big ? '#e8b84a' : P.burn ? '#f08a3a' : s.small ? '#cfd6e6' : '#e6e1d2';
+  ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
+  ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(l, 0); ctx.lineTo(-l - 3, 0); ctx.stroke();
+  ctx.restore();
+}
+function drawEnemy(e, time) {
+  const a = e.fly && e.mode === 'out' ? e.retreatA : Math.atan2(-e.y, -e.x), r = e.r, fl = e.flash > 0;
+  const [c0, c1, c2] = fl ? ['#fff', '#fff', e.col[2]] : e.col;
+  if (e.under) {
+    ctx.fillStyle = 'rgba(200,170,110,.55)'; ctx.beginPath(); ctx.ellipse(e.x, e.y, r * 1.1, r * .7, Math.atan2(e.y, e.x), 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(160,130,80,.5)'; for (const p of e.trail) { ctx.beginPath(); ctx.arc(p.x, p.y, r * .4, 0, TAU); ctx.fill(); }
+    return;
+  }
+  if (e.shape === 'snake' && e.trail.length) {
+    ctx.strokeStyle = c0; ctx.lineWidth = r * 1.1; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(e.x, e.y); for (const p of e.trail) ctx.lineTo(p.x, p.y); ctx.stroke();
+    ctx.strokeStyle = c1; ctx.lineWidth = 3; ctx.setLineDash([4, 6]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if (e.elite || e.boss) { ctx.strokeStyle = e.boss ? 'rgba(210,84,63,.6)' : 'rgba(232,184,74,.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, r * 1.35, 0, TAU); ctx.stroke(); }
+  if (e.lungeT > .6) { ctx.fillStyle = 'rgba(210,84,63,.25)'; ctx.beginPath(); ctx.arc(e.x, e.y, r * 1.6, 0, TAU); ctx.fill(); }
+  ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(a);
+  switch (e.shape) {
+    case 'bug': {
+      ctx.strokeStyle = '#11140f'; ctx.lineWidth = Math.max(1.5, r / 6);
+      for (let i = -1; i <= 1; i++) { const w = Math.sin(time / 60 + i) * 2; ctx.beginPath(); ctx.moveTo(i * r * .45, -r * .6); ctx.lineTo(i * r * .45 + w, -r * 1.3); ctx.moveTo(i * r * .45, r * .6); ctx.lineTo(i * r * .45 - w, r * 1.3); ctx.stroke(); }
+      if (e.wings) { ctx.fillStyle = 'rgba(220,230,240,.45)'; const f = Math.sin(time / 20) * .4; ctx.beginPath(); ctx.ellipse(-2, -r, r, r * .4, -.6 + f, 0, TAU); ctx.ellipse(-2, r, r, r * .4, .6 - f, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .75, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r * .6, 0); ctx.stroke();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .85, 0, r * .42, 0, TAU); ctx.fill();
+      if (e.wings) { ctx.strokeStyle = c1; ctx.beginPath(); ctx.moveTo(r, 0); ctx.lineTo(r * 1.8, 0); ctx.stroke(); }
+      break; }
+    case 'quad': {
+      const sw = Math.sin(time / 120 + e.ph) * .25;
+      ctx.fillStyle = c1;
+      if (e.tail === 'bushy') { ctx.beginPath(); ctx.ellipse(-r * 1.2, Math.sin(time / 90) * 3, r * .9, r * .65, sw, 0, TAU); ctx.fill(); }
+      else if (e.tail === 'striped') { ctx.beginPath(); ctx.ellipse(-r * 1.2, 0, r * .7, r * .3, sw, 0, TAU); ctx.fill(); ctx.fillStyle = '#2a2826'; for (let i = 0; i < 3; i++) ctx.fillRect(-r * 1.6 + i * r * .4, -r * .28, r * .18, r * .56); }
+      else if (e.tail === 'thin') { ctx.strokeStyle = c1; ctx.lineWidth = Math.max(2, r * .15); ctx.beginPath(); ctx.moveTo(-r * .8, 0); ctx.quadraticCurveTo(-r * 1.4, sw * r * 2, -r * 2, sw * r * 3); ctx.stroke(); }
+      else if (e.tail === 'puff') { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-r * .95, 0, r * .35, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .78, 0, 0, TAU); ctx.fill();
+      if (e.stripes) { ctx.strokeStyle = 'rgba(120,60,20,.7)'; ctx.lineWidth = r * .12; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(i * r * .35 - 3, -r * .7); ctx.lineTo(i * r * .35 + 3, -r * .2); ctx.moveTo(i * r * .35 - 3, r * .7); ctx.lineTo(i * r * .35 + 3, r * .2); ctx.stroke(); } }
+      ctx.fillStyle = c0;
+      if (e.ears === 'long') { ctx.beginPath(); ctx.ellipse(r * .5, -r * .45, r * .55, r * .18, -.5, 0, TAU); ctx.ellipse(r * .5, r * .45, r * .55, r * .18, .5, 0, TAU); ctx.fill(); }
+      else if (e.ears) { ctx.beginPath(); ctx.moveTo(r * .8, -r * .4); ctx.lineTo(r * 1.0, -r * .85); ctx.lineTo(r * 1.25, -r * .3); ctx.moveTo(r * .8, r * .4); ctx.lineTo(r * 1.0, r * .85); ctx.lineTo(r * 1.25, r * .3); ctx.fill(); }
+      if (e.antlers) { ctx.strokeStyle = '#d8c8a0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(r * .9, -r * .3); ctx.lineTo(r * .6, -r * 1.2); ctx.lineTo(r * .2, -r * 1.4); ctx.moveTo(r * .65, -r * 1.0); ctx.lineTo(r * 1.0, -r * 1.3); ctx.moveTo(r * .9, r * .3); ctx.lineTo(r * .6, r * 1.2); ctx.lineTo(r * .2, r * 1.4); ctx.moveTo(r * .65, r * 1.0); ctx.lineTo(r * 1.0, r * 1.3); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(r * .95, 0, r * .55, 0, TAU); ctx.fill();
+      if (e.mask) { ctx.fillStyle = '#1d1c1b'; ctx.fillRect(r * .85, -r * .45, r * .35, r * .9); }
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * 1.12, -r * .22, Math.max(1.5, r * .1), 0, TAU); ctx.arc(r * 1.12, r * .22, Math.max(1.5, r * .1), 0, TAU); ctx.fill();
+      if (e.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(r * .6, -r * .4); ctx.lineTo(r * .4, -r * .1); ctx.lineTo(r * .55, 0); ctx.lineTo(r * .4, r * .1); ctx.lineTo(r * .6, r * .4); ctx.lineTo(r * .8, 0); ctx.closePath(); ctx.fill(); }
+      break; }
+    case 'snake': {
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(2, 0, r * .9, r * .7, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .5, -r * .3, 2, 0, TAU); ctx.arc(r * .5, r * .3, 2, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#b7322a'; ctx.lineWidth = 1.5; const tf = Math.sin(time / 80) * 2; ctx.beginPath(); ctx.moveTo(r, 0); ctx.lineTo(r + 7, tf); ctx.stroke();
+      break; }
+    case 'bird': {
+      const f = Math.sin(time / 70 + e.ph) * .25;
+      ctx.fillStyle = c0;
+      ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(-6, -r * 2.1 - f * 10); ctx.lineTo(-12, -r * .3); ctx.lineTo(-12, r * .3); ctx.lineTo(-6, r * 2.1 + f * 10); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .45, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.moveTo(r, -2); ctx.lineTo(r + (e.k === 'heron' ? 14 : 6), 0); ctx.lineTo(r, 2); ctx.fill();
+      if (e.stolen) { ctx.fillStyle = C.shine; ctx.beginPath(); ctx.arc(r * .3, 0, 4, 0, TAU); ctx.fill(); }
+      break; }
+    case 'frog': {
+      const hop = (e.ph % .8) < .35 ? 1.15 : 1;
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(-r * .5, -r * .8, r * .6, r * .25, .6, 0, TAU); ctx.ellipse(-r * .5, r * .8, r * .6, r * .25, -.6, 0, TAU); ctx.fill();
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * hop, r * .85 * hop, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .55, -r * .45, r * .25, 0, TAU); ctx.arc(r * .55, r * .45, r * .25, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(r * .62, -r * .45, r * .1, 0, TAU); ctx.arc(r * .62, r * .45, r * .1, 0, TAU); ctx.fill();
+      break; }
+    case 'shell': {
+      ctx.fillStyle = '#6a7a4a'; ctx.beginPath(); ctx.arc(r * .95, 0, r * .35, 0, TAU); ctx.fill();
+      for (const [x, y] of [[.5, -.75], [.5, .75], [-.5, -.75], [-.5, .75]]) { ctx.beginPath(); ctx.arc(x * r, y * r, r * .22, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * .9, r * .8, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = c1; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU; ctx.moveTo(Math.cos(aa) * r * .35, Math.sin(aa) * r * .35); ctx.lineTo(Math.cos(aa) * r * .8, Math.sin(aa) * r * .7); }
+      ctx.arc(0, 0, r * .35, 0, TAU); ctx.stroke();
+      break; }
+    case 'spider': {
+      ctx.strokeStyle = c1 === '#fff' ? '#fff' : (e.k === 'tarantula' ? '#2a1a10' : c0); ctx.lineWidth = Math.max(1.5, r * .14); ctx.lineCap = 'round';
+      for (let i = 0; i < 4; i++) { const w = Math.sin(time / 70 + i * 1.7 + e.ph) * .25, ax = r * (.35 - i * .25); for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(ax, 0); ctx.lineTo(ax + r * (.3 - i * .15), sd * r * 1.0); ctx.lineTo(ax + r * (.6 - i * .45) + w * r, sd * r * 1.6); ctx.stroke(); } }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(-r * .55, 0, r * .75, r * .62, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; if (e.k === 'tarantula' || e.k === 'queen') { ctx.beginPath(); ctx.ellipse(-r * .6, 0, r * .4, r * .2, 0, 0, TAU); ctx.fill(); }
+      if (e.k === 'queen') { ctx.beginPath(); ctx.moveTo(-r * .9, 0); ctx.lineTo(-r * .55, -r * .25); ctx.lineTo(-r * .2, 0); ctx.lineTo(-r * .55, r * .25); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .3, 0, r * .42, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; for (const [x, y] of [[.55, -.15], [.55, .15], [.45, -.28], [.45, .28]]) { ctx.beginPath(); ctx.arc(x * r, y * r, Math.max(1.2, r * .07), 0, TAU); ctx.fill(); }
+      if (e.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(r * .05, -r * .3); ctx.lineTo(-r * .15, -r * .1); ctx.lineTo(0, 0); ctx.lineTo(-r * .15, r * .1); ctx.lineTo(r * .05, r * .3); ctx.lineTo(r * .2, 0); ctx.closePath(); ctx.fill(); }
+      break; }
+    case 'scorpion': {
+      ctx.strokeStyle = c1; ctx.lineWidth = Math.max(1.5, r * .1); ctx.lineCap = 'round';
+      for (let i = 0; i < 4; i++) { const w = Math.sin(time / 80 + i) * .2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * (.3 - i * .3), 0); ctx.lineTo(r * (.2 - i * .3 + w), sd * r * 1.0); ctx.stroke(); } }
+      ctx.fillStyle = c1; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * .5, sd * r * .25); ctx.lineTo(r * 1.1, sd * r * .6); ctx.lineTo(r * 1.4, sd * r * .45); ctx.lineTo(r * 1.2, sd * r * .3); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.ellipse(r * 1.35, sd * r * .45, r * .25, r * .14, sd * .5, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * .75, r * .5, 0, 0, TAU); ctx.fill();
+      const curl = Math.sin(time / 300 + e.ph) * .15;
+      for (let i = 1; i <= 5; i++) { ctx.beginPath(); ctx.arc(-r * (.55 + i * .22), Math.sin(i * .5 + curl) * r * .12 * i, r * (.3 - i * .03), 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(-r * 1.65, Math.sin(2.5 + curl) * r * .6, r * .16, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(r * .55, -r * .12, 1.5, 0, TAU); ctx.arc(r * .55, r * .12, 1.5, 0, TAU); ctx.fill();
+      break; }
+    case 'gator': {
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.moveTo(-r * .8, -r * .35); ctx.lineTo(-r * 2.4, Math.sin(time / 200) * r * .3); ctx.lineTo(-r * .8, r * .35); ctx.fill();
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * 1.1, r * .55, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; for (const [x, y] of [[.5, -.6], [.5, .6], [-.5, -.6], [-.5, .6]]) { ctx.beginPath(); ctx.ellipse(x * r, y * r, r * .25, r * .12, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(r * .8, -r * .3, r * 1.1, r * .6, r * .2) : ctx.rect(r * .8, -r * .3, r * 1.1, r * .6); ctx.fill();
+      ctx.fillStyle = '#fff'; for (let i = 0; i < 5; i++) { ctx.fillRect(r * .9 + i * r * .2, -r * .32, 2, 4); ctx.fillRect(r * .9 + i * r * .2, r * .28, 2, 4); }
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .75, -r * .32, 3, 0, TAU); ctx.arc(r * .75, r * .32, 3, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.arc(i * r * .3, 0, r * .1, 0, TAU); ctx.fill(); }
+      break; }
+  }
+  ctx.restore();
+  if (e.frozen > 0) { ctx.fillStyle = 'rgba(168,216,240,.45)'; ctx.beginPath(); ctx.arc(e.x, e.y, r * 1.1, 0, TAU); ctx.fill(); }
+  else if (e.stun > 0) { ctx.fillStyle = C.bone; for (let i = 0; i < 3; i++) { const sa = time / 150 + i * 2.1; ctx.beginPath(); ctx.arc(e.x + Math.cos(sa) * r, e.y - r - 6 + Math.sin(sa) * 3, 2, 0, TAU); ctx.fill(); } }
+  if (e.armor > 0 && !e.boss) { ctx.strokeStyle = 'rgba(200,200,210,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, r + 3, -2.4, -.7); ctx.stroke(); }
+  if (e.hp < e.max && !e.boss) {
+    const w = r * 2.2;
+    ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(e.x - w / 2, e.y - r - 12, w, 4);
+    ctx.fillStyle = e.elite ? C.shine : C.blood; ctx.fillRect(e.x - w / 2, e.y - r - 12, w * Math.max(0, e.hp / e.max), 4);
+  }
+}
+
+// ---------- HUD ----------
+function hud() {
+  if (!run || state === 'menu') return;
+  $('hWave').textContent = run.wave + (run.endless ? '∞' : '');
+  const left = enemies.length + spawnQ.length;
+  $('hLeft').textContent = state === 'wave' ? `${left} left` : '';
+  $('hGold').textContent = run.gold;
+  $('hCoins').textContent = `+${run.coins} coins`;
+  const hp = Math.max(0, run.hp);
+  $('hHp').style.width = (hp / run.maxHp * 100) + '%';
+  $('hHpNum').textContent = `${Math.ceil(hp)} / ${run.maxHp}`;
+  $('cawFill').style.transform = `scaleX(${P ? cawT / P.cawCd : 0})`;
+  const b = run.boss && !run.boss.dead ? run.boss : null;
+  $('bossWrap').hidden = !b;
+  if (b) { $('bossName').textContent = b.name; $('hBoss').style.width = Math.max(0, b.hp / b.max * 100) + '%'; }
+  for (const btn of $('spellBar').children) {
+    const id = btn.dataset.id, s = SPELLS.find(q => q.id === id);
+    btn.querySelector('.fill').style.transform = `scaleX(${spellCds[id] / (s.cd * P.spellCd)})`;
+  }
+}
+function renderSpellBar() {
+  const bar = $('spellBar');
+  if (bar.dataset.built !== save.spells.join()) {
+    bar.innerHTML = ''; bar.dataset.built = save.spells.join();
+    ownedSpells().forEach((s, i) => {
+      const b = el('button', 'sp'); b.type = 'button'; b.dataset.id = s.id;
+      b.append(el('span', 'fill'), el('span', 'lbl', s.short));
+      const k = el('span', 'kbd hide-sm', String(i + 1)); b.querySelector('.lbl').append(k);
+      b.title = `${s.name}: ${s.desc}`;
+      b.onclick = () => armSpell(s.id);
+      bar.append(b);
+    });
+  }
+  for (const b of bar.children) b.classList.toggle('armed', b.dataset.id === armed);
+}
+let toastTimer;
+function toast(big, small) {
+  if (api.sim) return;
+  const t = $('toast'); t.textContent = big; if (small) t.append(el('small', '', small));
+  t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+const achQueue = []; let achBusy = false;
+function toastSmall(text, head = '') { if (api.sim) return; achQueue.push([head, text]); pumpAch(); }
+function pumpAch() {
+  if (achBusy || !achQueue.length) return;
+  achBusy = true;
+  const [h, t] = achQueue.shift(), a = $('ach');
+  a.textContent = ''; if (h) a.append(el('b', '', h)); a.append(t);
+  a.classList.add('show');
+  setTimeout(() => { a.classList.remove('show'); setTimeout(() => { achBusy = false; pumpAch(); }, 300); }, 2600);
+}
+
+// ---------- achievements & skins ----------
+function grant(id) {
+  if (save.ach[id]) return;
+  const a = ACH.find(x => x.id === id); if (!a) return;
+  save.ach[id] = Date.now();
+  save.coins += a.coins; save.earnedTotal += a.coins;
+  if (run) run.unlocks.push(`Achievement: <b>${a.name}</b> (+${a.coins} coins)`);
+  toastSmall(`${a.name} · +${a.coins} coins`, 'Achievement');
+  sfx.ach();
+  checkSkins();
+  persist();
+}
+function checkSkins() {
+  for (const s of SKINS) if (s.has(save) && !save.skinsSeen.includes(s.id)) {
+    save.skinsSeen.push(s.id);
+    if (run) run.unlocks.push(`New skin: <b>${s.name}</b>`);
+    toastSmall(s.name, 'Skin unlocked');
+  }
+  if (save.skinsSeen.length >= 5) grant('collector');
+  if (save.earnedTotal >= 1000) grant('tycoon');
+}
+
+// ---------- shop ----------
+function itemCount(id) { return run.items[id] || 0; }
+function priceOf(it) { return Math.max(1, Math.round(it.cost * (1 + .12 * (run.wave - 1)) * (1 + .35 * itemCount(it.id)) * P.haggle)); }
+function rollOffers() {
+  const epicW = 6 + run.wave * 1.4, rareW = 26 + run.wave;
+  const avail = ITEMS.filter(it => !it.max || itemCount(it.id) < it.max);
+  const picks = [];
+  for (let n = 0; n < P.offers && avail.length; n++) {
+    const weights = avail.map(it => [60, rareW, epicW][it.rar]);
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0), i = 0;
+    while ((r -= weights[i]) > 0 && i < avail.length - 1) i++;
+    picks.push({ ...avail[i], sold: false });
+    avail.splice(i, 1);
+  }
+  offers = picks;
+}
+function waveCoins(w) { return Math.round((2 + w * .5) * B.coin * (run.endless ? 1.5 : 1)); }
+function waveCleared() {
+  const w = run.wave, bs = biomeState(B.id);
+  const bonus = 3 + Math.round(w * 1.5);
+  let interest = P.interest ? Math.min(20, Math.floor(run.gold * .1)) : 0;
+  run.gold += bonus + interest; run.earned += bonus + interest;
+  const wc = waveCoins(w); addCoins(wc);
+  shots = []; rings = []; zones = []; armed = null; cv.classList.remove('aiming');
+  bs.best = Math.max(bs.best, w);
+  grant('first');
+  if (w >= 5) grant('wave5');
+  if (w >= 5 && run.waveDmg === 0) grant('untouched');
+  if (run.endless && w >= 20) grant('endless20');
+  if (run.endless && w >= 30) grant('endless30');
+  if (run.gold >= 150) grant('hoard');
+  persist();
+  run.lastNote = `Wave bonus +${bonus} shinies` + (interest ? `, Golden Egg +${interest}` : '') + `. +${wc} coins.`;
+  if (w === BOSS_WAVE && !run.bossBeaten) return bossBeaten();
+  openShop();
+}
+function bossBeaten() {
+  run.bossBeaten = true;
+  state = 'choice';
+  const bs = biomeState(B.id), boss = E[B.boss];
+  run.unlocks = run.unlocks || [];
+  grant(B.boss);
+  if (!bs.cleared) {
+    bs.cleared = true;
+    const bonus = Math.round(40 * B.coin); addCoins(bonus);
+    run.unlocks.push(`First clear of ${B.name}: <b>+${bonus} coins</b>`);
+    const next = BIOMES[run.biome + 1];
+    if (BIOMES.every(b => biomeState(b.id).cleared)) grant('allbiomes');
+    if (next && !biomeState(next.id).unlocked) { biomeState(next.id).unlocked = true; run.unlocks.push(`New biome: <b>${next.name}</b>`); }
+    const sp = SPELLS.find(s => s.req === (next && next.id));
+    if (sp) run.unlocks.push(`New spell available in the Spells tab: <b>${sp.name}</b>`);
+  }
+  persist();
+  if (api.sim) return;
+  $('choiceTitle').textContent = `${boss.name} defeated`;
+  $('choiceText').textContent = `Fly home now and keep all ${run.coins} coins from this run. Or stay for endless waves: they pay 50% more coins and a boss returns every 10 waves, but if the nest falls you keep only half.`;
+  const u = $('choiceUnlocks'); u.innerHTML = '';
+  for (const s of run.unlocks) { const d = el('div'); d.innerHTML = s; u.append(d); }
+  $('leaveBtn').textContent = `Fly home with ${run.coins} coins`;
+  $('hud').hidden = true; $('choice').hidden = false;
+  $('leaveBtn').focus({ preventScroll: true });
+}
+function openShop() {
+  state = 'shop';
+  rerollCost = 2; healCost = 5 + Math.floor(run.wave * .8); healsLeft = 2;
+  rollOffers();
+  if (api.sim) return;
+  $('shopEyebrow').textContent = `Wave ${run.wave} cleared`;
+  $('shopNote').textContent = run.lastNote + (run.bossBeaten ? ' You can fly home any time from here.' : '');
+  const nw = run.wave + 1;
+  $('nextInfo').textContent = nw % BOSS_WAVE === 0 ? `Next: wave ${nw}. ${E[B.boss].name} is coming.` : nw % 5 === 0 ? `Next: wave ${nw}, with an elite.` : `Next: wave ${nw}`;
+  $('homeBtn').hidden = !run.bossBeaten;
+  renderShop();
+  $('hud').hidden = true; $('choice').hidden = true; $('shop').hidden = false;
+  $('nextBtn').focus({ preventScroll: true });
+}
+function renderShop() {
+  $('sGold').textContent = run.gold;
+  $('sCoins').textContent = run.coins;
+  const cards = $('cards'); cards.innerHTML = '';
+  offers.forEach((it, i) => {
+    const b = el('button', 'card' + (it.sold ? ' sold' : ''));
+    b.type = 'button'; b.dataset.rar = it.rar;
+    const p = priceOf(it), have = itemCount(it.id);
+    b.disabled = it.sold || run.gold < p;
+    b.append(el('span', 'rar', RAR[it.rar] + (have ? ` · owned ${have}` : '')), el('span', 'nm', it.name), el('span', 'ds', it.desc), el('span', 'pr', it.sold ? 'Bought' : p + ' shinies'));
+    b.onclick = () => buy(i);
+    cards.append(b);
+  });
+  $('rerollBtn').textContent = `Reroll (${rerollCost})`;
+  $('rerollBtn').disabled = run.gold < rerollCost;
+  $('healBtn').textContent = `Patch nest +35 HP (${healCost})`;
+  $('healBtn').disabled = run.gold < healCost || run.hp >= run.maxHp || healsLeft <= 0;
+  $('homeBtn').textContent = `Fly home with ${run.coins} coins`;
+  renderOwned($('owned'));
+}
+function renderOwned(box) {
+  box.innerHTML = '';
+  box.append(el('span', '', `Nest ${Math.ceil(Math.max(0, run.hp))}/${run.maxHp} HP`));
+  for (const id of Object.keys(run.items)) { const it = ITEMS.find(x => x.id === id); const s = el('span', '', it.name + ' '); s.append(el('em', '', 'x' + run.items[id])); box.append(s); }
+}
+function buy(i) {
+  const it = offers[i], p = priceOf(it);
+  if (!it || it.sold || run.gold < p) return false;
+  run.gold -= p; it.sold = true; run.items[it.id] = itemCount(it.id) + 1; run.bought++; it.apply(); sfx.buy();
+  if (run.bought >= 12) grant('shopper');
+  if (P.magpies >= 3) grant('murder');
+  if (!api.sim) renderShop();
+  return true;
+}
+function reroll() { if (run.gold < rerollCost) return; run.gold -= rerollCost; rerollCost += 2; rollOffers(); sfx.buy(); if (!api.sim) renderShop(); }
+function heal() { if (run.gold < healCost || healsLeft <= 0 || run.hp >= run.maxHp) return; run.gold -= healCost; healsLeft--; run.hp = Math.min(run.maxHp, run.hp + 35); sfx.buy(); if (!api.sim) renderShop(); }
+function nextWave() { $('shop').hidden = true; $('choice').hidden = true; $('hud').hidden = false; startWave(); }
+$('rerollBtn').onclick = reroll;
+$('healBtn').onclick = heal;
+$('nextBtn').onclick = nextWave;
+$('homeBtn').onclick = () => endRun(true);
+$('leaveBtn').onclick = () => endRun(true);
+$('stayBtn').onclick = () => { run.endless = true; openShop(); };
+
+// ---------- flow ----------
+function begin() {
+  newRun(save.biome);
+  makeDeco();
+  ['menu', 'over', 'shop', 'pause', 'choice'].forEach(id => $(id).hidden = true);
+  $('hud').hidden = false;
+  paused = false;
+  renderSpellBar();
+  startWave();
+}
+function endRun(home) {
+  state = 'over';
+  const kept = home ? run.coins : Math.floor(run.coins / 2);
+  save.coins += kept; save.earnedTotal += kept;
+  run.kept = kept;
+  checkSkins();
+  persist();
+  if (api.sim) return;
+  const bs = biomeState(B.id);
+  $('overEyebrow').textContent = home ? 'Safe flight home' : 'The eggs are gone';
+  $('overTitle').textContent = home ? `Home from ${B.name}` : `Fell on wave ${run.wave}`;
+  const sum = $('summary'); sum.innerHTML = '';
+  for (const [k, v] of [['Wave', run.wave], ['Enemies', run.kills], ['Coins kept', kept], ['Best here', bs.best || 0]]) { const d = el('div', '', k); d.prepend(el('b', '', v)); sum.append(d); }
+  $('overCoins').textContent = home ? `You kept all ${kept} coins. Spend them in the Roost.` : `The nest fell, so you kept half of your ${run.coins} coins: ${kept}. Beat the boss and fly home to keep them all.`;
+  const u = $('overUnlocks'); u.innerHTML = '';
+  for (const s of run.unlocks) { const d = el('div'); d.innerHTML = s; u.append(d); }
+  renderOwned($('overOwned'));
+  ['hud', 'shop', 'choice', 'pause'].forEach(id => $(id).hidden = true);
+  $('over').hidden = false;
+  $('againBtn').focus({ preventScroll: true });
+}
+function toMenu(tab) {
+  state = 'menu'; run = null; P = null; enemies = []; shots = []; zones = [];
+  ['over', 'shop', 'pause', 'choice', 'hud'].forEach(id => $(id).hidden = true);
+  $('menu').hidden = false;
+  renderMenu(tab);
+}
+function setPause(v) {
+  if (state !== 'wave') return;
+  paused = v; $('pause').hidden = !v;
+  if (v) $('pauseInfo').textContent = `${B.name}, wave ${run.wave}. ${run.coins} coins this run. Giving up keeps half.`;
+}
+$('startBtn').onclick = begin;
+$('againBtn').onclick = begin;
+$('roostBtn').onclick = () => toMenu('roost');
+$('pauseBtn').onclick = () => setPause(true);
+$('resumeBtn').onclick = () => setPause(false);
+$('quitBtn').onclick = () => { $('pause').hidden = true; paused = false; endRun(false); };
+$('cawBtn').onclick = caw;
+function setMute(m) { muted = m; save.muted = m; persist(); $('muteBtn').textContent = $('muteBtn2').textContent = m ? 'Sound off' : 'Sound on'; }
+$('muteBtn').onclick = () => setMute(!muted);
+$('muteBtn2').onclick = () => setMute(!muted);
+setMute(muted);
+
+function toWorld(ev) { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left - vw / 2) / scale, y: (ev.clientY - r.top - vh / 2) / scale }; }
+cv.addEventListener('pointermove', ev => { const p = toWorld(ev); mouse.x = p.x; mouse.y = p.y; mouse.in = true; });
+cv.addEventListener('pointerleave', () => { mouse.in = false; });
+cv.addEventListener('pointerdown', ev => {
+  if (state !== 'wave' || paused) return;
+  const p = toWorld(ev); mouse.x = p.x; mouse.y = p.y; mouse.in = ev.pointerType === 'mouse';
+  if (ev.button === 2) { armed = null; cv.classList.remove('aiming'); renderSpellBar(); return; }
+  if (armed) cast(armed, p.x, p.y); else caw();
+});
+cv.addEventListener('contextmenu', e => e.preventDefault());
+addEventListener('keydown', e => {
+  if (state !== 'wave') return;
+  if (e.code === 'Space') { e.preventDefault(); caw(); }
+  else if (e.key === 'p' || e.key === 'P') setPause(!paused);
+  else if (e.key === 'Escape') { if (armed) { armed = null; cv.classList.remove('aiming'); renderSpellBar(); } else setPause(!paused); }
+  else if (/^[1-7]$/.test(e.key)) { const s = ownedSpells()[+e.key - 1]; if (s) armSpell(s.id); }
+});
+addEventListener('blur', () => setPause(true));
+
+// ---------- menu ----------
+let curTab = 'fly';
+function renderMenu(tab) {
+  if (tab) curTab = tab;
+  $('mCoins').textContent = save.coins;
+  for (const t of document.querySelectorAll('.tab')) {
+    t.setAttribute('aria-selected', String(t.dataset.tab === curTab));
+    t.querySelector('.dot')?.remove();
+  }
+  const canBuy = ROOST.some(u => (save.up[u.id] || 0) < u.max && save.coins >= roostCost(u, save.up[u.id] || 0));
+  if (canBuy) document.querySelector('.tab[data-tab="roost"]').append(el('span', 'dot'));
+  for (const p of document.querySelectorAll('.tabpane')) p.hidden = p.id !== 'tab-' + curTab;
+  if (curTab === 'fly') renderFly();
+  if (curTab === 'roost') renderRoost();
+  if (curTab === 'spells') renderSpells();
+  if (curTab === 'skins') renderSkins();
+  if (curTab === 'feats') renderAch();
+}
+for (const t of document.querySelectorAll('.tab')) t.onclick = () => renderMenu(t.dataset.tab);
+function renderFly() {
+  const box = $('biomes'); box.innerHTML = '';
+  BIOMES.forEach((b, i) => {
+    const st = biomeState(b.id), c = el('button', 'card' + (save.biome === i ? ' sel' : '') + (st.unlocked ? '' : ' locked'));
+    c.type = 'button';
+    const sw = el('div', 'swatch'); sw.style.background = `linear-gradient(90deg, ${b.ground[0]}, ${b.blade[0]}, ${b.ground[1]})`;
+    c.append(sw, el('span', 'rar', st.unlocked ? (st.cleared ? 'Cleared' : 'Unlocked') : 'Locked'), el('span', 'nm', b.name),
+      el('span', 'ds', st.unlocked ? `Best wave ${st.best || '-'} · coins x${b.coin}` : `Defeat ${E[BIOMES[i - 1].boss].name} to unlock.`));
+    if (st.unlocked) c.onclick = () => { save.biome = i; persist(); B = null; makeDeco(); renderFly(); };
+    else c.disabled = true;
+    box.append(c);
+  });
+  const b = BIOMES[save.biome];
+  $('biomeInfo').textContent = b.blurb;
+}
+let resetArmed = 0;
+function roostRefund() { let n = 0; for (const u of ROOST) for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(u, l); return n; }
+function renderRoost() {
+  const box = $('roost'); box.innerHTML = '';
+  const refund = roostRefund();
+  const top = el('div', 'row spread');
+  top.append(el('span', 'muted', refund ? `${refund} coins spent here. Resetting gives every coin back so you can try a different build.` : 'Nothing bought yet.'));
+  const rb = el('button', 'ghost', resetArmed > Date.now() ? `Tap again to reset and get ${refund} coins` : 'Reset Roost'); rb.type = 'button';
+  rb.id = 'resetRoostBtn';
+  rb.disabled = !refund;
+  if (resetArmed > Date.now()) rb.style.borderColor = 'var(--blood)';
+  rb.onclick = () => {
+    if (resetArmed > Date.now()) { save.coins += refund; save.up = {}; resetArmed = 0; sfx.buy(); persist(); toastSmall(`Got back ${refund} coins`, 'Roost reset'); renderMenu(); return; }
+    resetArmed = Date.now() + 4000; renderRoost(); setTimeout(() => { if (resetArmed && resetArmed <= Date.now() && curTab === 'roost') renderRoost(); }, 4100);
+  };
+  top.append(rb); box.append(top);
+  for (const u of ROOST) {
+    const lvl = save.up[u.id] || 0, cost = roostCost(u, lvl), max = lvl >= u.max;
+    const li = el('div', 'li'), left = el('div');
+    left.append(el('div', 'nm', `${u.name} · ${lvl}/${u.max}`), el('div', 'ds', u.desc));
+    const pips = el('div', 'pips'); for (let i = 0; i < u.max; i++) pips.append(el('i', i < lvl ? 'on' : '')); left.append(pips);
+    const b = el('button', 'ghost', max ? 'Maxed' : `Upgrade · ${cost} coins`); b.type = 'button';
+    b.disabled = max || save.coins < cost;
+    b.onclick = () => { if (save.coins < cost || max) return; save.coins -= cost; save.up[u.id] = lvl + 1; sfx.buy(); if (lvl + 1 >= u.max) grant('fledged'); persist(); renderMenu(); };
+    const acts = el('div', 'row'); acts.style.justifyContent = 'flex-end';
+    if (lvl > 0) {
+      let back = 0; for (let l = 0; l < lvl; l++) back += roostCost(u, l);
+      const rf = el('button', 'ghost', `Refund ${back}`); rf.type = 'button';
+      rf.title = `Reset ${u.name} to level 0 and get ${back} coins back`;
+      rf.onclick = () => { save.coins += back; delete save.up[u.id]; sfx.buy(); persist(); toastSmall(`${u.name} reset · +${back} coins`, 'Refunded'); renderMenu(); };
+      acts.append(rf);
+    }
+    acts.append(b);
+    li.append(left, acts); box.append(li);
+  }
+}
+function renderSpells() {
+  const box = $('spellList'); box.innerHTML = '';
+  for (const s of SPELLS) {
+    const have = save.spells.includes(s.id), reqOk = !s.req || biomeState(s.req).unlocked;
+    const c = el('button', 'card' + (have ? ' sel' : '')); c.type = 'button';
+    const sw = el('div', 'swatch'); sw.style.background = s.col;
+    const status = have ? 'Unlocked' : !reqOk ? `Reach ${BIOMES.find(b => b.id === s.req).name} first` : `${s.cost} coins`;
+    c.append(sw, el('span', 'nm', s.name), el('span', 'ds', s.desc), el('span', 'ds', `Recharge ${s.cd}s`), el('span', 'pr coinc', status));
+    c.disabled = have || !reqOk || save.coins < s.cost;
+    if (have) c.disabled = false, c.classList.add('locked');
+    c.onclick = () => { if (have || !reqOk || save.coins < s.cost) return; save.coins -= s.cost; save.spells.push(s.id); sfx.buy(); persist(); renderMenu(); };
+    box.append(c);
+  }
+}
+function renderSkins() {
+  const box = $('skinList'); box.innerHTML = '';
+  for (const s of SKINS) {
+    const has = s.has(save), c = el('button', 'card skinc' + (save.skin === s.id ? ' sel' : '') + (has ? '' : ' locked')); c.type = 'button';
+    const cvs = document.createElement('canvas'); cvs.width = 320; cvs.height = 192;
+    c.append(cvs, el('span', 'nm', s.name), el('span', 'ds', has ? (save.skin === s.id ? 'Wearing' : 'Tap to wear') : s.cond));
+    if (has) c.onclick = () => { save.skin = s.id; persist(); renderSkins(); };
+    else c.disabled = true;
+    box.append(c);
+    const pc = cvs.getContext('2d'); pc.setTransform(2.2, 0, 0, 2.2, 160, 96);
+    ctx = pc; drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, 0); ctx = mainCtx;
+  }
+}
+function renderAch() {
+  const box = $('achList'); box.innerHTML = '';
+  const n = Object.keys(save.ach).length;
+  $('achCount').textContent = `${n} of ${ACH.length} earned. Each one pays coins.`;
+  for (const a of ACH) {
+    const done = !!save.ach[a.id], li = el('div', 'li' + (done ? ' done' : '')), left = el('div');
+    left.append(el('div', 'nm', a.name), el('div', 'ds', a.desc));
+    li.append(left, el('span', 'badge' + (done ? ' ok' : ''), done ? `Earned · +${a.coins}` : `+${a.coins} coins`));
+    box.append(li);
+  }
+}
+// ---------- test code ----------
+const BACKUP_KEY = 'nestguard-backup';
+let codeBackup = null;
+try { codeBackup = localStorage.getItem(BACKUP_KEY); } catch (e) {}
+function codeStatus(text) {
+  const m = $('codeMsg');
+  m.className = save.testMode ? 'muted testmode' : 'muted';
+  m.textContent = text || (save.testMode ? 'Test mode is on. Enter the code again to go back to your real progress.' : '');
+}
+$('codeForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const v = $('codeInput').value.trim().toLowerCase();
+  $('codeInput').value = '';
+  if (v !== 'crow') { codeStatus('That code does nothing.'); return; }
+  if (save.testMode) {
+    let back = null;
+    try { back = JSON.parse(codeBackup); } catch (e) {}
+    save = Object.assign(freshSave(), back || {});
+    delete save.testMode;
+    codeBackup = null;
+    try { localStorage.removeItem(BACKUP_KEY); } catch (e) {}
+    persist(); sfx.buy();
+    codeStatus('Test mode off. Your real progress is back.');
+  } else {
+    codeBackup = JSON.stringify(save);
+    try { localStorage.setItem(BACKUP_KEY, codeBackup); } catch (e) {}
+    const up = {}; for (const u of ROOST) up[u.id] = u.max;
+    const ach = {}; for (const a of ACH) ach[a.id] = Date.now();
+    const biomes = {}; for (const b of BIOMES) biomes[b.id] = { unlocked: true, cleared: true, best: (save.biomes[b.id] || {}).best || 0 };
+    Object.assign(save, { testMode: true, coins: 99999, up, ach, biomes, spells: SPELLS.map(s => s.id), skinsSeen: SKINS.map(s => s.id) });
+    persist(); sfx.ach();
+    codeStatus('Everything unlocked for testing. Enter the code again to undo.');
+  }
+  const keep = $('codeMsg').textContent;
+  renderMenu();
+  codeStatus(keep);
+});
+renderMenu('fly');
+codeStatus();
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (!paused && !api.sim) update(dt);
+  if (!api.sim) { draw(now); hud(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// Test hook for automated balance runs. Not used by the game itself.
+Object.assign(api, { newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
+  get: () => ({ state, run, P, enemies, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
+  setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
+  clearWave: () => { spawnQ = []; enemies = []; }, BIOMES, SPELLS });
+window.__nestguard = api;
+})();
+</script>
