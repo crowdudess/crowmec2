@@ -172,6 +172,10 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .upcard .meta span { font: 700 11px var(--mono); padding: 2px 8px; border-radius: 999px; background: var(--night); color: var(--bone-dim); }
 .upcard .meta .got { color: var(--coin); }
 .upcard.never { opacity: .8; }
+.uphead { display: flex; align-items: center; gap: 10px; }
+.card .upic { width: 44px; height: 44px; border-radius: 10px; background: var(--night); flex: none; }
+.ownchip { display: inline-flex; align-items: center; gap: 6px; }
+.ownchip .upic { width: 18px; height: 18px; border-radius: 4px; background: transparent; }
 .mon { cursor: pointer; }
 .mon:hover { transform: translateY(-2px); border-color: var(--bone-dim); }
 .monpop { width: min(560px, 100%); animation: pop .22s ease-out; }
@@ -2349,7 +2353,8 @@ function renderShop() {
     const p = priceOf(it), have = itemCount(it.id);
     b.disabled = it.sold || run.gold < p;
     const base = ITEMS.find(x => x.id === it.id) || it;
-    b.append(el('span', 'rar', T('rar' + it.rar) + (have ? T('owned', have) : '')), el('span', 'nm', base.name), el('span', 'ds', base.desc), el('span', 'pr', it.sold ? T('bought') : T('price', p)));
+    const head = el('span', 'uphead'); head.append(upIcon(it.id, 96), el('span', 'rar', T('rar' + it.rar) + (have ? T('owned', have) : '')));
+    b.append(head, el('span', 'nm', base.name), el('span', 'ds', base.desc), el('span', 'pr', it.sold ? T('bought') : T('price', p)));
     b.onclick = () => buy(i);
     cards.append(b);
   });
@@ -2364,7 +2369,7 @@ function renderShop() {
 function renderOwned(box) {
   box.innerHTML = '';
   box.append(el('span', '', T('nest_hp', Math.ceil(Math.max(0, run.hp)), run.maxHp)));
-  for (const id of Object.keys(run.items)) { const it = ITEMS.find(x => x.id === id); const s = el('span', '', it.name + ' '); s.append(el('em', '', 'x' + run.items[id])); box.append(s); }
+  for (const id of Object.keys(run.items)) { const it = ITEMS.find(x => x.id === id); const s = el('span', 'ownchip'); s.append(upIcon(id, 40), document.createTextNode(it.name + ' ')); s.append(el('em', '', 'x' + run.items[id])); box.append(s); }
 }
 function buy(i) {
   const it = offers[i], p = priceOf(it);
@@ -2981,6 +2986,13 @@ function renderMonsters() {
   bg.append(g); box.append(bg);
 }
 const UP_ICON = { sharp: ['feather', '#e6e1d2'], wings: ['feather', '#9ad0f0'], thorn: ['shard', '#8a9a5a'], mud: ['orb', '#a07a50'], eye: ['gem', '#e8c860'], caps: ['cap', '#e0402a'], lungs: ['orb', '#ece6d6'], iron: ['shard', '#9aa4b0'], twin: ['feather', '#cfd6e6'], needle: ['ice', '#ffffff'], magpie: ['feather', '#6a8ab0'], scare: ['star', '#c9a36a'], ember: ['flame', '#ff7a2a'], moss: ['leaf', '#6aa040'], golden: ['coin', '#f0c030'], ink: ['orb', '#8a5ac0'], rune: ['gem', '#7fb2c9'], murder: ['star', '#b88ae0'], storm: ['ice', '#f2e27a'], echo: ['orb', '#a0f0e0'], wind: ['petal', '#cfe8f0'], slay: ['shard', '#d2543f'], eagle: ['feather', '#e8b84a'], blood: ['petal', '#c8322a'], shell: ['shard', '#9fc6c2'], mana: ['orb', '#7fb2c9'], pecker: ['star', '#e8b84a'], judge: ['shard', '#b88ae0'], shrine: ['gem', '#e8b84a'], feast: ['orb', '#9fc6c2'], quiver: ['feather', '#c8a060'], lucky: ['leaf', '#4aa040'], swift: ['feather', '#f0d040'], scav: ['coin', '#c8a060'], frostbite: ['snowflake', '#bfe6ff'], barbs: ['shard', '#c86a3a'], doublecaw: ['orb', '#ece6d6'], overcharge: ['orb', '#f2e27a'], guardian: ['gem', '#e8b84a'] };
+function paintUpIcon(cv2, id) {
+  const [kind, col] = UP_ICON[id] || ['orb', '#ece6d6'], pc = cv2.getContext('2d'), keep = ctx, S = cv2.width;
+  ctx = pc; pc.setTransform(1, 0, 0, 1, 0, 0); pc.clearRect(0, 0, S, S);
+  pc.setTransform(S / 26.7, 0, 0, S / 26.7, S / 2, S / 2); try { drawProj(kind, col, -Math.PI / 4, 1.2, 0); } catch (e) {}
+  pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep;
+}
+function upIcon(id, size) { const c = document.createElement('canvas'); c.width = c.height = size; c.className = 'upic'; paintUpIcon(c, id); return c; }
 function renderUpgrades() {
   const box = $('upList'); box.innerHTML = '';
   const st = save.itemStats || {};
@@ -2991,8 +3003,7 @@ function renderUpgrades() {
     for (const it of ITEMS.filter(x => x.rar === rar)) {
       const c = el('div', 'card upcard' + (st[it.id] ? '' : ' never')); c.dataset.rar = rar;
       const cv2 = document.createElement('canvas'); cv2.width = cv2.height = 112;
-      const [kind, col] = UP_ICON[it.id] || ['orb', '#ece6d6'], pc = cv2.getContext('2d'), keep = ctx; ctx = pc;
-      pc.setTransform(4.2, 0, 0, 4.2, 56, 56); try { drawProj(kind, col, -Math.PI / 4, 1.2, 1000); } catch (e) {} pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep;
+      paintUpIcon(cv2, it.id);
       const meta = el('div', 'meta');
       meta.append(el('span', '', T('up_price', it.cost)), el('span', '', it.max ? T('up_max', it.max) : T('up_nomax')), el('span', st[it.id] ? 'got' : '', st[it.id] ? T('up_bought', st[it.id]) : T('up_never')));
       c.append(cv2, el('span', 'nm', it.name), el('span', 'ds', it.desc), meta);
