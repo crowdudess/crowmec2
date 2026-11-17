@@ -666,7 +666,8 @@ function deathSfx(k, boss, preview, mode) {
   if (mode === 'silly') { osc('sine', 900 + hv * 400, 220, 0, .32, .1); osc('square', 1300, 1600, .3, .06, .035); if (boss) osc('sine', 500, 90, .35, .7, .12); return; }
   if (mode === 'retro') { nz(0, .2, .12, 600); osc('square', 880 - hv * 300, 90, 0, .22, .05); if (boss) { for (let i = 0; i < 4; i++) osc('square', 440 / (i + 1), 60, .2 + i * .12, .12, .05); } return; }
   const base = (220 + hv * 440) * (1.45 - big);
-  switch (d.shape) {
+  const shp = { catboss: 'quad', kong: 'ape', gatorboss: 'gator', scorpboss: 'scorpion', wyrm: 'snake', faequeen: 'fairy' }[d.shape] || d.shape;
+  switch (shp) {
     case 'bug': nz(0, .06, .09, 3000); osc('square', base * 2, base, 0, .07, .04); if (d.wings) osc('sawtooth', base * 4, base * 2, 0, .1, .02); break;
     case 'quad': case 'bear': case 'oni': case 'ratking': osc('sawtooth', base * 1.6, base * .6, 0, .18, .05); osc('triangle', base * 2.2, base * 1.2, .02, .12, .035); break;
     case 'bird': osc('triangle', base * 2, base * 3, 0, .06, .06); osc('triangle', base * 3, base * 1.2, .06, .14, .06); break;
@@ -688,7 +689,7 @@ function deathSfx(k, boss, preview, mode) {
     case 'jobapp': nz(0, .45, .09, 1500); osc('sawtooth', 300, 60, 0, .5, .05); break;
     default: osc('triangle', base * 1.5, base * 2.2, 0, .07, .045);
   }
-  if (boss) { osc('sine', 95, 32, .05, .9, .22); nz(.05, .6, .1, 180); osc(d.shape === 'fairy' ? 'sine' : 'sawtooth', base, base * .3, .15, .7, .04); }
+  if (boss) { osc('sine', 95, 32, .05, .9, .22); nz(.05, .6, .1, 180); osc(d.shape === 'fairy' || d.shape === 'faequeen' ? 'sine' : 'sawtooth', base, base * .3, .15, .7, .04); }
 }
 const sfx = {
   caw: () => { tone(900, 380, .18, 'sawtooth', .09); setTimeout(() => tone(820, 340, .2, 'sawtooth', .08), 140); },
@@ -767,14 +768,14 @@ const E = {
   snake:    { name: 'Snake', shape: 'snake', col: ['#6f8a3a', '#4c6326', '#e8d24a'], hp: 44, spd: 34, dmg: 9, gold: 4, r: 13, cost: 2, from: 2, zig: .6 },
   hawk:     { name: 'Hawk', shape: 'bird', col: ['#6a4a30', '#8b6640', '#e8c860'], hp: 26, spd: 165, dmg: 6, gold: 5, r: 14, cost: 2, from: 3, fly: true },
   raccoon:  { name: 'Raccoon', shape: 'quad', tail: 'striped', mask: true, col: ['#7d7b77', '#5a5856', '#eee'], hp: 90, spd: 38, dmg: 15, gold: 8, r: 19, cost: 4, from: 4 },
-  cat:      { name: 'Alley Cat', shape: 'quad', tail: 'thin', ears: true, stripes: true, col: ['#d27a2c', '#e08a3c', '#c8e05a'], hp: 480, spd: 30, dmg: 28, gold: 40, r: 32, boss: true, lunge: true, summon: 'squirrel' },
+  cat:      { name: 'Alley Cat', shape: 'catboss', aura: '#ffa040', tail: 'thin', ears: true, stripes: true, col: ['#d27a2c', '#e08a3c', '#c8e05a'], hp: 480, spd: 30, dmg: 28, gold: 40, r: 32, boss: true, lunge: true, summon: 'squirrel' },
 
   frog:     { name: 'Frog', shape: 'frog', col: ['#5c8a3a', '#3f6528', '#f0d040'], hp: 22, spd: 70, dmg: 5, gold: 2, r: 12, cost: 1, from: 1, hop: true },
   mosquito: { name: 'Mosquitoes', shape: 'bug', wings: true, col: ['#6a5a4a', '#2a2018', '#c33'], hp: 7, spd: 115, dmg: 2, gold: 1, r: 7, cost: 2, from: 1, pack: 3, fly: true },
   leech:    { name: 'Leech', shape: 'snake', col: ['#4a2e4a', '#6a426a', '#e55'], hp: 38, spd: 42, dmg: 7, gold: 4, r: 11, cost: 2, from: 2, drain: true, zig: .4 },
   turtle:   { name: 'Snapping Turtle', shape: 'shell', col: ['#4a5a30', '#2e3a1c', '#e8d24a'], hp: 70, spd: 26, dmg: 12, gold: 6, r: 17, cost: 3, from: 3, armor: 4 },
   heron:    { name: 'Heron', shape: 'bird', col: ['#8a94a0', '#c0c8d0', '#e8c860'], hp: 40, spd: 150, dmg: 9, gold: 6, r: 16, cost: 3, from: 4, fly: true },
-  gator:    { name: 'Old Gator', shape: 'gator', col: ['#3c5a30', '#2a4020', '#e8d24a'], hp: 520, spd: 26, dmg: 36, gold: 50, r: 34, boss: true, lunge: true, armor: 4, summon: 'frog' },
+  gator:    { name: 'Old Gator', shape: 'gatorboss', aura: '#8adf4a', col: ['#3c5a30', '#2a4020', '#e8d24a'], hp: 520, spd: 26, dmg: 36, gold: 50, r: 34, boss: true, lunge: true, armor: 4, summon: 'frog' },
 
   hare:     { name: 'Snow Hare', shape: 'quad', tail: 'puff', ears: 'long', col: ['#e6e8ec', '#c8ccd4', '#c33'], hp: 20, spd: 80, dmg: 4, gold: 2, r: 11, cost: 1, from: 1, hop: true },
   fox:      { name: 'Arctic Fox', shape: 'quad', tail: 'bushy', ears: true, col: ['#dfe6ee', '#b8c4d0', '#222'], hp: 32, spd: 100, dmg: 6, gold: 3, r: 13, cost: 2, from: 1, zig: .7 },
@@ -794,7 +795,7 @@ const E = {
   scorpion: { name: 'Scorpion', shape: 'scorpion', col: ['#8a5a2a', '#5a3818', '#e33'], hp: 55, spd: 46, dmg: 8, gold: 4, r: 14, cost: 3, from: 2, poison: true, armor: 2 },
   vulture:  { name: 'Vulture', shape: 'bird', col: ['#3a3028', '#5a4a3a', '#d8b0a0'], hp: 48, spd: 130, dmg: 9, gold: 5, r: 16, cost: 2, from: 3, fly: true },
   worm:     { name: 'Sandworm', shape: 'snake', col: ['#b08858', '#8a6a40', '#300'], hp: 120, spd: 52, dmg: 18, gold: 9, r: 17, cost: 4, from: 4, burrow: true, armor: 3 },
-  emperor:  { name: 'Emperor Scorpion', shape: 'scorpion', col: ['#3a2a40', '#22182a', '#f44'], hp: 640, spd: 26, dmg: 50, gold: 110, r: 40, boss: true, armor: 7, poison: true, summon: 'scarab', lunge: true },
+  emperor:  { name: 'Emperor Scorpion', shape: 'scorpboss', aura: '#c060ff', col: ['#3a2a40', '#22182a', '#f44'], hp: 640, spd: 26, dmg: 50, gold: 110, r: 40, boss: true, armor: 7, poison: true, summon: 'scarab', lunge: true },
 
   spiderling: { name: 'Spiderlings', shape: 'spider', col: ['#4a3a50', '#2a2030', '#e33'], hp: 11, spd: 100, dmg: 3, gold: 1, r: 8, cost: 2, from: 1, pack: 4 },
   jumper:   { name: 'Jumping Spider', shape: 'spider', col: ['#2a2a2a', '#5a5a5a', '#6cf'], hp: 34, spd: 85, dmg: 6, gold: 3, r: 12, cost: 2, from: 1, hop: true },
@@ -808,14 +809,14 @@ const E = {
   slime:     { name: 'Lava Slime', shape: 'slime', col: ['#f07a2a', '#b03a10', '#200'], hp: 60, spd: 40, dmg: 8, gold: 4, r: 15, cost: 2, from: 3, split: 'slimelet' },
   slimelet:  { name: 'Slimelet', shape: 'slime', col: ['#f09a4a', '#b05a20', '#200'], hp: 15, spd: 70, dmg: 3, gold: 1, r: 8, cost: 0, from: 99 },
   golem:     { name: 'Obsidian Golem', shape: 'shell', col: ['#2a2a30', '#e0602a', '#f80'], hp: 200, spd: 28, dmg: 24, gold: 14, r: 22, cost: 5, from: 4, armor: 8 },
-  wyrm:      { name: 'Magma Wyrm', shape: 'snake', col: ['#e0502a', '#7a1a08', '#ff0'], hp: 700, spd: 26, dmg: 60, gold: 160, r: 40, boss: true, armor: 6, summon: 'bat', lunge: true },
+  wyrm:      { name: 'Magma Wyrm', shape: 'wyrm', aura: '#ff7a1a', col: ['#e0502a', '#7a1a08', '#ff0'], hp: 700, spd: 26, dmg: 60, gold: 160, r: 40, boss: true, armor: 6, summon: 'bat', lunge: true },
 
   pixie:     { name: 'Pixies', shape: 'fairy', col: ['#f0a0d8', '#a0f0e0', '#fff'], hp: 16, spd: 145, dmg: 4, gold: 2, r: 8, cost: 2, from: 1, fly: true, pack: 2 },
   shroom:    { name: 'Mushroom Walker', shape: 'shroom', col: ['#c83a3a', '#e8dcc0', '#222'], hp: 60, spd: 34, dmg: 9, gold: 4, r: 15, cost: 2, from: 1, armor: 5 },
   sprite:    { name: 'Healing Sprite', shape: 'fairy', col: ['#a0f0a0', '#f0f0a0', '#fff'], hp: 40, spd: 60, dmg: 0, gold: 6, r: 11, cost: 3, from: 2, ranged: true, healer: true },
   wisp:      { name: 'Will-o-wisp', shape: 'orb', col: ['#8af0ff', '#2a8aa0', '#fff'], hp: 40, spd: 110, dmg: 7, gold: 4, r: 11, cost: 2, from: 3, fly: true, phase: true },
   unicorn:   { name: 'Unicorn', shape: 'quad', tail: 'bushy', horn: true, col: ['#f4f0f8', '#d8a0f0', '#4a2a6a'], hp: 140, spd: 45, dmg: 20, gold: 12, r: 20, cost: 5, from: 4, armor: 4, lunge: true },
-  faequeen:  { name: 'Fairy Queen', shape: 'fairy', crown: true, col: ['#f0a0f0', '#a0f0ff', '#fff'], hp: 720, spd: 26, dmg: 50, gold: 190, r: 40, boss: true, armor: 5, summon: 'pixie', healer: true },
+  faequeen:  { name: 'Fairy Queen', shape: 'faequeen', aura: '#ff9cf0', crown: true, col: ['#f0a0f0', '#a0f0ff', '#fff'], hp: 720, spd: 26, dmg: 50, gold: 190, r: 40, boss: true, armor: 5, summon: 'pixie', healer: true },
 
   monkey:    { name: 'Snow Monkey', shape: 'quad', tail: 'thin', ears: true, col: ['#b0a090', '#d88a8a', '#222'], hp: 40, spd: 95, dmg: 6, gold: 3, r: 12, cost: 1, from: 1, hop: true },
   crane:     { name: 'Crane', shape: 'bird', col: ['#f0f0f0', '#202020', '#e33'], hp: 55, spd: 140, dmg: 9, gold: 5, r: 15, cost: 2, from: 1, fly: true },
@@ -827,7 +828,7 @@ const E = {
   gibbon:    { name: 'Gibbon', shape: 'ape', longarms: true, col: ['#6a5a4a', '#d8c0a0', '#222'], hp: 36, spd: 135, dmg: 7, gold: 5, r: 13, cost: 2, from: 2, fly: true },
   thrower:   { name: 'Banana Thrower', shape: 'ape', banana: true, col: ['#7a4a2a', '#e8c090', '#222'], hp: 60, spd: 50, dmg: 0, gold: 7, r: 14, cost: 3, from: 3, ranged: true, jamText: "Banana'd!" },
   gorilla:   { name: 'Silverback', shape: 'ape', silver: true, col: ['#2a2a2e', '#5a5a62', '#c33'], hp: 125, spd: 30, dmg: 17, gold: 16, r: 22, cost: 5, from: 4, armor: 5, lunge: true },
-  kong:      { name: 'The Monkey King', shape: 'ape', crown: true, silver: true, col: ['#b07a2a', '#f0d080', '#222'], hp: 760, spd: 26, dmg: 56, gold: 260, r: 48, boss: true, armor: 6, lunge: true, summon: 'baboon', weave: true, jamText: 'Banana storm!' },
+  kong:      { name: 'The Monkey King', shape: 'kong', aura: '#ffd040', crown: true, silver: true, col: ['#b07a2a', '#f0d080', '#222'], hp: 760, spd: 26, dmg: 56, gold: 260, r: 48, boss: true, armor: 6, lunge: true, summon: 'baboon', weave: true, jamText: 'Banana storm!' },
   oni:       { name: 'Oni', shape: 'oni', aura: '#ff5a1a', tail: 'none', horns: true, ears: false, col: ['#c8322a', '#8a1a14', '#ff0'], hp: 740, spd: 28, dmg: 55, gold: 230, r: 42, boss: true, armor: 6, summon: 'monkey', lunge: true },
 
   voidling:  { name: 'Voidlings', shape: 'orb', col: ['#6a3aa0', '#1a0a30', '#fff'], hp: 18, spd: 100, dmg: 4, gold: 1, r: 8, cost: 2, from: 1, pack: 4 },
@@ -1475,7 +1476,7 @@ function update(dt) {
       e.bite -= dt;
       if (e.bite <= 0) { biteNest(e); e.bite = 1; }
     }
-    if (e.shape === 'snake' || e.shape === 'gator') { const l = e.trail[0]; if (!l || Math.hypot(l.x - e.x, l.y - e.y) > 5) { e.trail.unshift({ x: e.x, y: e.y }); e.trail.length = Math.min(e.trail.length, e.shape === 'gator' ? 6 : 9); } }
+    if (e.shape === 'snake' || e.shape === 'gator' || e.shape === 'wyrm') { const l = e.trail[0]; if (!l || Math.hypot(l.x - e.x, l.y - e.y) > (e.shape === 'wyrm' ? e.r * .42 : 5)) { e.trail.unshift({ x: e.x, y: e.y }); e.trail.length = Math.min(e.trail.length, e.shape === 'gator' ? 6 : e.shape === 'wyrm' ? 14 : 9); } }
   }
   enemies = enemies.filter(e => !e.dead);
   updateFx(dt);
@@ -2018,6 +2019,19 @@ function drawEnemy(e, time) {
     ctx.fillStyle = 'rgba(160,130,80,.5)'; for (const p of e.trail) { ctx.beginPath(); ctx.arc(p.x, p.y, r * .4, 0, TAU); ctx.fill(); }
     return;
   }
+  if (e.shape === 'wyrm' && e.trail.length) {
+    const pts = [{ x: e.x, y: e.y }, ...e.trail], n = pts.length, glow = .55 + Math.sin(time / 160 + e.ph) * .25;
+    for (let i = n - 1; i >= 1; i--) {
+      const p = pts[i], q = pts[i - 1], k = 1 - i / (n + 2), rr = r * (.3 + k * .42), ang = Math.atan2(q.y - p.y, q.x - p.x);
+      ctx.fillStyle = fl ? '#fff' : `rgba(255,${120 + i * 6},30,${glow * .6})`; ctx.beginPath(); ctx.arc(p.x, p.y, rr * 1.12, 0, TAU); ctx.fill();
+      ctx.fillStyle = fl ? '#fff' : '#3a1408'; ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, TAU); ctx.fill();
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(ang);
+      ctx.strokeStyle = `rgba(255,${150 + (i % 3) * 30},40,${glow})`; ctx.lineWidth = Math.max(1, rr * .14); ctx.beginPath(); ctx.moveTo(-rr * .5, -rr * .6); ctx.lineTo(0, -rr * .1); ctx.lineTo(-rr * .2, rr * .6); ctx.moveTo(0, -rr * .1); ctx.lineTo(rr * .55, -rr * .25); ctx.stroke();
+      ctx.fillStyle = '#5a2010'; ctx.beginPath(); ctx.moveTo(-rr * .3, -rr * .2); ctx.lineTo(rr * .1, -rr * 1.25); ctx.lineTo(rr * .3, -rr * .2); ctx.fill();
+      ctx.restore();
+    }
+    for (let i = 0; i < 5; i++) { const t = (time / 900 + i / 5 + e.seed) % 1, p = pts[Math.min(n - 1, 1 + (i * 3) % (n - 1))]; ctx.fillStyle = `rgba(255,${180 - t * 120},40,${1 - t})`; ctx.beginPath(); ctx.arc(p.x + Math.sin(i * 9 + time / 300) * r * .4, p.y - t * r * 1.2, Math.max(1, r * .06 * (1 - t)), 0, TAU); ctx.fill(); }
+  }
   if (e.shape === 'snake' && e.trail.length) {
     ctx.strokeStyle = c0; ctx.lineWidth = r * 1.1; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(e.x, e.y); for (const p of e.trail) ctx.lineTo(p.x, p.y); ctx.stroke();
@@ -2298,6 +2312,125 @@ function drawEnemy(e, time) {
       ctx.strokeStyle = 'rgba(60,10,10,.45)'; ctx.lineWidth = Math.max(1, r * .06); ctx.beginPath(); ctx.arc(0, 0, r * .86, 0, TAU); ctx.stroke();
       for (const [x, y, q] of [[.3, -.42, .2], [-.3, .3, .24], [.12, .48, .14], [-.42, -.32, .16], [.52, .14, .12], [-.05, -.05, .13], [-.62, .02, .1]]) { ctx.fillStyle = '#f4ead2'; ctx.beginPath(); ctx.arc(x * r, y * r, q * r, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(180,160,120,.5)'; ctx.beginPath(); ctx.arc(x * r + q * r * .25, y * r + q * r * .25, q * r * .5, 0, TAU); ctx.fill(); }
       ctx.restore();
+      break; }
+    case 'catboss': {
+      const st = Math.sin(time / 120 + e.ph), sw = Math.sin(time / 260 + e.ph);
+      ctx.strokeStyle = c0; ctx.lineWidth = r * .26; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-r * .8, 0); ctx.bezierCurveTo(-r * 1.4, sw * r * .9, -r * 1.7, -sw * r * .6, -r * 2.15, sw * r * .5); ctx.stroke();
+      ctx.strokeStyle = '#7a3a10'; ctx.lineWidth = r * .1; for (const t of [.35, .6, .85]) { const bx = -r * (.8 + t * 1.35), by = sw * r * Math.sin(t * Math.PI) * .45; ctx.beginPath(); ctx.moveTo(bx, by - r * .14); ctx.lineTo(bx - r * .05, by + r * .14); ctx.stroke(); }
+      ctx.fillStyle = c1; for (const [px, py, k] of [[.6, -.62, 1], [.6, .62, -1], [-.55, -.6, -1], [-.55, .6, 1]]) { ctx.beginPath(); ctx.ellipse(r * px + st * k * r * .16, r * py, r * .2, r * .14, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * 1.0, r * .66, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#8a3a0c'; ctx.lineWidth = r * .13; ctx.lineCap = 'round'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * r * .3, -r * .6); ctx.quadraticCurveTo(i * r * .3 + r * .1, -r * .3, i * r * .3, -r * .12); ctx.moveTo(i * r * .3, r * .6); ctx.quadraticCurveTo(i * r * .3 + r * .1, r * .3, i * r * .3, r * .12); ctx.stroke(); }
+      ctx.strokeStyle = '#f2d8b0'; ctx.lineWidth = Math.max(1.2, r * .05); ctx.beginPath(); ctx.moveTo(-r * .35, -r * .45); ctx.lineTo(-r * .1, -r * .2); ctx.moveTo(-r * .25, -r * .5); ctx.lineTo(-r * .3, -r * .15); ctx.stroke();
+      ctx.fillStyle = '#2a2a30'; ctx.beginPath(); ctx.ellipse(r * .62, 0, r * .12, r * .48, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#d8d8e0'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(r * .62, i * r * .19 - r * .05); ctx.lineTo(r * .78, i * r * .19); ctx.lineTo(r * .62, i * r * .19 + r * .05); ctx.fill(); }
+      ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.arc(r * .78, 0, r * .1, 0, TAU); ctx.fill();
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .95, 0, r * .45, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(r * .75, -r * .25); ctx.lineTo(r * .78, -r * .72); ctx.lineTo(r * 1.08, -r * .38); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(r * .75, r * .25); ctx.lineTo(r * .76, r * .58); ctx.lineTo(r * .86, r * .52); ctx.lineTo(r * .88, r * .66); ctx.lineTo(r * 1.08, r * .38); ctx.fill();
+      ctx.fillStyle = '#e88a8a'; ctx.beginPath(); ctx.moveTo(r * .82, -r * .32); ctx.lineTo(r * .83, -r * .58); ctx.lineTo(r * .98, -r * .38); ctx.fill();
+      ctx.fillStyle = '#f2e6d0'; ctx.beginPath(); ctx.ellipse(r * 1.22, 0, r * .18, r * .2, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#e06a7a'; ctx.beginPath(); ctx.moveTo(r * 1.36, -r * .06); ctx.lineTo(r * 1.42, 0); ctx.lineTo(r * 1.36, r * .06); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1; for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(r * 1.25, sd * r * .12); ctx.lineTo(r * 1.6, sd * r * (.18 + i * .12)); ctx.stroke(); }
+      ctx.fillStyle = '#2a1a10'; ctx.beginPath(); ctx.ellipse(r * 1.05, r * .2, r * .13, r * .12, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = Math.max(1, r * .04); ctx.beginPath(); ctx.moveTo(r * .9, r * .05); ctx.lineTo(r * 1.2, r * .38); ctx.stroke();
+      ctx.fillStyle = 'rgba(200,224,90,.35)'; ctx.beginPath(); ctx.arc(r * 1.05, -r * .2, r * .14, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.ellipse(r * 1.05, -r * .2, r * .09, r * .1, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(r * 1.07, -r * .2, r * .025, r * .08, 0, 0, TAU); ctx.fill();
+      break; }
+    case 'gatorboss': {
+      const sw = Math.sin(time / 300 + e.ph), st = Math.sin(time / 180 + e.ph), jaw = e.lungeT > 0 ? .35 : (Math.sin(time / 900 + e.seed) > .7 ? .18 : .03);
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.moveTo(-r * .9, -r * .38); ctx.quadraticCurveTo(-r * 1.8, sw * r * .5 - r * .2, -r * 2.7, sw * r * .7); ctx.quadraticCurveTo(-r * 1.8, sw * r * .5 + r * .2, -r * .9, r * .38); ctx.fill();
+      ctx.fillStyle = '#5a7a40'; for (let i = 0; i < 6; i++) { const t = i / 6, x = -r * (1 + t * 1.5), y = sw * r * .62 * t * t; ctx.beginPath(); ctx.moveTo(x - r * .1, y); ctx.lineTo(x, y - r * .14 * (1 - t * .6)); ctx.lineTo(x + r * .1, y); ctx.lineTo(x, y + r * .14 * (1 - t * .6)); ctx.fill(); }
+      ctx.fillStyle = c1; for (const [px, py, k] of [[.55, -1, 1], [.55, 1, -1], [-.55, -1, -1], [-.55, 1, 1]]) { const lx = r * px + st * k * r * .15, ly = py * r * .62; ctx.beginPath(); ctx.ellipse(lx, ly, r * .16, r * .22, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#d8d0a0'; ctx.lineWidth = Math.max(1, r * .04); for (let c = -1; c <= 1; c++) { ctx.beginPath(); ctx.moveTo(lx + c * r * .08, ly + py * r * .15); ctx.lineTo(lx + c * r * .12, ly + py * r * .3); ctx.stroke(); } }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * 1.15, r * .6, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#2a3a1a'; for (const row of [-.3, -.1, .1, .3]) for (let i = -3; i <= 3; i++) { const x = i * r * .27 + (row > 0 ? r * .1 : 0); ctx.beginPath(); ctx.moveTo(x - r * .09, row * r); ctx.lineTo(x, row * r - r * .08); ctx.lineTo(x + r * .09, row * r); ctx.lineTo(x, row * r + r * .08); ctx.fill(); }
+      ctx.fillStyle = '#6a9a3a'; ctx.beginPath(); ctx.ellipse(-r * .4, -r * .25, r * .22, r * .14, .4, 0, TAU); ctx.ellipse(r * .2, r * .3, r * .16, r * .1, -.3, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#3a8a3a'; ctx.beginPath(); ctx.arc(-r * .15, r * .02, r * .24, .5, TAU - .2); ctx.lineTo(-r * .15, r * .02); ctx.fill(); ctx.fillStyle = '#f0a0c0'; ctx.beginPath(); ctx.arc(-r * .2, -r * .02, r * .08, 0, TAU); ctx.fill();
+      ctx.save(); ctx.translate(r * .95, 0);
+      ctx.fillStyle = '#2a1a10'; ctx.beginPath(); ctx.moveTo(0, -r * .1); ctx.lineTo(r * 1.15, -r * .12 - jaw * r * .4); ctx.lineTo(r * 1.15, r * .12 + jaw * r * .4); ctx.lineTo(0, r * .1); ctx.fill();
+      for (const sd of [-1, 1]) { ctx.save(); ctx.rotate(sd * jaw * .5); ctx.fillStyle = c0; ctx.beginPath(); ctx.moveTo(0, sd * r * .02); ctx.lineTo(0, sd * r * .36); ctx.quadraticCurveTo(r * .9, sd * r * .3, r * 1.25, sd * r * .14); ctx.lineTo(r * 1.25, sd * r * .02); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#f2ead2'; for (let i = 0; i < 7; i++) { const tx = r * (.15 + i * .15); ctx.beginPath(); ctx.moveTo(tx - r * .04, sd * r * .04); ctx.lineTo(tx, -sd * r * .06); ctx.lineTo(tx + r * .04, sd * r * .04); ctx.fill(); } ctx.restore(); }
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * 1.12, -r * .06, r * .04, 0, TAU); ctx.arc(r * 1.12, r * .06, r * .04, 0, TAU); ctx.fill();
+      for (const sd of [-1, 1]) { ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .12, sd * r * .26, r * .15, 0, TAU); ctx.fill(); ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .14, sd * r * .26, r * .09, 0, TAU); ctx.fill(); ctx.fillStyle = '#111'; ctx.fillRect(r * .12, sd * r * .26 - r * .07, r * .04, r * .14); }
+      ctx.restore();
+      break; }
+    case 'scorpboss': {
+      const st = Math.sin(time / 90 + e.ph), pinch = Math.max(0, Math.sin(time / 260 + e.seed)) * .5 + (e.lungeT > 0 ? .4 : 0);
+      ctx.strokeStyle = c1; ctx.lineWidth = Math.max(2, r * .09); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for (let i = 0; i < 4; i++) { const w = st * (i % 2 ? 1 : -1) * .18; for (const sd of [-1, 1]) { const bx = r * (.3 - i * .25); ctx.beginPath(); ctx.moveTo(bx, sd * r * .35); ctx.lineTo(bx + r * (.1 + w), sd * r * .85); ctx.lineTo(bx + r * (-.05 + w * 1.5), sd * r * 1.2); ctx.stroke(); } }
+      for (const sd of [-1, 1]) {
+        ctx.strokeStyle = c1; ctx.lineWidth = r * .16; ctx.beginPath(); ctx.moveTo(r * .5, sd * r * .3); ctx.lineTo(r * .95, sd * r * .75); ctx.lineTo(r * 1.35, sd * r * .62); ctx.stroke();
+        ctx.save(); ctx.translate(r * 1.45, sd * r * .6); ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * .3, r * .2, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = c0; ctx.save(); ctx.rotate(-sd * pinch * .6); ctx.beginPath(); ctx.moveTo(r * .15, -sd * r * .02); ctx.quadraticCurveTo(r * .5, -sd * r * .2, r * .62, sd * r * .02); ctx.lineTo(r * .2, sd * r * .06); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.rotate(sd * pinch * .3); ctx.beginPath(); ctx.moveTo(r * .15, sd * r * .08); ctx.quadraticCurveTo(r * .5, sd * r * .25, r * .55, sd * r * .06); ctx.lineTo(r * .2, sd * r * .02); ctx.fill(); ctx.restore();
+        ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.arc(-r * .05, 0, r * .06, 0, TAU); ctx.fill(); ctx.restore();
+      }
+      ctx.fillStyle = c0; for (let i = 0; i < 5; i++) { const x = r * (.35 - i * .27), w = r * (.5 - i * .03); ctx.beginPath(); ctx.ellipse(x, 0, r * .2, w, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#e8b84a'; ctx.lineWidth = Math.max(1, r * .035); ctx.beginPath(); ctx.ellipse(x, 0, r * .2, w, 0, -1.2, 1.2); ctx.stroke(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(r * .55, 0, r * .3, r * .42, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(r * .4, -r * .25); ctx.lineTo(r * .55, -r * .12); ctx.lineTo(r * .48, 0); ctx.lineTo(r * .55, r * .12); ctx.lineTo(r * .4, r * .25); ctx.lineTo(r * .7, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = c2; for (const [x, y] of [[.78, -.1], [.78, .1], [.72, -.2], [.72, .2], [.66, -.27], [.66, .27]]) { ctx.beginPath(); ctx.arc(x * r, y * r, Math.max(1.2, r * .045), 0, TAU); ctx.fill(); }
+      const curl = Math.sin(time / 380 + e.ph) * .25, strike = e.lungeT > 0 ? .5 : 0;
+      let tx = -r * .95, ty = 0; ctx.fillStyle = c0;
+      for (let i = 0; i < 6; i++) { const a = Math.PI + (i / 5) * (Math.PI * (.95 + strike)) + curl * (i / 5), nx = tx + Math.cos(a) * r * .3, ny = ty + Math.sin(a) * r * .26 * (i > 2 ? -1 : 1); tx = nx; ty = ny; ctx.beginPath(); ctx.arc(tx, ty, r * (.27 - i * .02), 0, TAU); ctx.fill(); ctx.strokeStyle = '#e8b84a'; ctx.lineWidth = Math.max(1, r * .03); ctx.stroke(); }
+      const gl = .5 + Math.sin(time / 140) * .3; ctx.fillStyle = `rgba(160,255,90,${gl * .5})`; ctx.beginPath(); ctx.arc(tx + r * .12, ty, r * .2, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.moveTo(tx, ty - r * .1); ctx.quadraticCurveTo(tx + r * .3, ty - r * .05, tx + r * .38, ty + r * .02); ctx.lineTo(tx, ty + r * .1); ctx.fill();
+      const dt2 = (time / 700 + e.seed) % 1; ctx.fillStyle = `rgba(160,255,90,${1 - dt2})`; ctx.beginPath(); ctx.arc(tx + r * .38, ty + dt2 * r * .5, r * .05, 0, TAU); ctx.fill();
+      break; }
+    case 'wyrm': {
+      const jaw = e.lungeT > 0 ? .5 : .12 + Math.sin(time / 400 + e.ph) * .08;
+      ctx.fillStyle = '#3a1408'; ctx.beginPath(); ctx.ellipse(0, 0, r * .6, r * .5, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#5a2010'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-r * .1, sd * r * .3); ctx.quadraticCurveTo(-r * .5, sd * r * .9, -r * .95, sd * r * .75); ctx.quadraticCurveTo(-r * .45, sd * r * .6, -r * .3, sd * r * .2); ctx.fill(); }
+      for (const sd of [-1, 1]) { ctx.save(); ctx.rotate(sd * jaw * .6); ctx.fillStyle = '#4a1a0a'; ctx.beginPath(); ctx.moveTo(r * .1, 0); ctx.lineTo(r * .2, sd * r * .42); ctx.quadraticCurveTo(r * .9, sd * r * .35, r * 1.15, sd * r * .05); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ffe8c0'; for (let i = 0; i < 4; i++) { const x = r * (.4 + i * .18); ctx.beginPath(); ctx.moveTo(x - r * .04, sd * r * .1); ctx.lineTo(x, sd * r * .0); ctx.lineTo(x + r * .04, sd * r * .1); ctx.fill(); } ctx.restore(); }
+      const gl = .6 + Math.sin(time / 120) * .3, fg = ctx.createRadialGradient(r * .6, 0, 0, r * .6, 0, r * .45); fg.addColorStop(0, `rgba(255,240,140,${gl})`); fg.addColorStop(1, 'rgba(255,90,20,0)'); ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(r * .6, 0, r * .45, 0, TAU); ctx.fill();
+      if (jaw > .3) for (let i = 0; i < 6; i++) { const t = (time / 250 + i / 6) % 1; ctx.fillStyle = `rgba(255,${200 - t * 150},40,${1 - t})`; ctx.beginPath(); ctx.arc(r * (1.1 + t * 1.2), Math.sin(i * 5 + time / 60) * r * .3 * t, r * (.08 + t * .18), 0, TAU); ctx.fill(); }
+      ctx.strokeStyle = `rgba(255,170,40,${gl})`; ctx.lineWidth = Math.max(1, r * .05); ctx.beginPath(); ctx.moveTo(-r * .45, -r * .1); ctx.lineTo(-r * .1, 0); ctx.lineTo(-r * .4, r * .15); ctx.stroke();
+      ctx.fillStyle = '#d8c8a0'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-r * .05, sd * r * .3); ctx.quadraticCurveTo(-r * .5, sd * r * .55, -r * .8, sd * r * .5); ctx.quadraticCurveTo(-r * .45, sd * r * .4, -r * .2, sd * r * .2); ctx.fill(); }
+      ctx.fillStyle = 'rgba(255,240,80,.4)'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .3, sd * r * .26, r * .13, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(r * .3, sd * r * .26, r * .08, r * .05, sd * .4, 0, TAU); ctx.fill(); }
+      break; }
+    case 'faequeen': {
+      const f = Math.sin(time / 70 + e.ph) * .35;
+      for (let i = 0; i < 10; i++) { const a = time / 700 + i / 10 * TAU, rr = r * (1.25 + Math.sin(time / 300 + i) * .15), tw = Math.sin(time / 90 + i * 3) * .5 + .5; ctx.fillStyle = `rgba(255,240,255,${tw})`; ctx.save(); ctx.translate(Math.cos(a) * rr, Math.sin(a) * rr); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(0, -r * .07); ctx.lineTo(r * .02, 0); ctx.lineTo(0, r * .07); ctx.lineTo(-r * .02, 0); ctx.closePath(); ctx.moveTo(-r * .07, 0); ctx.lineTo(0, r * .02); ctx.lineTo(r * .07, 0); ctx.lineTo(0, -r * .02); ctx.fill(); ctx.restore(); }
+      for (const sd of [-1, 1]) for (const [ox, oy, rx, ry, rot, big] of [[-.05, 1.0, .95, .55, .35, 1], [-.75, .7, .6, .35, 1.0, 0]]) {
+        ctx.save(); ctx.translate(r * ox, sd * r * oy * (1 - Math.abs(f) * .15)); ctx.rotate(sd * (rot + f)); const wg = ctx.createLinearGradient(-r * rx, 0, r * rx, 0);
+        wg.addColorStop(0, fl ? '#fff' : 'rgba(160,240,255,.75)'); wg.addColorStop(.5, fl ? '#fff' : 'rgba(255,170,240,.8)'); wg.addColorStop(1, fl ? '#fff' : 'rgba(255,240,170,.75)');
+        ctx.fillStyle = wg; ctx.beginPath(); ctx.ellipse(0, 0, r * rx, r * ry, 0, 0, TAU); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = Math.max(1, r * .03); ctx.stroke();
+        ctx.strokeStyle = 'rgba(120,60,140,.35)'; for (let v = -1; v <= 1; v++) { ctx.beginPath(); ctx.moveTo(-r * rx * .8, 0); ctx.quadraticCurveTo(0, v * r * ry * .6, r * rx * .9, v * r * ry * .5); ctx.stroke(); }
+        if (big) { ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(r * rx * .45, 0, r * .1, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(200,120,255,.8)'; ctx.beginPath(); ctx.arc(r * rx * .45, 0, r * .05, 0, TAU); ctx.fill(); }
+        ctx.restore();
+      }
+      const dg = ctx.createLinearGradient(-r * .7, 0, r * .3, 0); dg.addColorStop(0, fl ? '#fff' : '#c04ac0'); dg.addColorStop(1, fl ? '#fff' : c0);
+      ctx.fillStyle = dg; ctx.beginPath(); ctx.moveTo(r * .25, -r * .2); ctx.quadraticCurveTo(-r * .3, -r * .62, -r * .75, -r * .5 + Math.sin(time / 200) * r * .05); ctx.quadraticCurveTo(-r * .85, 0, -r * .75, r * .5 - Math.sin(time / 200) * r * .05); ctx.quadraticCurveTo(-r * .3, r * .62, r * .25, r * .2); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = Math.max(1, r * .03); for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(r * .1, i * r * .06); ctx.lineTo(-r * .7, i * r * .2); ctx.stroke(); }
+      ctx.fillStyle = '#f8c0e0'; ctx.beginPath(); ctx.moveTo(r * .2, -r * .25); ctx.quadraticCurveTo(-r * .25, -r * .45 + f * r * .1, -r * .35, 0); ctx.quadraticCurveTo(-r * .25, r * .45 - f * r * .1, r * .2, r * .25); ctx.fill();
+      ctx.fillStyle = '#fde8d8'; ctx.beginPath(); ctx.arc(r * .38, 0, r * .24, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#ffd6f0'; ctx.beginPath(); ctx.arc(r * .3, 0, r * .25, Math.PI * .55, Math.PI * 1.45); ctx.fill();
+      ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(r * .28, -r * .26); for (let i = 0; i <= 6; i++) { const y = -r * .26 + i * r * .087; ctx.lineTo(i % 2 ? r * .2 : r * .04, y); ctx.lineTo(r * .2, y + r * .04); } ctx.lineTo(r * .3, r * .26); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#7fe8ff'; ctx.beginPath(); ctx.arc(r * .12, 0, r * .05, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#5a3a6a'; ctx.beginPath(); ctx.arc(r * .5, -r * .09, r * .035, 0, TAU); ctx.arc(r * .5, r * .09, r * .035, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#e8d8a0'; ctx.lineWidth = Math.max(1.5, r * .05); ctx.beginPath(); ctx.moveTo(r * .3, r * .3); ctx.lineTo(r * 1.0, r * .55); ctx.stroke();
+      ctx.save(); ctx.translate(r * 1.05, r * .57); ctx.rotate(time / 400); ctx.fillStyle = '#fff6a0'; ctx.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * .07 : r * .17, a = i / 10 * TAU; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.fill(); ctx.restore();
+      break; }
+    case 'kong': {
+      const sw = Math.sin(time / 130 + e.ph), spin = time / (e.lungeT > 0 ? 60 : 260);
+      ctx.fillStyle = '#3a7a2a'; ctx.beginPath(); ctx.moveTo(r * .2, -r * .7); ctx.quadraticCurveTo(-r * 1.0, -r * (1.0 + sw * .08), -r * 1.35, 0); ctx.quadraticCurveTo(-r * 1.0, r * (1.0 - sw * .08), r * .2, r * .7); ctx.closePath(); ctx.fill();
+      for (let i = 0; i < 9; i++) { const t = i / 8, a = Math.PI * (.6 + t * .8), x = Math.cos(a) * r * 1.15 - r * .1, y = Math.sin(a) * r * .95; ctx.save(); ctx.translate(x, y); ctx.rotate(a + Math.sin(time / 200 + i) * .2); ctx.fillStyle = i % 2 ? '#4a9a32' : '#2a6a20'; ctx.beginPath(); ctx.ellipse(0, 0, r * .25, r * .11, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-r * .22, 0); ctx.lineTo(r * .22, 0); ctx.stroke(); ctx.restore(); }
+      ctx.save(); ctx.translate(r * .7, 0); ctx.rotate(spin);
+      ctx.strokeStyle = '#a02020'; ctx.lineWidth = r * .14; ctx.lineCap = 'butt'; ctx.beginPath(); ctx.moveTo(-r * 1.5, 0); ctx.lineTo(r * 1.5, 0); ctx.stroke();
+      ctx.fillStyle = '#f0c030'; for (const x of [-1.5, -1.3, 1.3, 1.5]) ctx.fillRect(r * x - r * .07, -r * .1, r * .14, r * .2);
+      ctx.restore();
+      ctx.strokeStyle = c0; ctx.lineWidth = r * .32; ctx.lineCap = 'round'; for (const sd of [-1, 1]) { const hx = r * .7 + Math.cos(spin) * r * .25 * sd, hy = Math.sin(spin) * r * .25 * sd; ctx.beginPath(); ctx.moveTo(r * .1, sd * r * .5); ctx.quadraticCurveTo(r * .45, sd * r * .7, hx, hy + sd * r * .1); ctx.stroke(); ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(hx, hy + sd * r * .1, r * .14, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * .72, r * .62, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#d89a3a'; ctx.beginPath(); ctx.ellipse(-r * .15, 0, r * .4, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#f0d040'; for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(-r * .35, (i - 1) * r * .32); ctx.rotate(.4); ctx.beginPath(); ctx.arc(0, 0, r * .12, -1.3, 1.3); ctx.arc(-r * .04, 0, r * .07, 1.3, -1.3, true); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .55, 0, r * .4, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#e8c890'; ctx.beginPath(); ctx.arc(r * .44, -r * .4, r * .14, 0, TAU); ctx.arc(r * .44, r * .4, r * .14, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(r * .72, 0, r * .24, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#5a3010'; ctx.beginPath(); ctx.arc(r * .9, -r * .05, r * .03, 0, TAU); ctx.arc(r * .9, r * .05, r * .03, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,220,80,.4)'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .7, sd * r * .14, r * .1, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .7, sd * r * .14, r * .055, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#f0c030'; ctx.beginPath(); ctx.ellipse(r * .45, 0, r * .1, r * .42, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(r * .42, -r * .3); for (let i = 0; i <= 4; i++) { const y = -r * .3 + i * r * .15; ctx.lineTo(i % 2 ? r * .45 : r * .15, y); ctx.lineTo(r * .45, y + r * .075); } ctx.lineTo(r * .5, r * .3); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#d2543f'; ctx.lineWidth = Math.max(1, r * .04); for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * .4, sd * r * .4); ctx.quadraticCurveTo(r * .1, sd * r * (.7 + sw * .1), -r * .3, sd * r * (.75 - sw * .1)); ctx.stroke(); }
+      ctx.fillStyle = '#d2543f'; ctx.beginPath(); ctx.arc(r * .3, 0, r * .06, 0, TAU); ctx.fill();
       break; }
     case 'shroom_old': {
       const st = Math.sin(time / 120 + e.ph) * r * .15;
@@ -2830,7 +2963,7 @@ function drawBiomePreview(time) {
       const n = prevMobs.length, a = (m.big ? 0 : m.i / (n - 1) * TAU) + t / (m.big ? 9000 : 7000) * (m.i % 2 ? -1 : 1), rr = m.big ? 330 : 190 + (m.i % 2) * 70;
       const nx = Math.cos(a) * rr * 1.6, ny = Math.sin(a) * rr * .75;
       if (!m.init) { m.x = nx; m.y = ny; m.init = 1; }
-      if (m.shape === 'snake' || m.shape === 'gator') { const l = m.trail[0]; if (!l || Math.hypot(l.x - nx, l.y - ny) > 5) { m.trail.unshift({ x: m.x, y: m.y }); m.trail.length = Math.min(m.trail.length, 9); } }
+      if (m.shape === 'snake' || m.shape === 'gator' || m.shape === 'wyrm') { const l = m.trail[0]; if (!l || Math.hypot(l.x - nx, l.y - ny) > (m.shape === 'wyrm' ? m.r * .42 : 5)) { m.trail.unshift({ x: m.x, y: m.y }); m.trail.length = Math.min(m.trail.length, 9); } }
       m.x = nx; m.y = ny; drawEnemy(m, t);
     }
     pc.globalAlpha = 1; drawNest(save.skin, 3); drawCrow(skinOf(save.skin), -Math.PI / 2 + Math.sin(t / 1400) * .7, 0, Math.sin(t / 300) * 1.2, t);
@@ -3234,16 +3367,18 @@ function monsterTraits(k) {
 function drawMonsterPreview(cvs, k, known, time = 1000) {
   const d = E[k], pc = cvs.getContext('2d'), W = cvs.width, H = cvs.height;
   pc.clearRect(0, 0, W, H);
-  const r = d.r, wide = d.shape === 'snake' || d.shape === 'ratking' ? 3 : d.shape === 'quad' || d.shape === 'bear' || d.shape === 'oni' || d.shape === 'ratking' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
-  const tall = d.shape === 'bat' ? 6 : d.shape === 'bird' ? 4.8 : d.shape === 'oni' ? 3 : d.shape === 'spider' ? 3.4 : d.shape === 'ratking' ? 2.8 : 2.4;
+  const SZ = { catboss: [3.2, 2.4], gatorboss: [3.6, 2.4], scorpboss: [3.2, 3], wyrm: [3.4, 2.6], faequeen: [2.6, 3.4], kong: [2.8, 3.2] }[d.shape];
+  const r = d.r, wide = SZ ? SZ[0] : d.shape === 'snake' || d.shape === 'ratking' ? 3 : d.shape === 'quad' || d.shape === 'bear' || d.shape === 'oni' || d.shape === 'ratking' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
+  const tall = SZ ? SZ[1] : d.shape === 'bat' ? 6 : d.shape === 'bird' ? 4.8 : d.shape === 'oni' ? 3 : d.shape === 'spider' ? 3.4 : d.shape === 'ratking' ? 2.8 : 2.4;
   const sc = Math.min(H * .8 / (r * tall), W * .8 / (r * wide), W / 100);
   const e = Object.assign({}, d, { k, x: 0, y: 0, hp: 1, max: 1, flash: 0, ph: 1, mode: 'in', trail: [], stun: 0, frozen: 0, under: false, ghostly: false, lungeT: 0, elite: false, stolen: 0, armor: d.armor || 0 });
   if (!known) { e.col = ['#2a2f28', '#232720', '#2a2f28']; e.noAura = true; }
   e.auraS = .62;
   if (d.shape === 'snake') for (let i = 1; i <= 8; i++) e.trail.push({ x: -i * r * .35, y: Math.sin(i * .9) * r * .35 });
+  if (d.shape === 'wyrm') for (let i = 1; i <= 12; i++) e.trail.push({ x: -i * r * .2, y: Math.sin(i * .55) * r * .45 });
   e.x = -0.0001;
   const keep = ctx; ctx = pc;
-  pc.setTransform(sc, 0, 0, sc, W / 2 + (d.shape === 'snake' ? r * 1.1 * sc : 0), H / 2);
+  pc.setTransform(sc, 0, 0, sc, W / 2 + (d.shape === 'snake' ? r * 1.1 * sc : d.shape === 'wyrm' ? r * 1.0 * sc : 0), H / 2);
   pc.globalAlpha = 1;
   try { drawEnemy(e, time); } catch (err) {}
   pc.setTransform(1, 0, 0, 1, 0, 0);
