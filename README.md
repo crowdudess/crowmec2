@@ -4,7 +4,7 @@ A roguelike nest defence game. You are a crow, and everything in the forest want
 
 - Hold the nest against waves of enemies. Your crow shoots by itself; press **Space** (or tap the field) to caw.
 - Shop between waves for random upgrades.
-- Ten biomes, from Whispering Wood to The Void. Each has its own enemies, a boss on wave 10, and 3 challenge runs that unlock a skin.
+- Eleven biomes, from Whispering Wood to The Void, plus a secret DLC office. Each has its own enemies, a boss on wave 10, and 3 challenge runs that unlock a skin.
 - Pick up to 5 spells to take into each run.
 - After a boss, fly home with your coins or stay for endless waves.
 - Spend coins in the Roost on permanent upgrades and placeable spells. Unlock skins and achievements.

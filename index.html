@@ -360,6 +360,9 @@ const BIOMES = [
   { id: 'dunes', name: 'Sunscorch Dunes', hp: 5.8, dmg: 2.1, coin: 4.2, boss: 'emperor', elite: 'worm',
     enemies: ['scarab', 'lizard', 'scorpion', 'vulture', 'worm'], ground: ['#6e5c3c', '#4a3d27', '#2a2217'], blade: ['#8a7550', '#5e4f34'], stone: '#5a4a30',
     blurb: 'Armoured scarabs, darting lizards, scorpions whose sting poisons the nest, vultures and sandworms that stay underground until they are close. The Emperor Scorpion guards the sand.' },
+  { id: 'jungle', name: 'Banana Jungle', hp: 7.6, dmg: 2.2, coin: 4.8, boss: 'kong', elite: 'gorilla',
+    enemies: ['baboon', 'chimp', 'gibbon', 'thrower', 'gorilla'], ground: ['#24402a', '#16281a', '#0c160e'], blade: ['#2e5a32', '#3a6a3a'], stone: '#1a3020',
+    blurb: 'Baboon gangs, hopping chimps, gibbons that swing in from the trees, banana throwers that pelt your crow, and armoured silverback gorillas. The Monkey King rules the canopy.' },
   { id: 'spider', name: 'Silkshade Hollow', hp: 8.2, dmg: 2.4, coin: 5.5, boss: 'queen', elite: 'tarantula',
     enemies: ['spiderling', 'jumper', 'weaver', 'moth', 'tarantula'], ground: ['#2c2433', '#1b1621', '#0e0b12'], blade: ['#3e3446', '#2e2636'], stone: '#251f2b',
     blurb: 'Spiderling swarms, jumping spiders, weavers that spit webs to slow your crow, moths, and tarantulas that burst into spiderlings. The Spider Queen waits in the dark.' },
@@ -440,6 +443,12 @@ const E = {
   kitsune:   { name: 'Kitsune', shape: 'quad', tail: 'bushy', tails: 3, ears: true, col: ['#f0a040', '#fff0d8', '#222'], hp: 50, spd: 100, dmg: 8, gold: 5, r: 13, cost: 2, from: 2, zig: .7, phase: true },
   petal:     { name: 'Petal Sprites', shape: 'fairy', col: ['#ffb0d0', '#ffe0ec', '#fff'], hp: 14, spd: 130, dmg: 3, gold: 1, r: 7, cost: 2, from: 3, fly: true, pack: 3 },
   tanuki:    { name: 'Tanuki', shape: 'quad', tail: 'striped', mask: true, col: ['#8a6a4a', '#5a4030', '#fff'], hp: 170, spd: 34, dmg: 22, gold: 14, r: 21, cost: 5, from: 4, armor: 6 },
+  baboon:    { name: 'Baboon Gang', shape: 'ape', col: ['#8a6a4a', '#e06a6a', '#222'], hp: 26, spd: 90, dmg: 5, gold: 3, r: 12, cost: 3, from: 1, pack: 3, zig: .6 },
+  chimp:     { name: 'Chimpanzee', shape: 'ape', col: ['#3a2a20', '#c8a080', '#222'], hp: 40, spd: 70, dmg: 7, gold: 4, r: 14, cost: 2, from: 1, hop: true },
+  gibbon:    { name: 'Gibbon', shape: 'ape', longarms: true, col: ['#6a5a4a', '#d8c0a0', '#222'], hp: 36, spd: 135, dmg: 7, gold: 5, r: 13, cost: 2, from: 2, fly: true },
+  thrower:   { name: 'Banana Thrower', shape: 'ape', banana: true, col: ['#7a4a2a', '#e8c090', '#222'], hp: 60, spd: 50, dmg: 0, gold: 7, r: 14, cost: 3, from: 3, ranged: true, jamText: "Banana'd!" },
+  gorilla:   { name: 'Silverback', shape: 'ape', silver: true, col: ['#2a2a2e', '#5a5a62', '#c33'], hp: 125, spd: 30, dmg: 17, gold: 16, r: 22, cost: 5, from: 4, armor: 5, lunge: true },
+  kong:      { name: 'The Monkey King', shape: 'ape', crown: true, silver: true, col: ['#b07a2a', '#f0d080', '#222'], hp: 760, spd: 26, dmg: 56, gold: 260, r: 48, boss: true, armor: 6, lunge: true, summon: 'baboon', weave: true, jamText: 'Banana storm!' },
   oni:       { name: 'Oni', shape: 'quad', tail: 'none', horns: true, ears: false, col: ['#c8322a', '#8a1a14', '#ff0'], hp: 740, spd: 28, dmg: 55, gold: 230, r: 42, boss: true, armor: 6, summon: 'monkey', lunge: true },
 
   voidling:  { name: 'Voidlings', shape: 'orb', col: ['#6a3aa0', '#1a0a30', '#fff'], hp: 18, spd: 100, dmg: 4, gold: 1, r: 8, cost: 2, from: 1, pack: 4 },
@@ -506,6 +515,8 @@ const SPELLS = [
     desc: 'Freezes every enemy in the ring for 3 seconds. Frozen enemies take 25% more damage.' },
   { id: 'sand', name: 'Sandstorm', short: 'Sandstorm', cd: 24, r: 110, cost: 260, req: 'dunes', col: '#d8b878',
     desc: 'A whirlwind that scours everything inside and pushes it away from the nest for 5 seconds. Bosses stand their ground.' },
+  { id: 'banana', name: 'Banana Peels', short: 'Bananas', cd: 20, r: 110, cost: 300, req: 'jungle', col: '#f0d040',
+    desc: 'Scatters banana peels for 8 seconds. Every walking enemy that steps in slips and is stunned for 1.5 seconds.' },
   { id: 'web', name: 'Web Snare', short: 'Web', cd: 24, r: 110, cost: 330, req: 'spider', col: '#e8e4f0',
     desc: 'A sticky web that lasts 6 seconds. Each enemy that walks in is stuck for 2.5 seconds and takes 20% more damage.' },
   { id: 'erupt', name: 'Eruption', short: 'Eruption', cd: 22, r: 100, cost: 420, req: 'volcano', col: '#f0602a',
@@ -579,6 +590,8 @@ const SKINS = [
   { id: 'ch-sakura', name: 'Ronin', body: '#14141a', wing: '#0a0a0e', sheen: 'rgba(255,176,208,.85)', beak: '#c8322a', eye: '#fff', bandana: null, cond: 'Complete all 3 Blossom Ridge challenges.', has: s => chDone(s, 'sakura') },
   { id: 'ch-void', name: 'Voidborn', body: '#000', wing: '#05000a', sheen: 'rgba(184,138,224,.9)', beak: '#b88ae0', eye: '#fff', glow: '#b88ae0', crown: true, cond: 'Complete all 3 Void challenges.', has: s => chDone(s, 'void') },
   { id: 'suitbandito', name: 'Bandito in a Suit', body: '#2a2e38', wing: '#1c2028', sheen: 'rgba(200,210,230,.35)', beak: '#e8b84a', eye: '#fff', googly: true, mask: true, suit: true, cond: 'Defeat the Job Application in the Corporate Office.', has: s => !!s.ach.jobapp || !!s.testMode },
+  { id: 'bananacrow', name: 'Banana Crow', body: '#e8c43a', wing: '#c8a028', sheen: 'rgba(255,250,200,.7)', beak: '#5a4010', eye: '#222', cond: 'Defeat the Monkey King.', has: s => !!s.ach.kong },
+  { id: 'ch-jungle', name: 'Canopy', body: '#1e4a24', wing: '#14361a', sheen: 'rgba(240,208,64,.7)', beak: '#f0d040', eye: '#fff', cond: 'Complete all 3 Banana Jungle challenges.', has: s => chDone(s, 'jungle') },
   { id: 'ch-office', name: 'Middle Manager', body: '#3a4252', wing: '#262c38', sheen: 'rgba(240,240,240,.6)', beak: '#c8a050', eye: '#fff', crown: false, cond: 'Complete all 3 Corporate Office challenges.', has: s => chDone(s, 'office') },
   { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
 ];
@@ -597,6 +610,7 @@ const ACH = [
   { id: 'faequeen', name: 'Iron Wings', desc: 'Defeat the Fairy Queen.', coins: 420 },
   { id: 'oni', name: 'Demon Slayer', desc: 'Defeat the Oni.', coins: 520 },
   { id: 'maw', name: 'Into the Void', desc: 'Defeat the Maw.', coins: 700 },
+  { id: 'kong', name: 'Top Banana', desc: 'Defeat the Monkey King.', coins: 220 },
   { id: 'jobapp', name: "You're Hired", desc: 'Defeat the Job Application. Unlocks Bandito in a Suit.', coins: 120 },
   { id: 'allbiomes', name: 'Every Nest', desc: 'Clear every biome.', coins: 600 },
   { id: 'challenger', name: 'Up for It', desc: 'Complete a challenge run.', coins: 40 },
@@ -799,6 +813,7 @@ function cast(id, x, y) {
   else if (id === 'pixie') zones.push({ id, x, y, r, t: 5, tick: 0 });
   else if (id === 'petal') zones.push({ id, x, y, r, t: 6, tick: 0 });
   else if (id === 'hole') zones.push({ id, x, y, r, t: 4, done: false });
+  else if (id === 'banana') zones.push({ id, x, y, r, t: 8, seed: Math.random() * 100 });
   else if (id === 'frost') {
     zones.push({ id, x, y, r, t: .7 });
     for (const e of enemies) if (!e.dead && Math.hypot(e.x - x, e.y - y) < r + e.r) { const f = e.boss ? 1.2 : 3; e.frozen = Math.max(e.frozen, f); e.stun = Math.max(e.stun, f); hurt(e, P.dmg * P.spellPow, { crit: false }); }
@@ -816,6 +831,8 @@ function updateZones(dt) {
     } else if (z.id === 'totem') {
       z.cd -= dt;
       if (z.cd <= 0) { const t = nearest(z.x, z.y, z.r); if (t) { fire(z.x, z.y - 18, t.x, t.y, P.dmg * .9 * P.spellPow, { pierce: 0, chain: 0, small: true, target: t }); z.cd = 1 / 2.4; } else z.cd = .1; }
+    } else if (z.id === 'banana') {
+      for (const e of enemies) if (!e.dead && !e.fly && !e.under && !(e.slipImm > 0) && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) { e.stun = Math.max(e.stun, e.boss ? .5 : 1.5); e.slipImm = 4; if (!api.sim) texts.push({ x: e.x, y: e.y - e.r, v: 'Slip!', t: .7 }); }
     } else if (z.id === 'erupt') {
       z.tick -= dt;
       if (z.tick <= 0) { z.tick = .3; for (const e of enemies) if (!e.dead && !e.fly && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) { hurt(e, P.dmg * P.spellPow * .2, { crit: false, text: false }); e.burn = 2; e.burnD = Math.max(e.burnD, .3 * P.dmg * P.spellPow); } }
@@ -931,6 +948,7 @@ function update(dt) {
     e.flash = Math.max(0, e.flash - dt);
     e.frozen = Math.max(0, e.frozen - dt);
     if (e.cawImm > 0) e.cawImm -= dt;
+    if (e.slipImm > 0) e.slipImm -= dt;
     if (e.burn > 0) {
       e.burn -= dt; e.hp -= e.burnD * dt;
       if (!api.sim && Math.random() < dt * 8) parts.push({ x: e.x + rnd(-e.r, e.r), y: e.y, vx: 0, vy: -40, t: .4, c: '#f08a3a', r: 2 });
@@ -1074,6 +1092,13 @@ function draw(time) {
     ctx.strokeStyle = 'rgba(180,190,210,.22)'; ctx.lineWidth = 6;
     for (const s of deco.stones) { if (Math.hypot(s.x, s.y) < 260) continue; const w = s.r * 9; ctx.beginPath(); ctx.moveTo(s.x - w / 2, s.y + w / 2); ctx.lineTo(s.x - w / 2, s.y - w / 2); ctx.lineTo(s.x + w / 2, s.y - w / 2); ctx.stroke(); ctx.fillStyle = 'rgba(120,90,60,.35)'; ctx.fillRect(s.x - w / 2 + 6, s.y - w / 2 + 6, w * .55, w * .3); }
   }
+  if (biome.id === 'jungle') {
+    for (let i = 0; i < deco.stones.length; i++) { const s = deco.stones[i], a = i * 1.7 + Math.sin(time / 1500 + i) * .05; ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(a);
+      ctx.fillStyle = i % 2 ? '#1f4a26' : '#2a5a2e'; ctx.beginPath(); ctx.ellipse(0, 0, s.r * 4, s.r * 1.6, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(120,180,100,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-s.r * 4, 0); ctx.lineTo(s.r * 4, 0); ctx.stroke(); ctx.restore(); }
+    ctx.strokeStyle = 'rgba(60,110,50,.5)'; ctx.lineWidth = 4;
+    for (let i = 0; i < 6; i++) { const x0 = -800 + i * 300; ctx.beginPath(); ctx.moveTo(x0, -900); ctx.bezierCurveTo(x0 + 80, -300, x0 - 80, 300, x0 + 40 * Math.sin(time / 1200 + i), 900); ctx.stroke(); }
+  }
   if (biome.id === 'void') {
     for (const b of deco.blades) { ctx.fillStyle = b.c ? 'rgba(184,138,224,.5)' : 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(b.x, b.y, b.h / 8, 0, TAU); ctx.fill(); }
     ctx.strokeStyle = 'rgba(120,60,200,.12)'; ctx.lineWidth = 18; for (let i = 0; i < 4; i++) { const a0 = time / 4000 + i * 1.57; ctx.beginPath(); ctx.arc(0, 0, 200 + i * 130, a0, a0 + 2.2); ctx.stroke(); }
@@ -1149,6 +1174,11 @@ function drawZone(z, time, under) {
       ctx.strokeStyle = z.delay > 0 ? 'rgba(242,226,122,.6)' : 'rgba(242,226,122,.3)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke();
     } else if (z.id === 'frost') {
       ctx.fillStyle = `rgba(168,216,240,${.35 * z.t / .7})`; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+    } else if (z.id === 'banana') {
+      ctx.strokeStyle = 'rgba(240,208,64,.25)'; ctx.lineWidth = 2; ctx.setLineDash([4, 8]); ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+      for (let i = 0; i < 9; i++) { const a = z.seed + i * 2.4, d = ((i * 37 + z.seed) % 10) / 10 * z.r * .85; ctx.save(); ctx.translate(z.x + Math.cos(a) * d, z.y + Math.sin(a) * d); ctx.rotate(a * 3);
+        ctx.strokeStyle = '#f0d040'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, 0, 8, .3, 2.6); ctx.stroke();
+        ctx.strokeStyle = '#5a4010'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(Math.cos(.3) * 8, Math.sin(.3) * 8); ctx.lineTo(Math.cos(.3) * 11, Math.sin(.3) * 8 - 2); ctx.stroke(); ctx.restore(); }
     } else if (z.id === 'erupt') {
       ctx.fillStyle = `rgba(240,96,42,${.35 + .1 * Math.sin(time / 120)})`; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
       ctx.fillStyle = 'rgba(255,200,80,.5)'; for (let i = 0; i < 7; i++) { const a = i * 2.3 + time / 900, d = (i * 31 % 10) / 10 * z.r * .8; ctx.beginPath(); ctx.arc(z.x + Math.cos(a) * d, z.y + Math.sin(a) * d, 4 + Math.sin(time / 200 + i) * 2, 0, TAU); ctx.fill(); }
@@ -1328,6 +1358,21 @@ function drawEnemy(e, time) {
       ctx.strokeStyle = c1; ctx.lineWidth = 2; ctx.beginPath();
       for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU; ctx.moveTo(Math.cos(aa) * r * .35, Math.sin(aa) * r * .35); ctx.lineTo(Math.cos(aa) * r * .8, Math.sin(aa) * r * .7); }
       ctx.arc(0, 0, r * .35, 0, TAU); ctx.stroke();
+      break; }
+    case 'ape': {
+      const sw = Math.sin(time / 110 + e.ph * 3);
+      if (!e.silver) { ctx.strokeStyle = c0; ctx.lineWidth = Math.max(2, r * .16); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-r * .7, 0); ctx.quadraticCurveTo(-r * 1.6, sw * r * .8, -r * 1.25, r * .55); ctx.stroke(); }
+      const reach = e.longarms ? 1.7 : e.silver ? 1.1 : 1;
+      ctx.strokeStyle = c0; ctx.lineWidth = r * (e.silver ? .42 : .3); ctx.lineCap = 'round';
+      for (const sd of [-1, 1]) { const hx = r * (.5 + .45 * reach) + sw * sd * r * .25, hy = sd * r * (.7 + .45 * reach); ctx.beginPath(); ctx.moveTo(r * .15, sd * r * .45); ctx.quadraticCurveTo(r * .2, hy, hx, hy); ctx.stroke(); ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(hx, hy, r * .17, 0, TAU); ctx.fill(); }
+      if (e.banana) { const by = r * (1.15) ; ctx.strokeStyle = '#f0d040'; ctx.lineWidth = r * .18; ctx.beginPath(); ctx.arc(r * 1.05 + sw * r * .25, by, r * .3, -1.2, 1.2); ctx.stroke(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(0, 0, r * .85, r * .72, 0, 0, TAU); ctx.fill();
+      if (e.silver) { ctx.fillStyle = e.crown ? '#e8c060' : '#9a9aa4'; ctx.beginPath(); ctx.ellipse(-r * .2, 0, r * .5, r * .36, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.arc(r * .72, 0, r * .45, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .62, -r * .44, r * .15, 0, TAU); ctx.arc(r * .62, r * .44, r * .15, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(r * .88, 0, r * .26, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(r * .92, -r * .11, Math.max(1.3, r * .07), 0, TAU); ctx.arc(r * .92, r * .11, Math.max(1.3, r * .07), 0, TAU); ctx.fill();
+      if (e.crown) { ctx.fillStyle = '#f0c030'; ctx.beginPath(); ctx.moveTo(r * .5, -r * .32); ctx.lineTo(r * .32, -r * .18); ctx.lineTo(r * .42, 0); ctx.lineTo(r * .32, r * .18); ctx.lineTo(r * .5, r * .32); ctx.lineTo(r * .6, 0); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c8322a'; ctx.beginPath(); ctx.arc(r * .45, 0, r * .06, 0, TAU); ctx.fill(); }
       break; }
     case 'bat': {
       const f = Math.sin(time / 45 + e.ph * 7);
@@ -2000,6 +2045,12 @@ const LORE = {
   gazer: 'Gazers stare from afar. When they look at the crow, the crow forgets how fast it is.',
   voidworm: 'Void worms swim through the dark between stars and come up right under the nest.',
   maw: 'At the end of everything waits the Maw: one eye, endless hunger, and it has seen your eggs.',
+  baboon: 'Baboons never go anywhere alone. They shout, they shove, and they zig-zag straight at the nest.',
+  chimp: 'Chimpanzees are clever enough to use tools. Today the tool is jumping on your nest.',
+  gibbon: 'Gibbons swing from vine to vine so fast they basically fly. They land on the nest and swing away again.',
+  thrower: 'The banana thrower stays at a safe distance and pelts your crow with fruit. It never misses breakfast.',
+  gorilla: 'A silverback is the strongest ape in the jungle and knows it. Weak feathers bounce off its chest.',
+  kong: 'The Monkey King wears a crown of gold and a cape of leaves. He calls his baboons and fills the sky with bananas.',
   paper: 'Loose paperwork that escaped the filing cabinet. Paper cuts hurt, even for crows.',
   chair: 'An office chair rolling free across the carpet. Nobody is sitting in it. Nobody needs to.',
   coffee: 'The coffee machine has been on since 1997. Its brew burns the nest for seconds after.',
@@ -2178,6 +2229,7 @@ $('codeForm').addEventListener('submit', ev => {
 });
 renderMenu('fly');
 if (save.codes && save.codes.bandito && !biomeState('office').unlocked) { biomeState('office').unlocked = true; persist(); renderMenu(); }
+{ const main = BIOMES.filter(b => !b.dlc); let changed = false; main.forEach((b, i) => { if (i > 0 && biomeState(main[i - 1].id).cleared && !biomeState(b.id).unlocked) { biomeState(b.id).unlocked = true; changed = true; } }); if (changed) { persist(); renderMenu(); } }
 codeStatus();
 
 // ---------- loop ----------
