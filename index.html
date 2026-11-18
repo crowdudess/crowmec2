@@ -44,6 +44,14 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .bossbar i { background: linear-gradient(90deg, #8a2a1c, var(--blood)); }
 .hud-bottom { display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 10px; }
 .spells { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.hud-items { position: fixed; left: max(10px, env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%); display: grid; grid-auto-flow: column; grid-template-rows: repeat(var(--rows, 10), auto); gap: 4px; opacity: .55; pointer-events: none; max-height: 70vh; }
+.hud-items .hi { position: relative; width: 30px; height: 30px; border-radius: 8px; background: rgba(10,13,9,.55); border: 1px solid rgba(236,230,214,.12); }
+.hud-items .hi[data-rar="1"] { border-color: color-mix(in srgb, var(--sky) 55%, transparent); }
+.hud-items .hi[data-rar="2"] { border-color: color-mix(in srgb, var(--amethyst) 60%, transparent); }
+.hud-items .hi[data-rar="3"] { border-color: #e8b84a; }
+.hud-items .hi canvas { position: absolute; inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); }
+.hud-items .hi b { position: absolute; right: -3px; bottom: -4px; font: 800 10px var(--mono); color: var(--bone); background: rgba(10,13,9,.9); border-radius: 6px; padding: 0 3px; line-height: 13px; }
+@media (max-width: 560px) { .hud-items .hi { width: 24px; height: 24px; } .hud-items { gap: 3px; } }
 .hud-right { display: grid; justify-items: end; gap: 10px; }
 .iconrow { display: flex; gap: 8px; }
 .iconbtn { pointer-events: auto; width: 44px; height: 44px; border-radius: 12px; background: var(--moss); border: 1px solid var(--moss-3); color: var(--bone); display: grid; place-items: center; cursor: pointer; padding: 0; }
@@ -314,7 +322,7 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
       <div class="stat gold"><span data-i18n="shinies">Shinies</span><b id="hGold">0</b><span class="coinc" id="hCoins"></span></div>
     </div>
   </div>
-  <div></div>
+  <div class="hud-items" id="hudItems" aria-label="Items bought this run"></div>
   <div class="hud-bottom">
     <button class="cawkey" id="cawBtn" type="button" data-i18n-aria="caw"><span class="spshade" id="cawShade"></span><canvas id="cawIcon" width="96" height="96" aria-hidden="true"></canvas><span class="cawlbl" data-i18n="caw">CAW!</span><span class="cawkbd hide-sm" data-i18n="space">Space</span><span class="sptime" id="cawTime"></span></button>
     <div class="spells" id="spellBar"></div>
@@ -2839,7 +2847,7 @@ function hud() {
   $('hWave').textContent = run.wave + (run.endless ? '∞' : '');
   const left = enemies.length + spawnQ.length;
   $('hLeft').textContent = state === 'wave' ? T('left', left) : '';
-  $('hGold').textContent = run.gold;
+  $('hGold').textContent = run.gold; renderHudItems();
   $('hCoins').textContent = T('plus_coins', run.coins);
   const hp = Math.max(0, run.hp);
   $('hHp').style.width = (hp / run.maxHp * 100) + '%';
@@ -3076,6 +3084,13 @@ function oddsStrip(box, w) {
   box.innerHTML = ''; const o = rarOdds(w);
   box.append(el('span', 'ot', T('odds_title', w)));
   o.forEach((x, r) => { const c = el('span', 'oc'); c.dataset.rar = r; c.append(el('b', '', T('rar' + r)), document.createTextNode(' ' + pct(x.rar))); if (r === 3 && w < MYTHIC_WAVE) c.title = T('mythic_from', MYTHIC_WAVE); box.append(c); });
+}
+function renderHudItems() {
+  const box = $('hudItems'); if (!box || !run) return;
+  const sig = JSON.stringify(run.items); if (box.dataset.sig === sig) return; box.dataset.sig = sig; box.innerHTML = '';
+  const ids = Object.keys(run.items).sort((a, b) => (ITEMS.find(x => x.id === b).rar - ITEMS.find(x => x.id === a).rar));
+  box.style.setProperty('--rows', Math.max(1, Math.min(12, Math.ceil(ids.length / Math.ceil(ids.length / 12)))));
+  for (const id of ids) { const it = ITEMS.find(x => x.id === id), d = el('div', 'hi'); d.dataset.rar = it.rar; d.title = it.name; d.append(upIcon(id, 48)); if (run.items[id] > 1) d.append(el('b', '', 'x' + run.items[id])); box.append(d); }
 }
 function renderOwned(box) {
   box.innerHTML = '';
