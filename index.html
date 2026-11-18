@@ -1697,8 +1697,10 @@ function updateCheese(dt) {
 function drawCheeseWedge(x, y, s, rot, alpha) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha;
   ctx.fillStyle = '#f2c84a'; ctx.strokeStyle = '#b8862a'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(-s, s * .7); ctx.lineTo(s, s * .7); ctx.lineTo(s * .7, -s * .8); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#d8a83a'; for (const [hx, hy, hr] of [[.2, .2, .18], [.55, -.25, .13], [-.35, .45, .12]]) { ctx.beginPath(); ctx.arc(hx * s, hy * s, hr * s, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#c8962e'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-s + s * .18, -s + s * .22, s * 2, s * 2, s * .18) : ctx.rect(-s + s * .18, -s + s * .22, s * 2, s * 2); ctx.fill();
+  ctx.fillStyle = '#f2c84a'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-s, -s, s * 2, s * 2, s * .18) : ctx.rect(-s, -s, s * 2, s * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,240,170,.55)'; ctx.fillRect(-s * .82, -s * .82, s * 1.64, s * .22);
+  ctx.fillStyle = '#d8a83a'; for (const [hx, hy, hr] of [[-.45, -.35, .2], [.4, -.45, .14], [.15, .1, .24], [-.5, .5, .14], [.55, .55, .17], [-.05, -.65, .1]]) { ctx.beginPath(); ctx.arc(hx * s, hy * s, hr * s, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(150,100,20,.35)'; ctx.beginPath(); ctx.arc(hx * s + hr * s * .25, hy * s + hr * s * .25, hr * s * .6, 0, TAU); ctx.fill(); ctx.fillStyle = '#d8a83a'; }
   ctx.restore(); ctx.globalAlpha = 1;
 }
 function releaseRats(e, n) {
@@ -1998,9 +2000,9 @@ function draw(time) {
 
   ambBack(biome.id, reduceMotion ? 0 : time);
   drawNest();
-  for (const c of cheeses) if (c.t >= c.dur) drawCheeseWedge(c.x, c.y, 10, c.rot, Math.min(1, c.dur + c.life - c.t));
+  for (const c of cheeses) if (c.t >= c.dur) drawCheeseWedge(c.x, c.y, 17, c.rot, Math.min(1, c.dur + c.life - c.t));
   for (const e of enemies) { ctx.globalAlpha = e.ghostly ? .25 : 1; drawEnemy(e, time); }
-  ctx.globalAlpha = 1; for (const c of cheeses) if (c.t < c.dur) { const k = c.t / c.dur, x = c.x0 + (c.x - c.x0) * k, y = c.y0 + (c.y - c.y0) * k, h = Math.sin(k * Math.PI) * 90; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y, 10, 5, 0, 0, TAU); ctx.fill(); drawCheeseWedge(x, y - h, 11 + Math.sin(k * Math.PI) * 4, c.rot + c.t * c.spin, 1); }
+  ctx.globalAlpha = 1; for (const c of cheeses) if (c.t < c.dur) { const k = c.t / c.dur, x = c.x0 + (c.x - c.x0) * k, y = c.y0 + (c.y - c.y0) * k, h = Math.sin(k * Math.PI) * 90; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y, 18, 9, 0, 0, TAU); ctx.fill(); drawCheeseWedge(x, y - h, 18 + Math.sin(k * Math.PI) * 6, c.rot + c.t * c.spin, 1); }
   ctx.globalAlpha = 1;
   for (const z of zones) drawZone(z, time, false);
   for (const s of shots) drawFeather(s);
