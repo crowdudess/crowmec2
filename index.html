@@ -156,10 +156,23 @@ canvas.manualaim { cursor: crosshair; }
 .codein:focus-visible { outline: 3px solid var(--bone); outline-offset: 2px; }
 .testmode { color: var(--shine); font-weight: 700; }
 
-.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--moss-2); }
-.tab { font: 700 14px var(--body); color: var(--bone-dim); background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 12px; cursor: pointer; }
-.tab[aria-selected="true"] { color: var(--bone); border-bottom-color: var(--shine); }
-.tab .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--shine); margin-left: 6px; vertical-align: middle; }
+.tabs { position: relative; display: flex; gap: 4px; padding: 5px; border-radius: 16px; background: var(--night); border: 1px solid var(--moss-2); overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs.fade-r { -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+.tabs.fade-l { -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%); mask-image: linear-gradient(90deg, transparent, #000 18%); }
+.tabs.fade-l.fade-r { -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.tabind { position: absolute; top: 5px; bottom: 5px; left: 0; width: 0; border-radius: 11px; background: var(--moss-2); box-shadow: inset 0 -3px 0 var(--shine), 0 2px 10px rgba(0,0,0,.35); transition: transform .28s cubic-bezier(.3,.8,.3,1), width .28s cubic-bezier(.3,.8,.3,1); pointer-events: none; }
+.tab { position: relative; z-index: 1; flex: 1 0 auto; display: grid; justify-items: center; gap: 3px; font: 700 12px var(--body); color: var(--bone-dim); background: none; border: 0; border-radius: 11px; padding: 8px 10px 7px; cursor: pointer; scroll-snap-align: center; white-space: nowrap; transition: color .15s; }
+.tab svg { width: 22px; height: 22px; transition: transform .2s; }
+.tab:hover { color: var(--bone); }
+.tab:hover svg { transform: translateY(-1px); }
+.tab[aria-selected="true"] { color: var(--bone); }
+.tab[aria-selected="true"] svg { color: var(--shine); }
+.tab:focus-visible { outline: 2px solid var(--bone); outline-offset: -2px; }
+.tab .dot { position: absolute; top: 6px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--shine); box-shadow: 0 0 0 2px var(--night); animation: dotpulse 1.6s ease-in-out infinite; }
+@keyframes dotpulse { 50% { transform: scale(1.35); } }
+@media (max-width: 560px) { .tab { flex: 0 0 auto; padding: 7px 10px; } .tab svg { width: 20px; height: 20px; } }
+@media (prefers-reduced-motion: reduce) { .tabind, .tab svg { transition: none; } .tab .dot { animation: none; } }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
 .card { text-align: left; font: inherit; color: var(--bone); background: var(--moss-2); border: 2px solid transparent; border-radius: 12px; padding: 14px; display: grid; align-content: start; gap: 6px; cursor: pointer; min-width: 0; transition: transform .12s, border-color .12s; }
@@ -442,15 +455,15 @@ canvas.manualaim { cursor: crosshair; }
       <div><div class="eyebrow" data-i18n="tagline">A roguelike nest defence</div><h1>Nestguard</h1><div class="byline"><span data-i18n="made_by">A game by crowdude</span><span id="helloName"></span></div></div>
       <div class="stat gold coin"><span data-i18n="coins">Coins</span><b id="mCoins">0</b></div>
     </div>
-    <div class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="fly" type="button" data-i18n="tab_fly">Fly</button>
-      <button class="tab" role="tab" data-tab="roost" type="button" data-i18n="tab_roost">Roost</button>
-      <button class="tab" role="tab" data-tab="spells" type="button" data-i18n="tab_spells">Spells</button>
-      <button class="tab" role="tab" data-tab="skins" type="button" data-i18n="tab_skins">Skins</button>
-      <button class="tab" role="tab" data-tab="monsters" type="button" data-i18n="tab_monsters">Monsters</button>
-      <button class="tab" role="tab" data-tab="upgrades" type="button" data-i18n="tab_upgrades">Upgrades</button>
-      <button class="tab" role="tab" data-tab="feats" type="button" data-i18n="tab_feats">Achievements</button>
-      <button class="tab" role="tab" data-tab="settings" type="button" data-i18n="tab_settings">Settings</button>
+    <div class="tabs" role="tablist"><span class="tabind" aria-hidden="true"></span>
+      <button class="tab" role="tab" data-tab="fly" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c4-1 6-4 9-8 1 3 0 6-2 8l9-2c-1 4-5 7-10 7l-4 3 1-4c-1 0-2-2-3-4z"/></svg><span class="tl" data-i18n="tab_fly">Fly</span></button>
+      <button class="tab" role="tab" data-tab="roost" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M6 20V11l6-5 6 5v9M10 20v-5h4v5"/></svg><span class="tl" data-i18n="tab_roost">Roost</span></button>
+      <button class="tab" role="tab" data-tab="spells" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 15 9M14 4l1.5 3L19 8.5 15.5 10 14 13l-1.5-3L9 8.5 12.5 7zM19 14l.8 1.7 1.7.8-1.7.8L19 19l-.8-1.7-1.7-.8 1.7-.8z"/></svg><span class="tl" data-i18n="tab_spells">Spells</span></button>
+      <button class="tab" role="tab" data-tab="skins" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-2 2.5-2H18a3 3 0 0 0 3-3c0-4.5-4-8.5-9-8.5zM7.5 11.5h.01M10 7.5h.01M15 7.5h.01"/></svg><span class="tl" data-i18n="tab_skins">Skins</span></button>
+      <button class="tab" role="tab" data-tab="monsters" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10a7 7 0 0 1 14 0v10l-3-2-2 2-2-2-2 2-2-2zM9.5 11h.01M14.5 11h.01"/></svg><span class="tl" data-i18n="tab_monsters">Monsters</span></button>
+      <button class="tab" role="tab" data-tab="upgrades" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4 3.5 7 8 8 4.5-1 8-4 8-8V7zM9 12l3-3 3 3M12 9v7"/></svg><span class="tl" data-i18n="tab_upgrades">Upgrades</span></button>
+      <button class="tab" role="tab" data-tab="feats" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span class="tl" data-i18n="tab_feats">Achievements</span></button>
+      <button class="tab" role="tab" data-tab="settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl" data-i18n="tab_settings">Settings</span></button>
     </div>
     <section id="tab-fly" class="tabpane">
       <div class="biocar">
@@ -3696,7 +3709,7 @@ function syncSettings() {
     for (const key of ['music', 'sfx', 'death']) { const i = $(pre + '-' + key); if (i && document.activeElement !== i) { i.value = Math.round(vol[key] * 100); i.nextSibling.textContent = i.value + '%'; } }
   }
 }
-function setLang(l) { setTimeout(() => { try { renderAimBtn(); } catch (e) {} });
+function setLang(l) { setTimeout(() => { try { renderAimBtn(); moveTabInd(); } catch (e) {} });
   lang = LANGS.some(x => x[0] === l) ? l : 'en'; save.lang = lang; persist();
   applyStatic(); applyContent(); setMute(muted);
   renderMenu(); updateHello();
@@ -3773,6 +3786,7 @@ function renderMenu(tab) {
     t.setAttribute('aria-selected', String(t.dataset.tab === curTab));
     t.querySelector('.dot')?.remove();
   }
+  requestAnimationFrame(() => { moveTabInd(); tabFades(); });
   const canBuy = ROOST.some(u => (save.up[u.id] || 0) < u.max && save.coins >= roostCost(u, save.up[u.id] || 0));
   if (canBuy) document.querySelector('.tab[data-tab="roost"]').append(el('span', 'dot'));
   for (const p of document.querySelectorAll('.tabpane')) p.hidden = p.id !== 'tab-' + curTab;
@@ -3786,6 +3800,20 @@ function renderMenu(tab) {
   if (curTab === 'settings') buildSettings($('settingsMenu'), 'm');
 }
 for (const t of document.querySelectorAll('.tab')) t.onclick = () => renderMenu(t.dataset.tab);
+function moveTabInd() {
+  const bar = document.querySelector('.tabs'), t = bar && bar.querySelector('.tab[aria-selected="true"]'), ind = bar && bar.querySelector('.tabind'); if (!t || !ind) return;
+  ind.style.width = t.offsetWidth + 'px'; ind.style.transform = `translateX(${t.offsetLeft}px)`;
+  const l = t.offsetLeft - bar.scrollLeft, r = l + t.offsetWidth; if (l < 0 || r > bar.clientWidth) bar.scrollTo({ left: t.offsetLeft - (bar.clientWidth - t.offsetWidth) / 2, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function tabFades() { const b = document.querySelector('.tabs'); if (!b) return; b.classList.toggle('fade-l', b.scrollLeft > 4); b.classList.toggle('fade-r', b.scrollLeft + b.clientWidth < b.scrollWidth - 4); }
+document.querySelector('.tabs').addEventListener('scroll', tabFades, { passive: true });
+addEventListener('resize', () => requestAnimationFrame(() => { moveTabInd(); tabFades(); }));
+try { document.fonts.ready.then(() => moveTabInd()); } catch (e) {}
+document.querySelector('.tabs').addEventListener('keydown', ev => {
+  if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+  const tabs = [...document.querySelectorAll('.tab')], i = tabs.findIndex(t => t.dataset.tab === curTab), n = tabs[(i + (ev.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+  ev.preventDefault(); ev.stopPropagation(); renderMenu(n.dataset.tab); n.focus();
+});
 let prevMobs = null, prevMobsFor = null;
 function previewMobs(b) {
   if (prevMobs && prevMobsFor === b.id) return prevMobs;
