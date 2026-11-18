@@ -919,7 +919,7 @@ const BIOMES = [
     enemies: ['pixie', 'shroom', 'sprite', 'wisp', 'unicorn'], ground: ['#1e3a3a', '#122626', '#0a1414'], blade: ['#2e5a4a', '#244a3e'], stone: '#1a3030',
     blurb: 'Pixie swarms, armoured mushroom walkers, sprites that heal other enemies, will-o-wisps that fade in and out, and charging unicorns. The Fairy Queen holds court.' },
   { id: 'sakura', name: 'Blossom Ridge', hp: 19.5, dmg: 3.7, coin: 11.5, boss: 'oni', elite: 'tanuki',
-    enemies: ['monkey', 'crane', 'kitsune', 'petal', 'tanuki'], ground: ['#4a2a3a', '#2e1a26', '#180e14'], blade: ['#6a3a50', '#4a2e3c'], stone: '#3a2430',
+    enemies: ['monkey', 'crane', 'kitsune', 'petal', 'tanuki'], ground: ['#3c3440', '#2a2230', '#16101a'], blade: ['#6a3a50', '#4a2e3c'], stone: '#3a2430',
     blurb: 'Leaping monkeys, cranes, kitsune that blink out of sight, petal sprite swarms and armoured tanuki. The Oni guards the ridge.' },
   { id: 'void', name: 'The Void', hp: 18.5, dmg: 3.6, coin: 15, boss: 'maw', elite: 'gazer',
     enemies: ['voidling', 'shade', 'voidwisp', 'gazer', 'voidworm'], ground: ['#1a1428', '#0e0a18', '#05030a'], blade: ['#3a2a5a', '#2a2040'], stone: '#141020',
@@ -2183,7 +2183,6 @@ function ambBack(id, t) {
         glow(x, y, 50, col, pul); ctx.fillStyle = '#e8dcc0'; ctx.fillRect(x - 3, y - 2, 6, 12); ctx.fillStyle = `rgb(${col})`; ctx.beginPath(); ctx.ellipse(x, y - 2, 12, 7, 0, Math.PI, TAU); ctx.fill(); }
       break;
     case 'sakura':
-      glow(-330, -230, 230, '255,236,220', .35); ctx.fillStyle = '#f6eadf'; ctx.beginPath(); ctx.arc(-330, -230, 58, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(220,200,190,.5)'; ctx.beginPath(); ctx.arc(-345, -240, 9, 0, TAU); ctx.arc(-315, -215, 6, 0, TAU); ctx.fill();
       for (let i = 0; i < 6; i++) { const a = AMB[70 + i], x = a.x * .75, y = a.y * .75, sw = Math.sin(t / 900 + i) * .12; glow(x, y, 90, '255,150,90', .2 + .05 * Math.sin(t / 300 + i));
         ctx.save(); ctx.translate(x, y); ctx.rotate(sw); ctx.fillStyle = '#d8402a'; ctx.beginPath(); ctx.ellipse(0, 0, 9, 12, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2a1a14'; ctx.fillRect(-6, -14, 12, 3); ctx.fillRect(-6, 11, 12, 3); ctx.restore(); }
       break;
@@ -2243,7 +2242,8 @@ function ambFront(id, t) {
       for (let i = 0; i < 22; i++) { const a = AMB[i], k = Math.max(0, Math.sin(t / 500 + a.p * 7)) ** 3, x = a.x * .8, y = a.y * .8; if (k < .05) continue;
         ctx.fillStyle = `rgba(255,255,255,${k * .9})`; ctx.beginPath(); ctx.moveTo(x, y - 8 * k); ctx.lineTo(x + 1.6, y - 1.6); ctx.lineTo(x + 8 * k, y); ctx.lineTo(x + 1.6, y + 1.6); ctx.lineTo(x, y + 8 * k); ctx.lineTo(x - 1.6, y + 1.6); ctx.lineTo(x - 8 * k, y); ctx.lineTo(x - 1.6, y - 1.6); ctx.closePath(); ctx.fill(); }
       break; }
-    case 'sakura': fog(t, '255,190,215', .06, 5); break;
+    case 'sakura': if (deco.cherries) drawCherryCanopy(t); fog(t, '255,190,215', .05, 5);
+      glow(-330, -230, 230, '255,236,220', .35); ctx.fillStyle = '#f6eadf'; ctx.beginPath(); ctx.arc(-330, -230, 58, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(220,200,190,.5)'; ctx.beginPath(); ctx.arc(-345, -240, 9, 0, TAU); ctx.arc(-315, -215, 6, 0, TAU); ctx.fill(); break;
     case 'void': {
       for (let i = 0; i < 3; i++) { const a = AMB[85 + i], cyc = (t / 4200 + a.p) % 1; if (cyc > .25) continue; const ph = cyc / .25, sx = a.x * .6 - 300 + ph * 600, sy = a.y * .5 - 300 + ph * 300;
         ctx.strokeStyle = `rgba(255,255,255,${.8 * (1 - ph)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 90, sy - 45); ctx.stroke(); }
@@ -2274,6 +2274,11 @@ function makeDeco() {
   deco.moss = Array.from({ length: 26 }, () => { const a = rnd(0, 7), d = rnd(100, 800); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, rx: rnd(30, 80), ry: rnd(18, 45), a: rnd(0, 3) }; });
   deco.shrooms = ring(10, 180, 560, () => ({ n: 2 + Math.floor(rnd(0, 3)), red: Math.random() < .5 }));
   deco.flowers = Array.from({ length: 40 }, () => { const a = rnd(0, 7), d = rnd(120, 700); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, c: Math.random() < .6 ? '#e8e4d0' : '#e8c84a' }; });
+  deco.cherries = ring(16, 400, 600, () => ({ r: rnd(70, 105), lobes: Array.from({ length: 8 }, (_, j) => ({ a: j / 8 * TAU + rnd(-.3, .3), d: rnd(.35, .6), r: rnd(.4, .6) })), sh: rnd(0, 7), tone: Math.floor(rnd(0, 3)) }));
+  deco.paths = [0, 1, 2].map(i => { const a0 = i / 3 * TAU + rnd(-.3, .3), st = []; let a = a0; for (let k = 0; k < 9; k++) { const d = 760 - k * 64; a += rnd(-.1, .1); st.push({ x: Math.cos(a) * d * 1.3 + rnd(-8, 8), y: Math.sin(a) * d + rnd(-8, 8), r: rnd(15, 21), rot: rnd(0, 3) }); } return st; });
+  deco.toro = ring(5, 250, 420, () => ({ rot: rnd(-.3, .3), ph: rnd(0, 7) }));
+  deco.bamboo = ring(6, 300, 520, () => ({ n: 4 + Math.floor(rnd(0, 4)), seed: rnd(0, 99) }));
+  deco.petals = Array.from({ length: 140 }, () => { const a = rnd(0, 7), d = rnd(60, 860); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, a: rnd(0, 7), s: rnd(2.5, 4.5), c: Math.random() < .7 }; });
   deco.pines = ring(18, 340, 540, () => ({ r: rnd(60, 95), arms: 7 + Math.floor(rnd(0, 3)), rot: rnd(0, 7), tone: Math.floor(rnd(0, 3)) }));
   deco.ponds = ring(3, 230, 360, () => ({ rx: rnd(50, 75), ry: rnd(28, 42), a: rnd(0, 3), cr: Array.from({ length: 5 }, () => [rnd(-1, 1), rnd(-1, 1), rnd(0, 7), rnd(.3, .7)]) }));
   deco.drifts = Array.from({ length: 22 }, () => { const a = rnd(0, 7), d = rnd(120, 820); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, rx: rnd(40, 110), ry: rnd(16, 34), a: rnd(-.4, .4) }; });
@@ -2319,6 +2324,38 @@ function drawForestFloor(time) {
   }
   for (const m of deco.shrooms) for (let i = 0; i < m.n; i++) { const x = m.x + (i - m.n / 2) * 9, y = m.y + (i % 2) * 6, rr = 4 + (i % 3) * 1.6; ctx.fillStyle = '#e8dcc0'; ctx.fillRect(x - 1.2, y, 2.4, rr * .9); ctx.fillStyle = m.red ? '#c83a3a' : '#a8784a'; ctx.beginPath(); ctx.arc(x, y, rr, Math.PI, 0); ctx.fill(); if (m.red) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x - rr * .35, y - rr * .45, rr * .18, 0, TAU); ctx.arc(x + rr * .3, y - rr * .3, rr * .14, 0, TAU); ctx.fill(); } }
   for (const fl of deco.flowers) { ctx.fillStyle = fl.c; for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; ctx.beginPath(); ctx.arc(fl.x + Math.cos(a) * 2.2, fl.y + Math.sin(a) * 2.2, 1.6, 0, TAU); ctx.fill(); } ctx.fillStyle = '#c89a2a'; ctx.beginPath(); ctx.arc(fl.x, fl.y, 1.3, 0, TAU); ctx.fill(); }
+}
+function drawSakuraFloor(time) {
+  for (const m of deco.moss) { ctx.fillStyle = 'rgba(70,110,60,.22)'; ctx.beginPath(); ctx.ellipse(m.x, m.y, m.rx, m.ry, m.a, 0, TAU); ctx.fill(); }
+  for (const p of deco.petals) { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c ? 'rgba(255,180,210,.75)' : 'rgba(255,235,240,.7)'; ctx.beginPath(); ctx.ellipse(0, 0, p.s, p.s * .55, 0, 0, TAU); ctx.fill(); ctx.restore(); }
+  for (const path of deco.paths) for (const st of path) { ctx.save(); ctx.translate(st.x, st.y); ctx.rotate(st.rot); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(3, 4, st.r * 1.1, st.r * .8, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#6a6470'; ctx.beginPath(); ctx.ellipse(0, 0, st.r * 1.1, st.r * .8, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#857e8a'; ctx.beginPath(); ctx.ellipse(-st.r * .2, -st.r * .2, st.r * .7, st.r * .45, 0, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(255,180,210,.8)'; ctx.beginPath(); ctx.ellipse(st.r * .3, st.r * .1, 3, 1.8, 1, 0, TAU); ctx.fill(); ctx.restore(); }
+  for (const b of deco.bamboo) for (let i = 0; i < b.n; i++) { const a = b.seed + i * 2.2, d = 8 + (i % 3) * 9, x = b.x + Math.cos(a) * d, y = b.y + Math.sin(a) * d; ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(x + 3, y + 4, 8, 0, TAU); ctx.fill(); ctx.fillStyle = '#5a8a3a'; ctx.beginPath(); ctx.arc(x, y, 7.5, 0, TAU); ctx.fill(); ctx.strokeStyle = '#3a6a2a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.stroke(); ctx.fillStyle = '#7aaa4a'; ctx.beginPath(); ctx.ellipse(x + 9, y - 4, 9, 3, a + Math.sin(time / 1300 + i) * .2, 0, TAU); ctx.fill(); }
+  for (const l of deco.toro) {
+    ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.rot);
+    const gl = .55 + .2 * Math.sin(time / 700 + l.ph);
+    const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 70); g.addColorStop(0, `rgba(255,190,110,${gl * .45})`); g.addColorStop(1, 'rgba(255,190,110,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 70, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-15, -12, 34, 32);
+    ctx.fillStyle = '#5a5660'; ctx.fillRect(-18, -18, 36, 36);
+    ctx.fillStyle = '#76707c'; ctx.beginPath(); ctx.moveTo(-18, -18); ctx.lineTo(0, -26); ctx.lineTo(18, -18); ctx.lineTo(18, 18); ctx.lineTo(0, 26); ctx.lineTo(-18, 18); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#4a4650'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -26); ctx.lineTo(0, 26); ctx.moveTo(-18, 0); ctx.lineTo(18, 0); ctx.stroke();
+    ctx.fillStyle = `rgba(255,210,140,${gl})`; ctx.fillRect(-6, -6, 12, 12);
+    ctx.fillStyle = '#8a8490'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+}
+function drawCherryCanopy(t) {
+  const TONES = [['#c8608a', '#e888aa', '#ffc0d8'], ['#b85080', '#de7aa2', '#ffb0cc'], ['#d06a96', '#f094b4', '#ffd0e0']];
+  for (const tr of deco.cherries) {
+    const sw = Math.sin(t / 2600 + tr.sh) * .025, [d, m, h] = TONES[tr.tone];
+    ctx.save(); ctx.translate(tr.x, tr.y); ctx.rotate(sw);
+    ctx.fillStyle = 'rgba(20,10,20,.32)'; ctx.beginPath(); ctx.arc(16, 20, tr.r * 1.05, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#3a2620'; ctx.lineCap = 'round'; for (let i = 0; i < 5; i++) { const a = tr.sh + i / 5 * TAU; ctx.lineWidth = 7 - i % 3 * 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(Math.cos(a + .4) * tr.r * .4, Math.sin(a + .4) * tr.r * .4, Math.cos(a) * tr.r * .85, Math.sin(a) * tr.r * .85); ctx.stroke(); }
+    ctx.fillStyle = d; for (const l of tr.lobes) { ctx.beginPath(); ctx.arc(Math.cos(l.a) * tr.r * l.d, Math.sin(l.a) * tr.r * l.d, tr.r * l.r, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = m; for (const l of tr.lobes) { ctx.beginPath(); ctx.arc(Math.cos(l.a) * tr.r * l.d * .9 - tr.r * .06, Math.sin(l.a) * tr.r * l.d * .9 - tr.r * .06, tr.r * l.r * .75, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = h; for (const l of tr.lobes) { ctx.beginPath(); ctx.arc(Math.cos(l.a) * tr.r * l.d * .8 - tr.r * .12, Math.sin(l.a) * tr.r * l.d * .8 - tr.r * .12, tr.r * l.r * .38, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; for (let i = 0; i < 10; i++) { const a = tr.sh * 2 + i * 2.3, dd = tr.r * (.2 + (i * 7 % 10) / 10 * .6); ctx.beginPath(); ctx.arc(Math.cos(a) * dd, Math.sin(a) * dd, 2.4, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
 }
 function drawSnowFloor(time) {
   for (const d of deco.drifts) { ctx.fillStyle = 'rgba(40,55,75,.18)'; ctx.beginPath(); ctx.ellipse(d.x + 6, d.y + 8, d.rx, d.ry, d.a, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(200,215,235,.16)'; ctx.beginPath(); ctx.ellipse(d.x, d.y, d.rx, d.ry, d.a, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(230,240,255,.14)'; ctx.beginPath(); ctx.ellipse(d.x - d.rx * .2, d.y - d.ry * .3, d.rx * .55, d.ry * .4, d.a, 0, TAU); ctx.fill(); }
@@ -2415,6 +2452,7 @@ function drawGround(biome, time) {
   if (biome.id === 'dunes') { ctx.strokeStyle = 'rgba(255,230,170,.08)'; ctx.lineWidth = 3; for (let i = -900; i < 900; i += 46) { ctx.beginPath(); for (let x = -900; x <= 900; x += 30) { const y = i + Math.sin(x / 90 + i) * 14; x === -900 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); } }
   if (biome.id === 'volcano' && deco.rivers) drawVolcanoFloor(time);
   if (biome.id === 'snow' && deco.pines) drawSnowFloor(time);
+  if (biome.id === 'sakura' && deco.cherries) drawSakuraFloor(time);
   if (false) {
     ctx.lineWidth = 3; ctx.strokeStyle = `rgba(255,110,40,${.3 + .12 * Math.sin(time / 400)})`;
     for (const s of deco.stones) { ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x + s.r * 4, s.y + s.r * 1.5); ctx.lineTo(s.x + s.r * 6, s.y - s.r * 2); ctx.moveTo(s.x + s.r * 4, s.y + s.r * 1.5); ctx.lineTo(s.x + s.r * 3, s.y + s.r * 5); ctx.stroke(); }
@@ -2443,9 +2481,9 @@ function drawGround(biome, time) {
     for (let r = 120; r < 1100; r += 70) { ctx.beginPath(); for (let i = 0; i <= 16; i++) { const a = i / 16 * TAU, rr = r * (i % 2 ? .96 : 1); i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.stroke(); }
   }
   if (biome.id === 'city') { ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 2; for (let i = -900; i < 900; i += 120) { ctx.beginPath(); ctx.moveTo(i, -900); ctx.lineTo(i, 900); ctx.moveTo(-900, i); ctx.lineTo(900, i); ctx.stroke(); } }
-  if (biome.id !== 'office' && biome.id !== 'volcano' && biome.id !== 'snow') for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
+  if (!['office', 'volcano', 'snow', 'sakura'].includes(biome.id)) for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
   ctx.lineWidth = 2; ctx.lineCap = 'round';
-  if (biome.id !== 'office' && biome.id !== 'volcano' && biome.id !== 'snow') for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
+  if (!['office', 'volcano', 'snow', 'sakura'].includes(biome.id)) for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
 }
 function drawWeather(biome, time) {
   if (biome.id === 'sakura' || biome.id === 'fairy' || biome.id === 'volcano') {
