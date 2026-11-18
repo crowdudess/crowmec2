@@ -326,7 +326,7 @@ canvas.manualaim { cursor: crosshair; }
 .dcard:focus-visible { outline: 3px solid var(--bone); outline-offset: 2px; }
 .dcard.sel { border-color: var(--dc); background: linear-gradient(180deg, color-mix(in srgb, var(--dc) 22%, var(--moss-2)), var(--moss-2)); box-shadow: 0 0 0 1px var(--dc), 0 0 18px color-mix(in srgb, var(--dc) 35%, transparent); }
 .dcard .skulls { display: flex; gap: 2px; height: 20px; align-items: center; }
-.dcard .skulls svg { width: 18px; height: 18px; color: var(--dc); }
+.dcard .skulls svg { width: 20px; height: 20px; color: var(--dc); }
 .dcard .dn { font: 800 16px var(--body); }
 .dcard .dm { font: 700 11px var(--mono); color: var(--bone-dim); line-height: 1.35; }
 .dcard .dm b { color: var(--coin); font-weight: 800; }
@@ -528,7 +528,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.51.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.51.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4262,7 +4262,7 @@ function renderFly() {
   $('startBtn').textContent = (C ? T('start_ch', chn(C)) : b.mode && save.chaos ? T('start_chaos', save.chaos) : T('start')) + (!b.mode && diffOf(b) ? ' · ' + T('diff_' + DIFFS[diffOf(b)].id) : '');
   $('startBtn').disabled = !biomeState(b.id).unlocked;
 }
-const SKULL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C7 2 3.5 5.6 3.5 10.2c0 2.7 1.2 4.7 3 5.9V19a1 1 0 0 0 1 1h1.5v-2h1.5v2h3v-2H15v2h1.5a1 1 0 0 0 1-1v-2.9c1.8-1.2 3-3.2 3-5.9C20.5 5.6 17 2 12 2zM8.5 13.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm7 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM12 14.2l1.2 2.2h-2.4z"/></svg>';
+const SKULL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.8c-4.6 0-8 3-8 7.2 0 2.6 1.3 4.6 3.4 5.8L12 22.8l4.6-8C18.7 13.6 20 11.6 20 9c0-4.2-3.4-7.2-8-7.2z"/><ellipse cx="8.6" cy="9.2" rx="2.3" ry="2.6" fill="#141a12"/><ellipse cx="15.4" cy="9.2" rx="2.3" ry="2.6" fill="#141a12"/><path d="M12 14v6.5" stroke="#141a12" stroke-width=".9" stroke-linecap="round"/><path d="M10.9 13.4l.7.9M13.1 13.4l-.7.9" stroke="#141a12" stroke-width=".8" stroke-linecap="round"/></svg>';
 const LOCK = '<svg class="dlock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2.2" fill="none"/></svg>';
 function renderDiff(b, bs, unlocked) {
   const box = $('diffBox'); box.innerHTML = ''; box.hidden = !unlocked || !!b.mode;
