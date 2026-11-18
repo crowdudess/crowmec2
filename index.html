@@ -834,7 +834,7 @@ function deathSfx(k, boss, preview, mode) {
   if (mode === 'silly') { osc('sine', 900 + hv * 400, 220, 0, .32, .1); osc('square', 1300, 1600, .3, .06, .035); if (boss) osc('sine', 500, 90, .35, .7, .12); return; }
   if (mode === 'retro') { nz(0, .2, .12, 600); osc('square', 880 - hv * 300, 90, 0, .22, .05); if (boss) { for (let i = 0; i < 4; i++) osc('square', 440 / (i + 1), 60, .2 + i * .12, .12, .05); } return; }
   const base = (220 + hv * 440) * (1.45 - big);
-  const shp = { wolf: 'quad', owl: 'bird', queenspider: 'spider', eggsac: 'bug', catboss: 'quad', kong: 'ape', gatorboss: 'gator', scorpboss: 'scorpion', wyrm: 'snake', faequeen: 'fairy' }[d.shape] || d.shape;
+  const shp = { roach: 'bug', wolf: 'quad', owl: 'bird', queenspider: 'spider', eggsac: 'bug', catboss: 'quad', kong: 'ape', gatorboss: 'gator', scorpboss: 'scorpion', wyrm: 'snake', faequeen: 'fairy' }[d.shape] || d.shape;
   switch (shp) {
     case 'bug': nz(0, .06, .09, 3000); osc('square', base * 2, base, 0, .07, .04); if (d.wings) osc('sawtooth', base * 4, base * 2, 0, .1, .02); break;
     case 'quad': case 'bear': case 'oni': case 'ratking': osc('sawtooth', base * 1.6, base * .6, 0, .18, .05); osc('triangle', base * 2.2, base * 1.2, .02, .12, .035); break;
@@ -954,8 +954,8 @@ const E = {
   bear:     { name: 'Frost Bear', shape: 'bear', aura: '#9fdcff', tail: 'none', ears: true, col: ['#cfd8e2', '#aab6c4', '#111'], hp: 560, spd: 24, dmg: 44, gold: 70, r: 38, boss: true, armor: 8, summon: 'wolf', frost: true },
 
   rat:      { name: 'Rats', shape: 'quad', tail: 'thin', ears: true, col: ['#5a504a', '#3a3430', '#e33'], hp: 13, spd: 92, dmg: 3, gold: 1, r: 9, cost: 2, from: 1, pack: 4 },
-  roach:    { name: 'Roach', shape: 'bug', col: ['#5a3018', '#2a1408', '#000'], hp: 26, spd: 62, dmg: 4, gold: 2, r: 11, cost: 1, from: 1, armor: 2, split: 'roachling' },
-  roachling:{ name: 'Roachling', shape: 'bug', col: ['#6a3a20', '#2a1408', '#000'], hp: 8, spd: 85, dmg: 2, gold: 1, r: 7, cost: 0, from: 99 },
+  roach:    { name: 'Roach', shape: 'roach', col: ['#5a3018', '#2a1408', '#000'], hp: 26, spd: 62, dmg: 4, gold: 2, r: 11, cost: 1, from: 1, armor: 2, split: 'roachling' },
+  roachling:{ name: 'Roachling', shape: 'roach', col: ['#6a3a20', '#2a1408', '#000'], hp: 8, spd: 85, dmg: 2, gold: 1, r: 7, cost: 0, from: 99 },
   pigeon:   { name: 'Thief Pigeon', shape: 'bird', col: ['#6a7080', '#8a90a0', '#e0a040'], hp: 30, spd: 150, dmg: 3, gold: 4, r: 13, cost: 2, from: 2, fly: true, thief: true },
   dog:      { name: 'Stray Dog', shape: 'quad', tail: 'thin', ears: true, col: ['#8a6a48', '#6a4f34', '#111'], hp: 80, spd: 85, dmg: 11, gold: 7, r: 17, cost: 3, from: 3 },
   binbandit:{ name: 'Bin Raccoon', shape: 'quad', tail: 'striped', mask: true, col: ['#4a4844', '#33312e', '#eee'], hp: 160, spd: 38, dmg: 20, gold: 12, r: 21, cost: 5, from: 4, armor: 5 },
@@ -2785,20 +2785,29 @@ function drawEnemy(e, time) {
       ctx.fillStyle = '#111'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * 1.08, sd * r * .16, r * .025, 0, TAU); ctx.fill(); }
       break; }
     case 'owl': {
-      const f = Math.sin(time / 95 + e.ph), span = r * (2.3 + f * .25), lift = f * r * .15;
-      for (const sd of [-1, 1]) {
-        ctx.fillStyle = c0; ctx.beginPath(); ctx.moveTo(r * .35, sd * r * .25); ctx.quadraticCurveTo(r * .5, sd * span * .7, r * .05 - lift, sd * span); ctx.quadraticCurveTo(-r * .5, sd * span * .95, -r * .55, sd * span * .7); ctx.quadraticCurveTo(-r * .7, sd * span * .4, -r * .4, sd * r * .25); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = '#9aa2ac'; for (let i = 0; i < 4; i++) { const t = .55 + i * .12; ctx.beginPath(); ctx.ellipse(-r * .28 + i * r * .05 - lift * t, sd * span * t, r * .1, r * .05, sd * .4, 0, TAU); ctx.fill(); }
-        ctx.fillStyle = '#5a626c'; for (let i = 0; i < 3; i++) { const t = .35 + i * .18; ctx.beginPath(); ctx.arc(r * .05 - i * r * .12, sd * span * t, r * .045, 0, TAU); ctx.fill(); }
-      }
-      ctx.fillStyle = c1; ctx.beginPath(); ctx.moveTo(-r * .5, -r * .3); ctx.lineTo(-r * 1.1, -r * .22); ctx.lineTo(-r * 1.15, 0); ctx.lineTo(-r * 1.1, r * .22); ctx.lineTo(-r * .5, r * .3); ctx.fill();
-      ctx.fillStyle = c0; ctx.beginPath(); ctx.ellipse(-r * .05, 0, r * .62, r * .48, 0, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#7a828c'; for (const [x, y] of [[-.3, -.2], [-.15, .2], [0, -.1], [-.4, .15], [.1, .22]]) { ctx.beginPath(); ctx.arc(x * r, y * r, r * .05, 0, TAU); ctx.fill(); }
+      const f = Math.sin(time / 95 + e.ph), span = r * (2.2 + f * .3);
+      ctx.fillStyle = c0;
+      for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * .3, sd * r * .2); ctx.quadraticCurveTo(r * .35, sd * span, -r * .25, sd * span); ctx.quadraticCurveTo(-r * .55, sd * span * .6, -r * .45, sd * r * .2); ctx.closePath(); ctx.fill(); }
+      ctx.fillStyle = '#6a727c'; for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) { const t = .45 + i * .2; ctx.fillRect(-r * .2 - i * r * .05, sd * span * t - r * .06, r * .32, r * .12); }
+      ctx.fillStyle = c0; ctx.beginPath(); ctx.moveTo(-r * .4, -r * .28); ctx.lineTo(-r * 1.05, 0); ctx.lineTo(-r * .4, r * .28); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, 0, r * .6, r * .46, 0, 0, TAU); ctx.fill();
       ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .55, 0, r * .48, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#ffffff'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .62, sd * r * .2, r * .24, 0, TAU); ctx.fill(); }
-      ctx.fillStyle = fl ? '#fff' : c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .7, sd * r * .2, r * .15, 0, TAU); ctx.fill(); }
-      ctx.fillStyle = '#111'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .73, sd * r * .2, r * .08, 0, TAU); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(r * .7, sd * r * .2 - r * .04, r * .03, 0, TAU); ctx.fill(); ctx.fillStyle = '#111'; }
-      ctx.fillStyle = '#3a3428'; ctx.beginPath(); ctx.moveTo(r * .88, -r * .07); ctx.quadraticCurveTo(r * 1.08, 0, r * .9, r * .09); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = fl ? '#fff' : c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .68, sd * r * .2, r * .17, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#111'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .72, sd * r * .2, r * .09, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = '#3a3428'; ctx.beginPath(); ctx.moveTo(r * .86, -r * .07); ctx.lineTo(r * 1.06, 0); ctx.lineTo(r * .86, r * .07); ctx.fill();
+      break; }
+    case 'roach': {
+      const baby = e.k === 'roachling', g = time / 55 + e.ph * 4, ant = Math.sin(time / 140 + e.ph);
+      ctx.strokeStyle = '#1a0c04'; ctx.lineWidth = Math.max(1.3, r * .1); ctx.lineCap = 'round';
+      for (let i = 0; i < 3; i++) { const w = Math.sin(g + i * 2.1) * .3, ax = r * (.35 - i * .45); for (const sd of [-1, 1]) { const ww = w * (sd > 0 ? 1 : -1); ctx.beginPath(); ctx.moveTo(ax, sd * r * .4); ctx.lineTo(ax + r * (.25 - i * .25) + ww * r, sd * r * .95); ctx.lineTo(ax + r * (.1 - i * .45) + ww * r * 1.4, sd * r * 1.35); ctx.stroke(); } }
+      ctx.lineWidth = Math.max(1, r * .06); for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(r * .95, sd * r * .15); ctx.quadraticCurveTo(r * 1.7, sd * r * (.4 + ant * sd * .2), r * (baby ? 1.9 : 2.4), sd * r * (.9 + ant * sd * .4)); ctx.stroke(); }
+      if (!baby) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-r * .95, sd * r * .15); ctx.lineTo(-r * 1.3, sd * r * .35); ctx.stroke(); }
+      ctx.fillStyle = fl ? '#fff' : c0; ctx.beginPath(); ctx.ellipse(-r * .1, 0, r * 1.0, r * .62, 0, 0, TAU); ctx.fill();
+      if (!baby) { ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = Math.max(1, r * .07); ctx.beginPath(); ctx.moveTo(r * .35, 0); ctx.lineTo(-r * 1.05, 0); ctx.stroke(); ctx.fillStyle = 'rgba(255,220,180,.18)'; ctx.beginPath(); ctx.ellipse(-r * .25, -r * .28, r * .55, r * .14, -.1, 0, TAU); ctx.fill(); }
+      else { ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = Math.max(1, r * .08); for (const x of [-.5, -.15, .2]) { ctx.beginPath(); ctx.moveTo(x * r, -r * .5); ctx.lineTo(x * r, r * .5); ctx.stroke(); } }
+      ctx.fillStyle = fl ? '#fff' : '#c8955a'; ctx.beginPath(); ctx.ellipse(r * .62, 0, r * .4, r * .5, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(r * .66, 0, r * .24, r * .32, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(r * .98, 0, r * .2, 0, TAU); ctx.fill();
       break; }
     case 'bird': {
       const f = Math.sin(time / 70 + e.ph) * .25;
@@ -4337,7 +4346,7 @@ function monsterTraits(k) {
 function drawMonsterPreview(cvs, k, known, time = 1000) {
   const d = E[k], pc = cvs.getContext('2d'), W = cvs.width, H = cvs.height;
   pc.clearRect(0, 0, W, H);
-  const SZ = { wolf: [3.4, 2.4], owl: [2.6, 5.2], queenspider: [3.4, 3.4], eggsac: [2.4, 2.4], catboss: [3.2, 2.4], gatorboss: [3.6, 2.4], scorpboss: [3.2, 3], wyrm: [3.4, 2.6], faequeen: [2.6, 3.4], kong: [4.4, 4.4] }[d.shape];
+  const SZ = { roach: [3.6, 3.4], wolf: [3.4, 2.4], owl: [2.6, 5.2], queenspider: [3.4, 3.4], eggsac: [2.4, 2.4], catboss: [3.2, 2.4], gatorboss: [3.6, 2.4], scorpboss: [3.2, 3], wyrm: [3.4, 2.6], faequeen: [2.6, 3.4], kong: [4.4, 4.4] }[d.shape];
   const r = d.r, wide = SZ ? SZ[0] : d.shape === 'snake' || d.shape === 'ratking' ? 3 : d.shape === 'quad' || d.shape === 'bear' || d.shape === 'oni' || d.shape === 'ratking' || d.shape === 'gator' || d.shape === 'scorpion' ? 2.6 : 2.3;
   const tall = SZ ? SZ[1] : d.shape === 'bat' ? 6 : d.shape === 'bird' ? 4.8 : d.shape === 'oni' ? 3 : d.shape === 'spider' ? 3.4 : d.shape === 'ratking' ? 2.8 : 2.4;
   const sc = Math.min(H * .8 / (r * tall), W * .8 / (r * wide), W / 100);
