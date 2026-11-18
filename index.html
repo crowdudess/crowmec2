@@ -585,72 +585,92 @@ function tone(f0, f1, dur, type = 'square', v = .06) {
 }
 // ---------- music: a small live sequencer, one tune per biome ----------
 const SC = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], phryg: [0, 1, 3, 5, 7, 8, 10], hijaz: [0, 1, 4, 5, 7, 8, 10], lydian: [0, 2, 4, 6, 7, 9, 11], pent: [0, 2, 4, 7, 9], mpent: [0, 3, 5, 7, 10], insen: [0, 1, 5, 7, 10], whole: [0, 2, 4, 6, 8, 10], locrian: [0, 1, 3, 5, 6, 8, 10] };
+// Each song: tempo, key, chord loop, and its own groove. Patterns are 16 steps per bar (32 for melodies).
+// Melody/bass chars: 0-9 = scale step above the chord root, a-e = 10-14, A-C = 1-3 below, '.' = rest.
+// Drums: k kick, s snare, h hat, o open hat, c clap, r rim, z shaker, t tom, T low tom, j taiko, q tick.
 const SONGS = {
-  menu:    { bpm: 84,  root: 50, sc: 'minor',   prog: [0, 5, 3, 4], lead: 'triangle', bass: 'sine', pad: .5, arp: [0, 2, 4, 2, 0, 2, 4, 6] },
-  forest:  { bpm: 98,  root: 55, sc: 'major',   prog: [0, 4, 5, 3], lead: 'triangle', bass: 'triangle', pad: .35, arp: [0, 2, 4, 2, 4, 5, 4, 2] },
-  marsh:   { bpm: 82,  root: 50, sc: 'dorian',  prog: [0, 3, 0, 4], lead: 'sine', bass: 'triangle', pad: .45, arp: [0, 4, 2, 4, 0, 4, 2, 6] },
-  snow:    { bpm: 74,  root: 57, sc: 'minor',   prog: [0, 5, 2, 6], lead: 'sine', bass: 'sine', pad: .55, arp: [4, 2, 0, 2, 4, 6, 4, 2], bell: true },
-  city:    { bpm: 112, root: 45, sc: 'mpent',   prog: [0, 0, 2, 3], lead: 'square', bass: 'sawtooth', pad: .2, arp: [0, 1, 2, 1, 3, 2, 1, 0], hat: true },
-  dunes:   { bpm: 100, root: 52, sc: 'hijaz',   prog: [0, 1, 0, 6], lead: 'sawtooth', bass: 'triangle', pad: .3, arp: [0, 1, 2, 1, 0, 1, 4, 2], hat: true },
-  jungle:  { bpm: 114, root: 53, sc: 'pent',    prog: [0, 3, 1, 0], lead: 'triangle', bass: 'triangle', pad: .25, arp: [0, 2, 1, 3, 2, 4, 3, 1], hat: true, kick: true },
-  spider:  { bpm: 76,  root: 49, sc: 'locrian', prog: [0, 1, 0, 4], lead: 'sine', bass: 'sine', pad: .5, arp: [0, 1, 0, 3, 0, 1, 4, 3] },
-  volcano: { bpm: 122, root: 40, sc: 'phryg',   prog: [0, 1, 5, 0], lead: 'sawtooth', bass: 'sawtooth', pad: .25, arp: [0, 0, 2, 0, 1, 0, 4, 3], kick: true, hat: true },
-  fairy:   { bpm: 94,  root: 62, sc: 'lydian',  prog: [0, 1, 4, 0], lead: 'sine', bass: 'triangle', pad: .45, arp: [0, 2, 4, 6, 4, 2, 4, 3], bell: true },
-  sakura:  { bpm: 86,  root: 57, sc: 'insen',   prog: [0, 2, 3, 0], lead: 'triangle', bass: 'sine', pad: .4, arp: [0, 1, 2, 3, 4, 3, 2, 1], bell: true },
-  void:    { bpm: 66,  root: 44, sc: 'whole',   prog: [0, 3, 1, 4], lead: 'sine', bass: 'sine', pad: .6, arp: [0, 3, 1, 4, 2, 5, 3, 0] },
-  rift:    { bpm: 118, root: 47, sc: 'phryg',   prog: [0, 1, 6, 5], lead: 'sawtooth', bass: 'square', pad: .35, arp: [0, 3, 1, 4, 2, 5, 3, 6], hat: true, kick: true, bell: true },
-  office:  { bpm: 106, root: 55, sc: 'major',   prog: [1, 4, 0, 5], lead: 'square', bass: 'triangle', pad: .3, arp: [0, 2, 4, 6, 4, 2, 1, 2], hat: true },
+  menu:    { bpm: 80,  root: 50, sc: 'minor',   prog: [0, 5, 3, 4], pad: .6, bp: '0.......4.......', bw: 'sine', bv: .09, mel: '0...2...4...2...3...2...1.......', lw: 'triangle', lv: .04, leg: .9 },
+  forest:  { bpm: 104, root: 55, sc: 'major',   prog: [0, 3, 4, 0], swing: .18, pad: .3, bp: '0..4..0.2..4..0.', bw: 'triangle', bv: .1, mel: '4.2.4.5.7...5.4.2.0.2.4...2.....', lw: 'triangle', lv: .05, leg: .6, pluck: 1, drums: { z: 'x.x.x.x.x.x.x.x.', k: 'x.......x.......', r: '....x.......x...' } },
+  marsh:   { bpm: 78,  root: 48, sc: 'dorian',  prog: [0, 0, 3, 4], pad: .45, glide: 1, bp: '0.....0.3.....2.', bw: 'sawtooth', bv: .07, mel: '....4..3...2....0.....2..1..0...', lw: 'sine', lv: .05, vib: 6, leg: 1, drums: { T: 'x.......x..x....', q: '..x...x...x...x.' } },
+  snow:    { bpm: 70,  root: 57, sc: 'minor',   prog: [0, 5, 2, 6], pad: .7, bp: '0...............', bw: 'sine', bv: .08, mel: '7.6.4.2.4.......7.6.4.6.7.......', lw: 'sine', lv: .04, leg: .5, mo: 2, bells: 'x.......x.......' },
+  city:    { bpm: 92,  root: 45, sc: 'mpent',   prog: [0, 0, 3, 2], swing: .2, bp: '0..0.......3.2..', bw: 'square', bv: .08, mel: '....2.3.....2.0.....3.4.3.2.0...', lw: 'square', lv: .028, leg: .5, drums: { k: 'x......xx.......', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', o: '..............x.' } },
+  dunes:   { bpm: 96,  root: 52, sc: 'hijaz',   prog: [0, 0, 1, 0], drone: 1, bp: '0.....0.....0.4.', bw: 'triangle', bv: .1, mel: '0.1.2...1.2.1.0.4...3.2.1.2.1.0.', lw: 'sawtooth', lv: .028, vib: 5, leg: .9, drums: { T: 'x..x..x.x.......', r: '....x..x....x.xx' } },
+  jungle:  { bpm: 118, root: 53, sc: 'pent',    prog: [0, 3, 1, 0], bp: '0.0...2.0.0...3.', bw: 'triangle', bv: .1, mel: '0.2.4.2.5.4.2...3.4.5.7.5.4.2...', lw: 'triangle', lv: .045, leg: .35, pluck: 1, drums: { k: 'x.....x...x.....', t: '..x.x...x...x.x.', T: 'x......x.....x..', z: 'xxxxxxxxxxxxxxxx' } },
+  spider:  { bpm: 72,  root: 49, sc: 'locrian', prog: [0, 1, 0, 4], bp: '0.......A.......', bw: 'sine', bv: .1, mel: '0..1..0..4..3...0..1..0..6..4...', lw: 'square', lv: .024, leg: .3, pluck: 1, drums: { q: 'x...x...x...x...', T: 'x...............' } },
+  volcano: { bpm: 128, root: 40, sc: 'phryg',   prog: [0, 1, 0, 5], bp: '0.00.0.00.0.1.0.', bw: 'sawtooth', bv: .09, mel: '0...1...0...4.3.0...1...5...4...', lw: 'sawtooth', lv: .032, leg: .8, mo: 2, drums: { k: 'x.x.x.x.x.x.x.x.', s: '....x.......x...', h: '..x...x...x...x.' } },
+  fairy:   { bpm: 100, root: 62, sc: 'lydian',  prog: [0, 1, 4, 0], pad: .45, arp: [0, 2, 4, 6, 7, 6, 4, 2], arpRate: 1, av: .018, mel: '4.......6.......7.....6.4.......', lw: 'sine', lv: .04, vib: 4, leg: 1, bells: '..x.......x...x.', drums: { z: '..x...x...x...x.' } },
+  sakura:  { bpm: 84,  root: 57, sc: 'insen',   prog: [0, 2, 3, 0], bp: '0.......3.......', bw: 'sine', bv: .09, mel: '0.1.2...4.3.2...1.2.0.....A.0...', lw: 'triangle', lv: .05, leg: .4, pluck: 1, mel2: '4...............3...............', l2w: 'sine', l2v: .028, drums: { j: 'x.........x.....', r: '....x.......x..x' } },
+  void:    { bpm: 60,  root: 44, sc: 'whole',   prog: [0, 3, 1, 4], pad: .8, drone: 1, mel: '0.......3.......5.......2.......', lw: 'sine', lv: .03, vib: 3, leg: 1.5, drums: { k: 'x..x............' } },
+  rift:    { bpm: 124, root: 47, sc: 'phryg',   prog: [0, 1, 6, 5], arp: [0, 3, 1, 4, 2, 5, 3, 6], arpRate: 1, av: .03, aw: 'square', bp: '0.0.0.0.0.0.0.0.', bw: 'square', bv: .07, drums: { k: 'x...x...x...x...', h: '..x...x...x...x.', c: '....x.......x...' } },
+  office:  { bpm: 100, root: 55, sc: 'major',   prog: [1, 4, 0, 5], swing: .12, bp: '0..4..0.0..4..0.', bw: 'triangle', bv: .1, mel: '2...4.2...1.0...2...4.5...4.2...', lw: 'square', lv: .024, leg: .6, drums: { r: 'x..x..x...x..x..', z: 'x.x.x.x.x.x.x.x.', k: 'x.......x.......' } },
 };
 const BOSS_SONGS = {
-  menu:    { bpm: 132, root: 50, sc: 'minor',   prog: [0, 5, 6, 4], lead: 'square',   bass: 'sawtooth', arp: [0, 4, 2, 4, 7, 4, 2, 4] },
-  forest:  { bpm: 136, root: 52, sc: 'minor',   prog: [0, 5, 6, 4], lead: 'square',   bass: 'sawtooth', arp: [0, 4, 2, 4, 7, 4, 2, 4] },
-  marsh:   { bpm: 120, root: 47, sc: 'phryg',   prog: [0, 1, 0, 6], lead: 'sawtooth', bass: 'square',   arp: [0, 2, 4, 2, 1, 2, 4, 6] },
-  snow:    { bpm: 128, root: 50, sc: 'minor',   prog: [0, 3, 6, 5], lead: 'triangle', bass: 'sawtooth', arp: [7, 4, 2, 0, 2, 4, 7, 9], bell: true },
-  city:    { bpm: 140, root: 43, sc: 'mpent',   prog: [0, 3, 0, 4], lead: 'square',   bass: 'sawtooth', arp: [0, 2, 3, 2, 4, 3, 2, 1] },
-  dunes:   { bpm: 132, root: 50, sc: 'hijaz',   prog: [0, 1, 4, 1], lead: 'sawtooth', bass: 'sawtooth', arp: [0, 1, 2, 3, 4, 3, 2, 1] },
-  jungle:  { bpm: 144, root: 48, sc: 'mpent',   prog: [0, 2, 3, 4], lead: 'square',   bass: 'triangle', arp: [0, 2, 4, 2, 3, 1, 4, 0] },
-  spider:  { bpm: 118, root: 46, sc: 'locrian', prog: [0, 4, 1, 0], lead: 'sawtooth', bass: 'square',   arp: [0, 1, 4, 1, 0, 3, 6, 3] },
-  volcano: { bpm: 150, root: 38, sc: 'phryg',   prog: [0, 1, 0, 5], lead: 'sawtooth', bass: 'sawtooth', arp: [0, 0, 1, 0, 4, 0, 5, 3] },
-  fairy:   { bpm: 126, root: 57, sc: 'minor',   prog: [0, 2, 5, 4], lead: 'triangle', bass: 'square',   arp: [0, 2, 4, 7, 4, 2, 4, 6], bell: true },
-  sakura:  { bpm: 130, root: 52, sc: 'insen',   prog: [0, 3, 2, 4], lead: 'square',   bass: 'sawtooth', arp: [0, 2, 1, 3, 2, 4, 3, 5] },
-  void:    { bpm: 112, root: 41, sc: 'whole',   prog: [0, 1, 3, 2], lead: 'sawtooth', bass: 'sine',     arp: [0, 3, 5, 3, 1, 4, 6, 4] },
-  office:  { bpm: 140, root: 50, sc: 'minor',   prog: [0, 4, 5, 3], lead: 'square',   bass: 'square',   arp: [0, 2, 4, 2, 0, 2, 4, 7] },
+  menu:    { bpm: 150, root: 52, sc: 'dorian',  prog: [0, 0, 3, 4], swing: .2, bp: '0.2.4.5.7.5.4.2.', bw: 'triangle', bv: .11, mel: '7.7.6.4...7.6.4.3.4.6.7.....9...', lw: 'sawtooth', lv: .035, leg: .6, vib: 3, drums: { k: 'x.......x.......', s: '....x.......x...', h: 'x.xxx.xxx.xxx.xx' } },
+  forest:  { bpm: 150, root: 52, sc: 'dorian',  prog: [0, 0, 3, 4], swing: .2, bp: '0.2.4.5.7.5.4.2.', bw: 'triangle', bv: .11, mel: '7.7.6.4...7.6.4.3.4.6.7.....9...', lw: 'sawtooth', lv: .035, leg: .6, vib: 3, drums: { k: 'x.......x.......', s: '....x.......x...', h: 'x.xxx.xxx.xxx.xx' } },
+  marsh:   { bpm: 96,  root: 43, sc: 'mpent',   prog: [0, 0, 3, 0], glide: 1, bp: '0...0.0.3...2.0.', bw: 'sawtooth', bv: .11, mel: '....3.2.0.......4.3.2.0.2.......', lw: 'square', lv: .03, vib: 5, leg: .8, drums: { k: 'x...x...x...x...', c: '....x.......x...', T: '..x.......x.....' } },
+  snow:    { bpm: 110, root: 45, sc: 'minor',   prog: [0, 5, 3, 4], pad: .5, bp: '0.......0...0...', bw: 'sawtooth', bv: .11, mel: '0...2...4...7...6...4...2...4...', lw: 'sawtooth', lv: .036, leg: 1, mo: 2, bells: '....x.......x...', drums: { j: 'x.....x...x.....', T: '....x.......x.x.', s: '............x...' } },
+  city:    { bpm: 168, root: 45, sc: 'mpent',   prog: [0, 2, 3, 0], bp: '0.0.0.0.2.2.3.3.', bw: 'square', bv: .09, stab: '..x...x...x...x.', mel: '4.4.3.2.0...2.3.4.4.3.2.3.......', lw: 'square', lv: .03, leg: .5, drums: { k: 'x...x...x...x...', s: '....x.......x...', h: 'xxxxxxxxxxxxxxxx' } },
+  dunes:   { bpm: 140, root: 50, sc: 'hijaz',   prog: [0, 0, 1, 0], drone: 1, bp: '0..0..0.0..0..1.', bw: 'triangle', bv: .11, mel: '01234321012345656543210.1210....', lw: 'sawtooth', lv: .026, leg: .9, drums: { T: 'x..x..x.x..x..x.', r: '.x.xx.x..x.xx.x.', k: 'x.......x.......' } },
+  jungle:  { bpm: 150, root: 48, sc: 'mpent',   prog: [0, 2, 3, 4], bp: '0.0.0.2.0.0.3.4.', bw: 'triangle', bv: .1, mel: '4.4.7.4.3.2.0...4.4.7.9.7.4.2...', lw: 'triangle', lv: .045, leg: .35, pluck: 1, drums: { k: 'x..x..x...x..x..', t: 'x.x.x.x.x.x.x.x.', T: '..x...x...x...x.', z: 'xxxxxxxxxxxxxxxx' } },
+  spider:  { bpm: 126, root: 46, sc: 'locrian', prog: [0, 4, 1, 0], arp: [0, 2, 4, 7, 4, 2, 0, 2], arpRate: 1, av: .022, aw: 'square', bp: '0.......4...1...', bw: 'sawtooth', bv: .1, mel: '7.......6.......4.......3...1...', lw: 'sawtooth', lv: .03, leg: 1, drums: { k: 'x.....x.x.......', s: '....x.......x...', q: 'xxxxxxxxxxxxxxxx' } },
+  volcano: { bpm: 170, root: 38, sc: 'phryg',   prog: [0, 1, 0, 5], bp: '00.000.000.000.1', bw: 'sawtooth', bv: .09, mel: '0...1...3...1...0...4...5...3...', lw: 'sawtooth', lv: .036, leg: 1, mo: 2, drums: { k: 'xxxxxxxxxxxxxxxx', s: '....x.......x...', o: 'x.......x.......' } },
+  fairy:   { bpm: 138, root: 57, sc: 'minor',   prog: [0, 5, 3, 4], arp: [0, 2, 4, 7, 9, 7, 4, 2], arpRate: 1, av: .016, bp: '0.....4.....2...', bw: 'triangle', bv: .1, mel: '7.....6.....4...7.....9.....7...', lw: 'sine', lv: .045, vib: 5, leg: 1, bells: '..x..x....x..x..', drums: { k: 'x.....x.....x...', h: '..x..x..x..x..x.' } },
+  sakura:  { bpm: 132, root: 52, sc: 'insen',   prog: [0, 3, 2, 4], bp: '0...0...0.0.3...', bw: 'sawtooth', bv: .1, mel: '0.0.2.1.0...3.2.4.4.3.2.1...0...', lw: 'sawtooth', lv: .036, leg: .3, pluck: 1, drums: { j: 'x...x...x.x.x...', T: '..x...x.....x.xx', r: 'x.x.x.x.x.x.x.x.' } },
+  void:    { bpm: 92,  root: 41, sc: 'whole',   prog: [0, 1, 3, 2], pad: .4, drone: 1, glide: 1, bp: '0.......0.0.....', bw: 'sawtooth', bv: .12, mel: '0.......1.......3...2...1.......', lw: 'sawtooth', lv: .028, vib: 8, leg: 1.2, bells: '......x.......x.', drums: { k: 'x..x....x..x....', c: '........x.......' } },
+  office:  { bpm: 156, root: 50, sc: 'minor',   prog: [0, 4, 5, 3], bp: '0.4.0.4.0.4.0.4.', bw: 'square', bv: .08, mel: '0.2.4.2.0.2.4.7.6.4.2.4.6.4.2...', lw: 'square', lv: .028, leg: .5, drums: { k: 'x...x...x...x...', q: 'xxxxxxxxxxxxxxxx', c: '....x.......x...', r: '...x..x....x..x.' } },
 };
 const midi = n => 440 * Math.pow(2, (n - 69) / 12);
+const mdeg = c => c >= '0' && c <= '9' ? +c : c >= 'a' && c <= 'e' ? 10 + c.charCodeAt(0) - 97 : c >= 'A' && c <= 'C' ? -(c.charCodeAt(0) - 64) : null;
 const music = {
   song: 'menu', boss: false, step: 0, next: 0, timer: 0, preview: null,
   start() { if (this.timer) return; this.next = actx.currentTime + .1; this.timer = setInterval(() => this.tick(), 30); },
   set(song, boss) { this.song = SONGS[song] ? song : 'menu'; this.boss = !!boss; },
-  note(f, t, dur, type, v, slide) {
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(f * slide, t + dur);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + Math.min(.02, dur / 4)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    o.connect(g).connect(musicBus); o.start(t); o.stop(t + dur + .05);
+  note(f, t, dur, type, v, slide, o = {}) {
+    const osc = actx.createOscillator(), g = actx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(f, t); if (slide) osc.frequency.exponentialRampToValueAtTime(f * slide, t + dur);
+    if (o.pluck) { osc.frequency.setValueAtTime(f * 1.03, t); osc.frequency.exponentialRampToValueAtTime(f, t + .03); }
+    if (o.vib) { const l = actx.createOscillator(), lg = actx.createGain(); l.frequency.value = 5.5; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(o.vib * f / 440, t + Math.min(.3, dur * .6)); l.connect(lg).connect(osc.frequency); l.start(t); l.stop(t + dur + .05); }
+    const att = o.pluck ? .004 : Math.min(.02, dur / 4);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    osc.connect(g).connect(musicBus); osc.start(t); osc.stop(t + dur + .05);
   },
-  noise(t, dur, v, hp) {
+  noise(t, dur, v, hp, lp) {
     const n = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
-    n.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = hp; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    n.buffer = noiseBuf; f.type = lp ? 'lowpass' : 'highpass'; f.frequency.value = lp || hp; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
     n.connect(f).connect(g).connect(musicBus); n.start(t); n.stop(t + dur + .02);
   },
+  drum(k, t, a) {
+    switch (k) {
+      case 'k': this.note(150, t, .2, 'sine', .22 * a, .3); break;
+      case 's': this.noise(t, .14, .09 * a, 1500); this.note(220, t, .08, 'triangle', .05 * a, .7); break;
+      case 'h': this.noise(t, .04, .035 * a, 7000); break;
+      case 'o': this.noise(t, .18, .03 * a, 6000); break;
+      case 'c': for (const d of [0, .012, .024]) this.noise(t + d, .06, .06 * a, 1200); break;
+      case 'r': this.note(1100, t, .03, 'triangle', .05 * a); break;
+      case 'z': this.noise(t, .07, .022 * a, 5000); break;
+      case 't': this.note(240, t, .16, 'sine', .1 * a, .7); break;
+      case 'T': this.note(130, t, .24, 'sine', .14 * a, .7); break;
+      case 'j': this.note(85, t, .5, 'sine', .26 * a, .55); this.noise(t, .2, .07 * a, 0, 400); break;
+      case 'q': this.note(2200, t, .015, 'square', .02 * a); break;
+    }
+  },
+  span(pat, i) { let n = 1; while (n < pat.length && pat[(i + n) % pat.length] === '.') n++; return n; },
   tick() {
     if (!actx || muted || vol.music <= 0) { if (actx) this.next = actx.currentTime + .05; return; }
-    const S = (this.boss && BOSS_SONGS[this.song]) || SONGS[this.song], scale = SC[S.sc], bpm = S.bpm, sp = 60 / bpm / 4;
+    const S = (this.boss && BOSS_SONGS[this.song]) || SONGS[this.song], scale = SC[S.sc], sp = 60 / S.bpm / 4;
     const deg = (d, oct = 0) => S.root + scale[((d % scale.length) + scale.length) % scale.length] + 12 * (Math.floor(d / scale.length) + oct);
     while (this.next < actx.currentTime + .15) {
-      const t = this.next, st = this.step % 16, bar = Math.floor(this.step / 16) % S.prog.length, ch = S.prog[bar];
-      if (st === 0 && S.pad && !this.boss) for (const k of [0, 2, 4]) this.note(midi(deg(ch + k)), t, sp * 16, 'sine', .035 * S.pad);
-      if (this.boss) {
-        if (st === 0 || st === 10) for (const k of [0, 2, 4]) this.note(midi(deg(ch + k, 1)), t, sp * 2, S.lead, .03);
-        if (st % 2 === 1) this.note(midi(deg(ch, -1)), t, sp * .9, S.bass, .07);
-        if (st === 4 || st === 12) this.noise(t, .14, .1, 1200);
-        this.noise(t, .03, .03, 8000);
-      }
-      if (st === 0 || st === 8 || (this.boss && (st === 6 || st === 14)) || (S.hat && st === 14)) this.note(midi(deg(ch, -1)), t, sp * (st === 0 ? 6 : 4), S.bass, .12);
-      if (st % 2 === 0) { const a = S.arp[(st / 2 + bar * 2) % S.arp.length], up = (this.step >> 6) % 2 && st >= 8 ? 1 : 0; this.note(midi(deg(ch + a, up + (S.root < 48 ? 1 : 0))), t, sp * 1.8, S.lead, S.lead === 'square' || S.lead === 'sawtooth' ? .028 : .05); }
-      if (S.bell && st === 12 && bar % 2 === 1) this.note(midi(deg(ch + 4, 2)), t, sp * 8, 'sine', .04);
-      if ((S.kick || this.boss) && st % 4 === 0) this.note(110, t, .18, 'sine', .22, .35);
-      if ((S.hat || this.boss) && st % 4 === 2) this.noise(t, .05, .05, 7000);
-      if (this.boss && st % 8 === 4) this.noise(t, .12, .08, 1500);
+      const st = this.step % 16, s32 = this.step % 32, bar = Math.floor(this.step / 16) % S.prog.length, ch = S.prog[bar];
+      const t = this.next + (S.swing && st % 2 === 1 ? sp * S.swing : 0);
+      if (st === 0 && S.pad) for (const k of [0, 2, 4]) this.note(midi(deg(ch + k)), t, sp * 16, 'sine', .032 * S.pad);
+      if (st === 0 && S.drone) { this.note(midi(deg(0, -1)), t, sp * 16.5, 'sawtooth', .018); this.note(midi(deg(4, -1)), t, sp * 16.5, 'sine', .03); }
+      if (S.drums) for (const k in S.drums) { const c = S.drums[k][st]; if (c === 'x' || c === 'o') this.drum(k, t, c === 'o' ? .5 : 1); }
+      if (S.bp) { const c = mdeg(S.bp[st]); if (c != null) this.note(midi(deg(ch + c, S.bo ?? -1)), t, sp * this.span(S.bp, st) * .95, S.bw, S.bv, S.glide ? 1.02 : null); }
+      if (S.stab && S.stab[st] === 'x') for (const k of [0, 2, 4]) this.note(midi(deg(ch + k)), t, sp * .8, 'square', .022);
+      if (S.mel) { const c = mdeg(S.mel[s32]); if (c != null) this.note(midi(deg(ch + c, S.mo ?? 1)), t, sp * this.span(S.mel, s32) * (S.leg ?? .8), S.lw, S.lv, null, { vib: S.vib, pluck: S.pluck }); }
+      if (S.mel2) { const c = mdeg(S.mel2[s32]); if (c != null) this.note(midi(deg(ch + c, 2)), t, sp * this.span(S.mel2, s32), S.l2w || 'sine', S.l2v || .03, null, { vib: 5 }); }
+      if (S.arp && st % (S.arpRate || 2) === 0) { const a = S.arp[(st / (S.arpRate || 2) + bar * 2) % S.arp.length]; this.note(midi(deg(ch + a, 1)), t, sp * 1.6, S.aw || 'triangle', S.av ?? .03, null, { pluck: 1 }); }
+      if (S.bells && S.bells[st] === 'x') this.note(midi(deg(ch + 4, 2)), t, sp * 8, 'sine', .035);
       this.next += sp; this.step++;
     }
   },
@@ -883,7 +903,7 @@ const E = {
   voidwisp:  { name: 'Void Wisp', shape: 'orb', col: ['#b88ae0', '#3a1a6a', '#fff'], hp: 50, spd: 120, dmg: 9, gold: 5, r: 12, cost: 2, from: 2, fly: true, phase: true },
   gazer:     { name: 'Gazer', shape: 'eye', col: ['#2a1a40', '#c83aff', '#fff'], hp: 80, spd: 45, dmg: 0, gold: 8, r: 16, cost: 3, from: 3, ranged: true, field: { k: 6, on: 3, off: 4 } },
   voidworm:  { name: 'Void Worm', shape: 'snake', col: ['#3a2a5a', '#1a0a30', '#c8f'], hp: 180, spd: 50, dmg: 22, gold: 12, r: 18, cost: 4, from: 4, burrow: true, armor: 5 },
-  maw:       { name: 'The Maw', shape: 'eye', col: ['#120a20', '#ff3a6a', '#fff'], hp: 640, spd: 24, dmg: 45, gold: 300, r: 46, boss: true, armor: 6, summon: 'voidling', weave: true, lunge: true, field: { k: 4.2, on: 4, off: 4 } },
+  maw:       { name: 'The Maw', shape: 'eye', col: ['#120a20', '#ff3a6a', '#fff'], hp: 640, spd: 24, dmg: 45, gold: 300, r: 46, boss: true, armor: 6, summon: 'voidling', weave: true, lunge: true, field: { k: 4.2, on: 4, off: 4, slow: .1 } },
   paper:     { name: 'Paper Swarm', shape: 'paper', col: ['#f4f4f0', '#8aa0c0', '#222'], hp: 7, spd: 120, dmg: 3, gold: 1, r: 9, cost: 2, from: 1, fly: true, pack: 3 },
   chair:     { name: 'Office Chair', shape: 'chair', col: ['#3a5a9a', '#8a8a94', '#ddd'], hp: 16, spd: 115, dmg: 5, gold: 2, r: 14, cost: 1, from: 1, zig: .9 },
   coffee:    { name: 'Coffee Machine', shape: 'coffee', col: ['#2a2a2e', '#6a4028', '#f33'], hp: 26, spd: 50, dmg: 6, gold: 4, r: 17, cost: 2, from: 2, poison: true },
@@ -1504,7 +1524,7 @@ function update(dt) {
   const kongs = enemies.filter(e => e.bananas && !e.dead && !e.under);
   for (const s of shots) {
     let fm = 1;
-    for (const f of fields) { const R = f.r * f.field.k; if ((f.x - s.x) ** 2 + (f.y - s.y) ** 2 < R * R) { fm = .3; s.slowed = true; break; } }
+    for (const f of fields) { const R = f.r * f.field.k; if ((f.x - s.x) ** 2 + (f.y - s.y) ** 2 < R * R) { fm = f.field.slow ?? .3; s.slowed = true; break; } }
     if (fm === 1) s.slowed = false;
     if (P.homing && s.target && !s.target.dead) {
       const a = Math.atan2(s.target.y - s.y, s.target.x - s.x), cur = Math.atan2(s.vy, s.vx);
