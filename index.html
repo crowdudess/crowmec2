@@ -321,8 +321,11 @@ canvas.manualaim { cursor: crosshair; }
 .li { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: center; background: var(--moss-2); border-radius: 10px; padding: 12px 14px; }
 .li .nm { font-weight: 800; }
 .li .ds { font-size: 13px; color: var(--bone-dim); }
-.pips { display: flex; gap: 3px; margin-top: 4px; }
-.pips i { width: 14px; height: 6px; border-radius: 3px; background: var(--moss); }
+.pips { display: flex; flex-wrap: nowrap; gap: 3px; margin-top: 4px; }
+.li > div:first-child { min-width: 0; }
+.li .row { flex-wrap: nowrap; }
+@media (max-width: 640px) { .li { grid-template-columns: 1fr; } .li .row { justify-content: flex-start !important; flex-wrap: wrap; } }
+.pips i { flex: 0 1 14px; min-width: 6px; height: 6px; border-radius: 3px; background: var(--moss); }
 .pips i.on { background: var(--coin); }
 .li.done { outline: 1px solid color-mix(in srgb, var(--coin) 50%, transparent); }
 .badge { font: 700 11px var(--mono); padding: 3px 8px; border-radius: 999px; background: var(--night); color: var(--bone-dim); white-space: nowrap; }
