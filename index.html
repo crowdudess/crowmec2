@@ -506,7 +506,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.45.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.45.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1306,6 +1306,7 @@ const WAVE_TH = [
   { n: ['Onslaught', 'Déferlante', 'Avalancha', 'Großangriff'], budget: 1.4, gap: .7 },
 ];
 const thn = th => th.n[li()] || th.n[0];
+const beatenBosses = () => { const l = BIOMES.filter(b => b.boss && !b.mode && (!b.dlc || biomeState(b.id).unlocked) && (biomeState(b.id).cleared || (save.ach && save.ach[b.boss]) || (save.seen && save.seen[b.boss]))).map(b => b.boss); return l.length ? l : [B.boss || BIOMES[0].boss]; };
 const riftPool = () => BIOMES.filter(b => !b.mode && (!b.dlc || biomeState(b.id).unlocked));
 function riftSideOf(k) { if (!run.riftPair) return null; const [a, b] = run.riftPair.map(id => BIOMES.find(x => x.id === id)); const inA = a.enemies.includes(k) || a.boss === k || a.elite === k, inB = b.enemies.includes(k) || b.boss === k || b.elite === k; return inA && !inB ? 0 : inB && !inA ? 1 : Math.random() < .5 ? 0 : 1; }
 function riftAngNow(time) { return (run && run.riftAng || 0) + time / 60000; }
@@ -1384,18 +1385,18 @@ function startWave() {
     const n = isBoss ? Math.floor(w / BOSS_WAVE) + (chaosOn(5) ? 1 : 0) : 1; miniBoss = !isBoss;
     bossKeys = isBoss && !B.mode ? [B.boss] : []; run.bossBag = run.bossBag || [];
     while (bossKeys.length < n) {
-      if (!run.bossBag.length) { run.bossBag = BIOMES.filter(b => b.boss && !b.mode && (!b.dlc || biomeState(b.id).unlocked)).map(b => b.boss); for (let a = run.bossBag.length - 1; a > 0; a--) { const j2 = Math.floor(Math.random() * (a + 1)); [run.bossBag[a], run.bossBag[j2]] = [run.bossBag[j2], run.bossBag[a]]; } }
+      if (!run.bossBag.length) { run.bossBag = beatenBosses(); for (let a = run.bossBag.length - 1; a > 0; a--) { const j2 = Math.floor(Math.random() * (a + 1)); [run.bossBag[a], run.bossBag[j2]] = [run.bossBag[j2], run.bossBag[a]]; } }
       bossKeys.push(run.bossBag.pop());
     }
-    if (run.riftPair) { const own = run.riftPair.map(id => BIOMES.find(b => b.id === id).boss).filter(Boolean).sort(() => Math.random() - .5); for (let i = 0; i < bossKeys.length && i < own.length; i++) bossKeys[i] = own[i]; }
+    if (run.riftPair) { const bb = beatenBosses(), own = run.riftPair.map(id => BIOMES.find(b => b.id === id).boss).filter(k => k && bb.includes(k)).sort(() => Math.random() - .5); for (let i = 0; i < bossKeys.length && i < own.length; i++) bossKeys[i] = own[i]; }
   }
   run.bossCount = bossKeys.length;
   bossKeys.forEach((k, i) => spawnQ.push({ k, t: mid + i * 4, boss: true, share: bossKeys.length, mini: miniBoss }));
   let nMini = 0;
   if (run.endless && w > BOSS_WAVE && !isBoss) {
     nMini = (w % 3 === 0 ? 0 : 1) + Math.floor((w - BOSS_WAVE) / 12);
-    const all = BIOMES.filter(b => b.boss && !b.mode && (!b.dlc || biomeState(b.id).unlocked)).map(b => b.boss), endT = spawnQ.length ? spawnQ[spawnQ.length - 1].t : 6;
-    const mpool = run.riftPair ? run.riftPair.map(id => BIOMES.find(b => b.id === id).boss).filter(Boolean) : all;
+    const all = beatenBosses(), endT = spawnQ.length ? spawnQ[spawnQ.length - 1].t : 6;
+    const mpool = run.riftPair ? run.riftPair.map(id => BIOMES.find(b => b.id === id).boss).filter(k => k && all.includes(k)) : all;
     for (let i = 0; i < nMini; i++) spawnQ.push({ k: (mpool.length ? mpool : all)[Math.floor(Math.random() * (mpool.length || all.length))], t: endT * (.25 + .6 * (i + 1) / (nMini + 1)), boss: true, minib: true });
   }
   const anyElite = () => { const els = run.riftPair ? run.riftPair.map(id => BIOMES.find(b => b.id === id).elite).filter(Boolean) : BIOMES.filter(b => b.elite && !b.mode && (!b.dlc || biomeState(b.id).unlocked)).map(b => b.elite); return els[Math.floor(Math.random() * els.length)]; };
