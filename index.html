@@ -2320,19 +2320,12 @@ function drawVolcanoFloor(time) {
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   for (const c of deco.cracks) { const gl = .35 + .25 * Math.sin(time / 600 + c.ph); ctx.strokeStyle = `rgba(255,90,20,${gl})`; ctx.lineWidth = 3; ctx.beginPath(); c.pts.forEach((p, j) => j ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke(); ctx.strokeStyle = `rgba(255,220,120,${gl * .7})`; ctx.lineWidth = 1; ctx.stroke(); }
   for (const r of deco.rivers) {
-    const path = () => { ctx.beginPath(); ctx.moveTo(r.pts[0].x, r.pts[0].y); for (let j = 1; j < r.pts.length - 1; j++) { const a = r.pts[j], b = r.pts[j + 1]; ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2); } ctx.lineTo(r.pts[r.pts.length - 1].x, r.pts[r.pts.length - 1].y); };
-    path(); ctx.strokeStyle = 'rgba(255,80,20,.18)'; ctx.lineWidth = r.w * 3.2; ctx.stroke();
-    path(); ctx.strokeStyle = '#2a0e08'; ctx.lineWidth = r.w * 1.35; ctx.stroke();
-    path(); ctx.strokeStyle = '#e8501a'; ctx.lineWidth = r.w; ctx.stroke();
-    path(); ctx.strokeStyle = '#ffb030'; ctx.lineWidth = r.w * .5; ctx.setLineDash([r.w * 1.6, r.w * 1.2]); ctx.lineDashOffset = -time / 40 - r.ph * 50; ctx.stroke();
-    path(); ctx.strokeStyle = 'rgba(255,245,180,.7)'; ctx.lineWidth = r.w * .18; ctx.setLineDash([r.w * .6, r.w * 2.2]); ctx.lineDashOffset = -time / 28 - r.ph * 30; ctx.stroke(); ctx.setLineDash([]);
-  }
-  for (const p of deco.pools) {
-    const g = ctx.createRadialGradient(p.x, p.y, 4, p.x, p.y, p.rx * 1.9); g.addColorStop(0, 'rgba(255,120,30,.35)'); g.addColorStop(1, 'rgba(255,80,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.rx * 1.9, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#2a0e08'; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx + 6, p.ry + 6, p.a, 0, TAU); ctx.fill();
-    const lg = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, p.rx); lg.addColorStop(0, '#fff0a0'); lg.addColorStop(.35, '#ffb030'); lg.addColorStop(1, '#d8401a'); ctx.fillStyle = lg; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, p.a, 0, TAU); ctx.fill();
-    ctx.fillStyle = 'rgba(90,30,15,.55)'; for (let k = 0; k < 3; k++) { const a = p.ph + k * 2.1 + time / 4000; ctx.beginPath(); ctx.ellipse(p.x + Math.cos(a) * p.rx * .45, p.y + Math.sin(a) * p.ry * .45, p.rx * .22, p.ry * .14, a, 0, TAU); ctx.fill(); }
-    for (let k = 0; k < 3; k++) { const t = ((time / 1400 + k / 3 + p.ph) % 1), a = p.ph * 3 + k * 2.4, bx = p.x + Math.cos(a) * p.rx * .5, by = p.y + Math.sin(a) * p.ry * .5; ctx.strokeStyle = `rgba(255,240,170,${1 - t})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(bx, by, 2 + t * 9, 0, TAU); ctx.stroke(); }
+    const P = r.pts, n = P.length, mid = j => ({ x: (P[j].x + P[j + 1].x) / 2, y: (P[j].y + P[j + 1].y) / 2 });
+    const seg = (j, fn) => { const a = j === 0 ? P[0] : mid(j - 1), b = mid(j); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(P[j].x, P[j].y, b.x, b.y); fn(j / (n - 2)); };
+    const layers = [[3.2, 'rgba(255,80,20,.16)', 0], [1.35, '#2a0e08', 0], [1, '#e8501a', 0], [.5, '#ffb030', 1], [.18, 'rgba(255,245,180,.7)', 2]];
+    for (const [k, col, dash] of layers) for (let j = 0; j < n - 1; j++) seg(j, t => { const w = r.w * k * (t < .6 ? 1 : Math.max(.2, 1 - (t - .6) / .4 * .8)); if (w < .6) return; ctx.strokeStyle = col; ctx.lineWidth = w; if (dash === 1) { ctx.setLineDash([r.w * 1.6, r.w * 1.2]); ctx.lineDashOffset = -time / 40 - r.ph * 50; } else if (dash === 2) { ctx.setLineDash([r.w * .6, r.w * 2.2]); ctx.lineDashOffset = -time / 28 - r.ph * 30; } ctx.stroke(); ctx.setLineDash([]); });
+    const e = P[n - 1], q = P[n - 2]; ctx.fillStyle = '#1e1210'; ctx.beginPath(); ctx.ellipse(e.x, e.y, r.w * .9, r.w * .55, Math.atan2(e.y - q.y, e.x - q.x), 0, TAU); ctx.fill();
+    ctx.strokeStyle = `rgba(255,110,30,${.35 + .2 * Math.sin(time / 500 + r.ph)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(e.x - r.w * .4, e.y); ctx.lineTo(e.x, e.y - r.w * .2); ctx.lineTo(e.x + r.w * .35, e.y + r.w * .1); ctx.stroke();
   }
   for (const r of deco.rocks) {
     ctx.save(); ctx.translate(r.x, r.y);
