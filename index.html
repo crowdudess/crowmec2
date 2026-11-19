@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.65.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.65.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2216,7 +2216,7 @@ function update(dt) {
           if (e.dPhase === 'up') { e.alt = Math.min(1, 1 - e.dT); orbit(430, 1.8); if (e.dT <= 0) { e.dPhase = 'air'; e.dT = angry ? 6.5 : 5.5; e.mT = .5; } }
           else if (e.dPhase === 'air') {
             e.alt = 1; e.homeA += dt * .35; orbit(430, 2.2); e.mT -= dt;
-            if (e.mT <= 0) { e.mT = angry ? .8 : 1.05; const n = angry ? 5 : 3, base = Math.atan2(-e.y, -e.x); for (let i = 0; i < n; i++) { const off = (i - (n - 1) / 2) * .3, ca = base + off, f = makeEnemy('fireball', e.x + Math.cos(ca) * e.r * 1.6, e.y + Math.sin(ca) * e.r * 1.6); f.ph = off * 4; f.hp = f.max = P.dmg * 1.1; f.dmg *= .4; } e.spitT = .5; if (!api.sim) tone(300, 110, .3, 'sawtooth', .05); }
+            if (e.mT <= 0) { e.mT = angry ? 1.4 : 1.8; const n = angry ? 4 : 3, base = Math.atan2(-e.y, -e.x); for (let i = 0; i < n; i++) { const off = (i - (n - 1) / 2) * .3, ca = base + off, f = makeEnemy('fireball', e.x + Math.cos(ca) * e.r * 1.6, e.y + Math.sin(ca) * e.r * 1.6); f.ph = off * 4; f.hp = f.max = P.dmg * 1.1; f.dmg *= .4; } e.spitT = .5; if (!api.sim) tone(300, 110, .3, 'sawtooth', .05); }
             if (e.dT <= 0) { e.dPhase = 'down'; e.dT = 1; }
           } else if (e.dPhase === 'down') {
             e.alt = Math.max(0, e.dT); orbit(320, 1.5);
