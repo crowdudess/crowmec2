@@ -560,7 +560,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.51.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.51.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3820,7 +3820,7 @@ const itemOpen = id => STARTER_ITEMS.includes(id) || (save.itemsOpen || []).incl
 const MAX_LOCKED_OFFERS = 2;
 const coinsAvail = () => (run ? run.coins : 0) + save.coins;
 function payCoins(n) { const fromRun = Math.min(run.coins, n); run.coins -= fromRun; save.coins -= n - fromRun; }
-function rarW(w) { return [60, 26 + w, 6 + w * 1.4, w >= MYTHIC_WAVE ? 1.5 + w * .6 : 0]; }
+function rarW(w) { return [60, (26 + w) / 4, (6 + w * 1.4) / 4, w >= MYTHIC_WAVE ? (1.5 + w * .6) / 4 : 0]; }
 function rarOdds(w) { const W = rarW(w), cnt = [0, 1, 2, 3].map(r => ITEMS.filter(it => it.rar === r).length), tot = W.reduce((a, x, r) => a + x * cnt[r], 0); return W.map((x, r) => ({ rar: x * cnt[r] / tot, item: x / tot })); }
 const pct = v => v <= 0 ? '0%' : v < .01 ? (v * 100).toFixed(1) + '%' : Math.round(v * 100) + '%';
 function rollOffers() {
