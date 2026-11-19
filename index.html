@@ -37,7 +37,8 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .coin b, .coinc { color: var(--coin); }
 .hpwrap { width: min(42vw, 280px); text-align: center; }
 .hpwrap span { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone-dim); }
-.hpbar { margin-top: 4px; height: 12px; border-radius: 6px; background: var(--moss); border: 1px solid var(--moss-2); overflow: hidden; }
+.hpbar { position: relative; margin-top: 4px; height: 12px; border-radius: 6px; background: var(--moss); border: 1px solid var(--moss-2); overflow: hidden; }
+.hpbar #hShield { position: absolute; top: 0; bottom: 0; width: 0; background: repeating-linear-gradient(135deg, #6ab8ff 0 6px, #4a90e0 6px 12px); box-shadow: 0 0 8px rgba(106,184,255,.8), inset 0 0 0 1px rgba(220,240,255,.6); transition: width .15s, left .15s; }
 .hpbar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--blood), var(--shine)); transition: width .15s; }
 .hpnum { font-family: var(--mono); font-size: 12px; margin-top: 3px; font-variant-numeric: tabular-nums; }
 .bossbar { margin-top: 3px; }
@@ -605,7 +606,7 @@ canvas.manualaim { cursor: crosshair; }
   <div class="hud-top">
     <div class="stat"><span data-i18n="wave">Wave</span><span class="hdiff" id="hDiff" hidden></span><b id="hWave">1</b><span id="hLeft"></span></div>
     <div class="hpwrap">
-      <span data-i18n="nest">Nest</span><div class="hpbar"><i id="hHp"></i></div><div class="hpnum" id="hHpNum"></div>
+      <span data-i18n="nest">Nest</span><div class="hpbar"><i id="hHp"></i><b id="hShield"></b></div><div class="hpnum" id="hHpNum"></div>
       <div id="bossWrap" hidden><div id="bossBars"></div><span class="bossmore" id="bossMore"></span></div>
     </div>
     <div class="hud-right">
@@ -688,7 +689,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.59.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.59.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1296,7 +1297,7 @@ const ITEMS = [
   { id: 'mana',   rar: 2, cost: 14, name: 'Mana Feathers', desc: 'Every kill takes 0.25s off all spell recharges.', max: 2, apply: () => P.killCdr += .25 },
   { id: 'pecker', rar: 3, cost: 20, name: 'Woodpecker Rhythm', desc: 'Every 6th shot deals 5x damage.', max: 1, apply: () => P.pecker = true },
   { id: 'judge',  rar: 3, cost: 22, name: "Raven's Judgement", desc: 'Enemies that drop under 15% HP are finished off. Bosses are immune.', max: 1, apply: () => P.execute = true },
-  { id: 'feast', rar: 0, cost: 9, name: 'Nest Feast', desc: 'Shields the nest: blocks the next 60 damage.', max: 3, apply: () => run.shield = (run.shield || 0) + 60 },
+  { id: 'feast', rar: 0, cost: 9, name: 'Nest Feast', desc: 'Shields the nest: blocks the next 60 damage.', apply: () => run.shield = (run.shield || 0) + 60 },
   { id: 'quiver', rar: 0, cost: 7, name: 'Long Quiver', desc: 'Feathers fly 22% faster.', max: 2, apply: () => P.speed *= 1.22 },
   { id: 'lucky', rar: 0, cost: 8, name: 'Lucky Clover', desc: 'Eggs are 10% more likely to hold an uncommon or better item.', max: 3, apply: () => P.charm = (P.charm || 0) + .85 },
   { id: 'swift', rar: 0, cost: 8, name: 'Swift Talons', desc: '+13% attack speed.', max: 3, apply: () => P.rate += P.baseRate * .13 },
@@ -3949,6 +3950,7 @@ function hud() {
   $('hCoins').textContent = T('plus_coins', run.coins);
   const hp = Math.max(0, run.hp);
   $('hHp').style.width = (hp / run.maxHp * 100) + '%';
+  { const hpP = Math.max(0, hp) / run.maxHp * 100, shP = Math.min(100, (run.shield || 0) / run.maxHp * 100), sb = $('hShield'); sb.style.width = shP + '%'; sb.style.left = Math.min(hpP, 100 - shP) + '%'; }
   $('hHpNum').textContent = `${Math.ceil(hp)} / ${run.maxHp}` + (run.shield > 0 ? ` +${Math.ceil(run.shield)} 🛡` : '');
   { const cb = $('cawBtn'), frac = P ? Math.min(1, cawT / P.cawCd) : 0; $('cawShade').style.width = (frac * 100) + '%'; $('cawShade').style.display = cawT > 0 ? '' : 'none'; $('cawTime').textContent = cawT > 0 ? (cawT >= 1 ? Math.ceil(cawT) : cawT.toFixed(1)) : ''; cb.classList.toggle('ready', cawT <= 0); cb.classList.toggle('cd', cawT > 0); if (!cb.dataset.painted) paintCawIcon(); }
   if (run.boss && run.boss.dead) run.boss = enemies.find(x => x.boss && !x.minib && !x.dead) || run.boss;
