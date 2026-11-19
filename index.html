@@ -496,6 +496,8 @@ canvas.manualaim { cursor: crosshair; }
 .nestpop .nm { font-weight: 800; font-size: 14px; color: var(--bone); line-height: 1.2; }
 .nestpop .ds { font-size: 11.5px; color: var(--bone-dim); line-height: 1.3; }
 .nestpop .capbadge { position: absolute; top: 6px; right: 6px; bottom: auto; left: auto; width: auto; height: auto; min-height: 0; padding: 2px 7px; font-size: 10px; line-height: 1.4; }
+.nestpop.still { animation: none; }
+.nestpop .aura::before { animation: none !important; }
 @keyframes nestpop { from { transform: translateY(60px) scale(.3); opacity: 0; } to { transform: none; opacity: 1; } }
 .eggnest.opened .nestrow { bottom: 62px; left: 1%; right: 1%; justify-content: space-between; }
 .eggnest.opened .nestslot { width: 32.5%; }
@@ -686,7 +688,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.58.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.58.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4137,7 +4139,7 @@ function rollOffers() {
     const it = rollItem(used); if (!it) break; used.add(it.id);
     picks.push({ ...it, sold: false, locked: false, shell: EGG_SHELLS[Math.floor(Math.random() * EGG_SHELLS.length)], seed: Math.random() * 99 });
   }
-  offers = picks; run.picked = null; run.crackT = 0;
+  offers = picks; run.picked = null; run.crackT = 0; run.popSeen = new Set();
 }
 const CRACK_MS = 2300, STAGE_HOLD = 1700;
 function runReel(win, lab, it, left) {
@@ -4309,7 +4311,7 @@ function renderShop() {
       if (!done) { drawEgg(cv2, it, 'whole'); b.onclick = () => buy(i); if (it.rar >= 3) b.classList.add('shimmer'); b.setAttribute('aria-label', T('egg_n', i + 1)); }
       else { drawEgg(cv2, it, shown || i === picked ? 'open' : 'crack'); b.disabled = true; if (!shown) b.classList.add(i === picked ? 'gone' : 'waiting'); }
       if (shown) {
-        anyShown = true; const base = ITEMS.find(x => x.id === it.id) || it, pop = el('div', 'nestpop' + (i === picked ? ' got' : ' miss'));
+        anyShown = true; const base = ITEMS.find(x => x.id === it.id) || it, seen = (run.popSeen = run.popSeen || new Set()), pop = el('div', 'nestpop' + (i === picked ? ' got' : ' miss') + (seen.has(i) ? ' still' : '')); seen.add(i);
         pop.style.setProperty('--rgb', RAR_RGB[it.rar]); pop.title = base.name + ': ' + base.desc;
         const au = el('span', 'aura'); au.dataset.rar = it.rar; au.style.setProperty('--rgb', RAR_RGB[it.rar]); au.append(upIcon(it.id, 72));
         const have = itemCount(it.id);
