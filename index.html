@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.65.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.65.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2209,7 +2209,7 @@ function update(dt) {
         if (!e.dPhase) { e.dPhase = 'ground'; e.dT = rnd(5, 6.5); e.alt = 0; }
         e.dT -= dt; const angry = e.hp < e.max * .5;
         if (e.dPhase === 'ground') {
-          if (e.dT <= 0 && !(e.lungeT > 0)) { e.dPhase = 'up'; e.dT = 1; e.soar = true; e.ghostly = true; e.homeA = Math.atan2(e.y, e.x); if (!api.sim) { texts.push({ x: e.x, y: e.y - e.r - 20, v: T('dragon_up'), t: 1.6, bad: true }); tone(140, 520, .9, 'sawtooth', .06); shake = Math.max(shake, 6); } }
+          if (e.dT <= 0 && !(e.lungeT > 0) && (d > NEST_R + e.r + 40 || e.bitLand)) { e.bitLand = false; e.dPhase = 'up'; e.dT = 1; e.soar = true; e.ghostly = true; e.homeA = Math.atan2(e.y, e.x); if (!api.sim) { texts.push({ x: e.x, y: e.y - e.r - 20, v: T('dragon_up'), t: 1.6, bad: true }); tone(140, 520, .9, 'sawtooth', .06); shake = Math.max(shake, 6); } }
         } else {
           e.ghostly = true; e.stun = 0; e.frozen = 0;
           const orbit = (R0, k) => { const tx = Math.cos(e.homeA) * R0 * 1.15, ty = Math.sin(e.homeA) * R0; e.x += (tx - e.x) * Math.min(1, dt * k); e.y += (ty - e.y) * Math.min(1, dt * k); };
@@ -2591,6 +2591,7 @@ function releaseRats(e, n) {
 function shieldEat(d) { const s2 = Math.min(run.shield || 0, d); if (s2 > 0) { run.shield -= s2; if (run.shield < .5) run.shield = 0; } return d - s2; }
 function biteNest(e) {
   if (P.guard && !run.guardUsed) { run.guardUsed = true; if (!api.sim) { texts.push({ x: 0, y: -NEST_R - 10, v: T('blocked'), t: 1 }); rings.push({ x: 0, y: 0, r: NEST_R, max: NEST_R + 30, t: 0, c: '232,184,74' }); } return; }
+  if (e.meteors) e.bitLand = true;
   if (e.coinThief && run.coins > 0) { const st = Math.min(run.coins, 3 + Math.floor(run.wave / 8)); run.coins -= st; e.stolen = (e.stolen || 0) + st; e.shieldHp = (e.shieldHp || 0) + e.max * .025 * st; if (!api.sim) texts.push({ x: e.x, y: e.y - e.r - 14, v: T('stolen', st), t: 1.2, bad: true }); }
   const bd = shieldEat(e.dmg * (P.biteTaken || 1)); run.hp -= bd; run.waveDmg += bd; shake = Math.max(shake, e.boss ? 10 : 4); sfx.hurt();
   if (!api.sim) texts.push({ x: rnd(-20, 20), y: -NEST_R, v: '-' + Math.round(e.dmg), t: .9, bad: true });
