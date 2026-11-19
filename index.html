@@ -485,6 +485,22 @@ canvas.manualaim { cursor: crosshair; }
 .eggnest .nestbg, .eggnest .nestfront { position: absolute; left: 0; bottom: 0; width: 100%; height: 200px; pointer-events: none; }
 .eggnest .nestfront { z-index: 2; }
 .eggnest .nestrow { position: absolute; left: 12%; right: 12%; bottom: 62px; display: flex; justify-content: space-around; align-items: flex-end; z-index: 1; }
+.nestslot { position: relative; display: flex; flex-direction: column; align-items: center; width: 31%; }
+.eggnest.opened { height: 440px; }
+.nestpop { position: relative; z-index: 3; display: grid; justify-items: center; gap: 3px; text-align: center; width: 100%; max-width: 210px; margin-bottom: -18px; padding: 10px 10px 8px; border-radius: 14px; background: linear-gradient(180deg, rgba(var(--rgb), .2), rgba(12,16,10,.88)); border: 2px solid rgba(var(--rgb), .85); box-shadow: 0 0 22px rgba(var(--rgb), .35); animation: nestpop .5s cubic-bezier(.2,1.6,.4,1) both; }
+.nestpop.miss { opacity: .72; border-style: dashed; box-shadow: none; filter: saturate(.75); }
+.nestpop .eggres { font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: rgb(var(--rgb)); }
+.nestpop.miss .eggres { color: var(--bone-dim); }
+.nestpop .aura { width: 72px; height: 72px; margin: 6px 0 2px; }
+.nestpop .rar { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: rgb(var(--rgb)); }
+.nestpop .nm { font-weight: 800; font-size: 14px; color: var(--bone); line-height: 1.2; }
+.nestpop .ds { font-size: 11.5px; color: var(--bone-dim); line-height: 1.3; }
+.nestpop .capbadge { position: absolute; top: 6px; right: 6px; bottom: auto; left: auto; width: auto; height: auto; min-height: 0; padding: 2px 7px; font-size: 10px; line-height: 1.4; }
+@keyframes nestpop { from { transform: translateY(60px) scale(.3); opacity: 0; } to { transform: none; opacity: 1; } }
+.eggnest.opened .nestrow { bottom: 62px; left: 1%; right: 1%; justify-content: space-between; }
+.eggnest.opened .nestslot { width: 32.5%; }
+.nestpop { max-width: none; }
+@media (max-width: 560px) { .eggnest.opened { height: 400px; } .nestpop { padding: 6px 4px; } .nestpop .ds { display: none; } .nestpop .aura { width: 52px; height: 52px; } .nestpop .aura canvas { width: 52px; height: 52px; } .nestpop .nm { font-size: 12px; } }
 .nestegg { background: none; border: 0; padding: 0; cursor: pointer; width: 150px; transition: transform .15s; }
 .nestegg canvas { width: 150px; height: 150px; display: block; }
 .nestegg:not(:disabled):hover { transform: translateY(-14px) rotate(-3deg); }
@@ -493,7 +509,7 @@ canvas.manualaim { cursor: crosshair; }
 .nestegg.shimmer canvas { filter: drop-shadow(0 0 8px rgba(255,240,200,.45)); animation: eggwob 2.4s ease-in-out infinite; }
 .nestegg.waiting canvas { animation: eggshake .14s linear infinite; }
 .nestegg.gone { opacity: .5; }
-@media (max-width: 560px) { .eggnest { height: 190px; } .eggnest .nestbg, .eggnest .nestfront { height: 130px; } .eggnest .nestrow { bottom: 40px; left: 4%; right: 4%; } .nestegg, .nestegg canvas { width: 96px; height: 96px; } }
+@media (max-width: 560px) { .eggnest { height: 190px; } .eggnest .nestbg, .eggnest .nestfront { height: 130px; } .eggnest .nestrow { bottom: 40px; left: 4%; right: 4%; } .nestegg, .nestegg canvas { width: 96px; height: 96px; } .nestslot { width: 32%; } }
 .eggprompt { text-align: center; font-size: 15px; color: var(--bone); margin: -4px 0 -6px; }
 .card.egg { display: grid; justify-items: center; align-content: start; gap: 6px; min-height: 250px; text-align: center; transition: transform .15s, box-shadow .2s; }
 .card.egg:not(:disabled):hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,.4), 0 0 0 2px rgba(232,184,74,.5); }
@@ -670,7 +686,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.58.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.58.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4283,32 +4299,27 @@ function renderShop() {
   oddsStrip($('shopOdds'), run.wave);
   const picked = run.picked, done = picked != null, now = performance.now(), crackLeft = done ? run.crackAt + CRACK_MS - now : 0;
   $('shopPrompt').textContent = done ? (picked >= 0 ? (crackLeft > 0 ? T('egg_cracking') : T('egg_done')) : T('egg_patched')) : T('egg_choose');
-  if (!done || crackLeft > 0) {
+  {
     const nest = el('div', 'eggnest'), back = document.createElement('canvas'), front = document.createElement('canvas'), row = el('div', 'nestrow');
     back.className = 'nestbg'; front.className = 'nestfront'; back.width = front.width = 1000; back.height = front.height = 260; drawNestBowl(back, 'back'); drawNestBowl(front, 'front');
+    let anyShown = false;
     offers.forEach((it, i) => {
-      const b = el('button', 'nestegg'); b.type = 'button'; const cv2 = document.createElement('canvas'); cv2.width = cv2.height = 260;
+      const slot = el('div', 'nestslot'), b = el('button', 'nestegg'); b.type = 'button'; const cv2 = document.createElement('canvas'); cv2.width = cv2.height = 260;
+      const shown = done && (i === picked ? crackLeft <= 0 : crackLeft <= -STAGE_HOLD - 300 - 300 * i);
       if (!done) { drawEgg(cv2, it, 'whole'); b.onclick = () => buy(i); if (it.rar >= 3) b.classList.add('shimmer'); b.setAttribute('aria-label', T('egg_n', i + 1)); }
-      else { drawEgg(cv2, it, i === picked ? 'open' : 'crack'); b.disabled = true; b.classList.add(i === picked ? 'gone' : 'waiting'); }
-      b.append(cv2); row.append(b);
+      else { drawEgg(cv2, it, shown || i === picked ? 'open' : 'crack'); b.disabled = true; if (!shown) b.classList.add(i === picked ? 'gone' : 'waiting'); }
+      if (shown) {
+        anyShown = true; const base = ITEMS.find(x => x.id === it.id) || it, pop = el('div', 'nestpop' + (i === picked ? ' got' : ' miss'));
+        pop.style.setProperty('--rgb', RAR_RGB[it.rar]); pop.title = base.name + ': ' + base.desc;
+        const au = el('span', 'aura'); au.dataset.rar = it.rar; au.style.setProperty('--rgb', RAR_RGB[it.rar]); au.append(upIcon(it.id, 72));
+        const have = itemCount(it.id);
+        pop.append(el('span', 'eggres', i === picked ? T('egg_got') : T('egg_missed')), au, el('span', 'rar', T('rar' + it.rar)), el('span', 'nm', base.name), el('span', 'ds', base.desc), el('span', 'capbadge', it.max ? `${have}/${it.max}` : (have ? `${have}/∞` : '∞')));
+        slot.append(pop);
+      }
+      b.append(cv2); slot.append(b); row.append(slot);
     });
-    nest.append(back, row, front); cards.append(nest); cards.classList.add('nestmode');
-  } else { cards.classList.remove('nestmode');
-  offers.forEach((it, i) => {
-    const b = el('button', 'card egg' + (done ? (i === picked ? ' chosen' : ' missed') : '')); b.type = 'button';
-    const base = ITEMS.find(x => x.id === it.id) || it, cv2 = document.createElement('canvas'); cv2.width = cv2.height = 240; cv2.className = 'eggcv';
-    const revealing = done && (i === picked ? crackLeft <= 0 : crackLeft <= -STAGE_HOLD - 300 - 300 * i);
-    if (!done) { drawEgg(cv2, it, 'whole'); b.append(cv2, el('span', 'eggtag', T('egg_n', i + 1)), el('span', 'egghint', T('egg_tap'))); b.onclick = () => buy(i); if (it.rar >= 3) b.classList.add('shimmer'); }
-    else if (!revealing) { drawEgg(cv2, it, 'crack'); b.classList.add(i === picked ? 'shaking' : 'waiting'); b.style.setProperty('--rgb', RAR_RGB[it.rar]); b.disabled = true;
-      b.append(cv2, el('span', 'eggtag', '…')); }
-    else {
-      b.disabled = true; b.classList.add('revealed'); b.dataset.rar = it.rar; b.style.setProperty('--rgb', RAR_RGB[it.rar]);
-      const head = el('span', 'uphead'), au = el('span', 'aura'); au.dataset.rar = it.rar; au.append(upIcon(it.id, 96)); head.append(au, el('span', 'rar', T('rar' + it.rar)));
-      const have = itemCount(it.id), cb = el('span', 'capbadge', it.max ? `${have}/${it.max}` : (have ? `${have}/∞` : '∞'));
-      b.append(el('span', 'eggres', i === picked ? T('egg_got') : T('egg_missed')), head, el('span', 'nm', base.name), el('span', 'ds', base.desc), cb);
-    }
-    cards.append(b);
-  }); }
+    nest.classList.toggle('opened', done); nest.append(back, row, front); cards.append(nest); cards.classList.add('nestmode');
+  }
   if (done && crackLeft > -STAGE_HOLD - 300 - 300 * offers.length) { clearTimeout(run.crackTimer); run.crackTimer = setTimeout(() => { if (state === 'shop' && !$('shop').hidden) { renderShop(); const ms = offers.findIndex((o, j) => j !== run.picked && run.picked >= 0 && performance.now() - run.crackAt > CRACK_MS + STAGE_HOLD + 300 + 300 * j && !o.teased); if (ms >= 0 && actx && !muted && offers[ms].rar >= 2) { offers[ms].teased = 1; tone(300, 180, .35, 'sawtooth', .04); } } }, crackLeft > 0 ? crackLeft + 10 : 300); }
   $('healBtn').textContent = T('patch_instead', P.patchHp);
   $('healBtn').disabled = done || run.noHeal || run.hp >= run.maxHp;
