@@ -699,7 +699,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.61.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.61.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1803,7 +1803,7 @@ function kill(e) {
     toast(T('x_defeated', e.name), T('plus_coins', c));
     if (run.hp / run.maxHp < .15) grant('glass');
     run.bossKilledThisWave = true;
-    if (e.champ) { run.goldenNext = true; if (!api.sim) toastSmall(T('golden_drop'), T('golden_t')); }
+    if (e.champ) goldenPop();
   }
   if (run.coins >= 150) grant('hoard');
   if (save.stats.kills >= 2500) grant('kills');
@@ -4163,7 +4163,6 @@ function rollOffers() {
     picks.push({ ...it, sold: false, locked: false, shell: EGG_SHELLS[Math.floor(Math.random() * EGG_SHELLS.length)], seed: Math.random() * 99 });
   }
   offers = picks; run.picked = null; run.crackT = 0; run.popSeen = new Set(); run.golden = null;
-  if (run.goldenNext) { run.goldenNext = false; const g = rollItem(new Set(picks.map(x => x.id)), 5, true); if (g) run.golden = { ...g, golden: true, cracked: false, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }; }
 }
 const CRACK_MS = 2300, STAGE_HOLD = 1700;
 function runReel(win, lab, it, left) {
@@ -4212,6 +4211,7 @@ function playEggStage(it) {
 function setNextLabel(n) { const sp = $('nextBtn') && $('nextBtn').querySelector('[data-i18n="next_wave"]'); if (sp) sp.textContent = n != null && n <= 5 ? T('next_in', n) : T('next_wave'); }
 function closeEggStage() {
   const st = $('eggStage'); if (!st || st.hidden) return; st.hidden = true; if (run) run.stageToken = (run.stageToken || 0) + 1;
+  if (run && run.goldPause) { run.goldPause = false; paused = false; renderHudItems(); return; }
   if (run && run.picked >= 0) { const now = performance.now(); if (now - run.crackAt < CRACK_MS + STAGE_HOLD) run.crackAt = now - CRACK_MS - STAGE_HOLD; if (state === 'shop') renderShop(); }
 }
 function drawNestBowl(cv2, part) {
@@ -4399,6 +4399,14 @@ function renderOwned(box) {
   box.innerHTML = '';
   box.append(el('span', '', T('nest_hp', Math.ceil(Math.max(0, run.hp)), run.maxHp)));
   for (const id of Object.keys(run.items)) { const it = ITEMS.find(x => x.id === id); const s = el('span', 'ownchip'); s.append(upIcon(id, 40), document.createTextNode(it.name + ' ')); s.append(el('em', '', 'x' + run.items[id])); box.append(s); }
+}
+function goldenPop() {
+  const it = rollItem(new Set(), 5, true); if (!it) return;
+  save.itemStats = save.itemStats || {}; save.itemStats[it.id] = (save.itemStats[it.id] || 0) + 1; persist();
+  run.items[it.id] = itemCount(it.id) + 1; run.bought++; it.apply();
+  if (api.sim) return;
+  run.goldPause = true; paused = true; toastSmall(T('golden_drop'), T('golden_t'));
+  setTimeout(() => { sfx.spell(); playEggStage({ ...it, golden: true, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }); }, 350);
 }
 function crackGolden() {
   const g = run && run.golden; if (!g || g.cracked) return false;
@@ -4660,7 +4668,8 @@ for (const evn of ['pointerup', 'pointercancel']) cv.addEventListener(evn, () =>
 addEventListener('blur', () => { mouse.down = false; });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => {
-  if (e.code === 'Space' && $('eggStage') && !$('eggStage').hidden) { e.preventDefault(); return; }
+  if ($('eggStage') && !$('eggStage').hidden) { e.preventDefault(); return; }
+  if (run && run.goldPause) { e.preventDefault(); return; }
   if (state === 'shop' && e.code === 'Space' && !$('shop').hidden && $('pause').hidden) { e.preventDefault(); if (!e.repeat && performance.now() - (run.shopAt || 0) > 400 && !mustPick() && !(run.picked >= 0 && performance.now() - run.crackAt < CRACK_MS + STAGE_HOLD) && !(run.golden && performance.now() - run.golden.crackAt < CRACK_MS + STAGE_HOLD)) nextWave(); return; }
   if (state !== 'wave') return;
   if (run.form && e.key.startsWith('Arrow')) { e.preventDefault(); if (!paused && !e.repeat) formKey(e.key); return; }
