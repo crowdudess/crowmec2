@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.65.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.65.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2198,7 +2198,7 @@ function update(dt) {
       if (e.fireballs && !e.soar) {
         e.fbT = (e.fbT ?? 2.5) - dt;
         if (e.spitT > 0) e.spitT -= dt;
-        if (e.fbT <= 0 && d > NEST_R + e.r + 30) {
+        if (e.fbT <= 0 && d > NEST_R + e.r + 130) {
           const angry = e.hp < e.max * .5, nb = angry ? 3 : 2;
           e.fbT = angry ? rnd(2, 2.6) : rnd(2.8, 3.4); e.spitT = .5;
           for (let i = 0; i < nb; i++) { const off = (i - (nb - 1) / 2) * .35, ca = Math.atan2(uy, ux) + off, f = makeEnemy('fireball', e.x + Math.cos(ca) * e.r * 1.1, e.y + Math.sin(ca) * e.r * 1.1); f.ph = off * 3; f.hp = f.max = P.dmg * 1.6; }
