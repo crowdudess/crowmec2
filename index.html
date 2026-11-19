@@ -688,7 +688,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.58.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.58.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1779,7 +1779,7 @@ function kill(e) {
   if (P.killCdr) for (const k in spellCds) spellCds[k] = Math.max(0, spellCds[k] - P.killCdr);
   if (!api.sim) {
     for (let i = 0; i < (e.boss ? 40 : 8); i++) parts.push({ x: e.x, y: e.y, vx: rnd(-140, 140), vy: rnd(-140, 140), t: rnd(.3, .7), c: e.col[0], r: rnd(2, 4) });
-    for (let i = 0; i < Math.min(g, 6); i++) coinsFx.push({ x: e.x + rnd(-8, 8), y: e.y + rnd(-8, 8), t: 0 });
+    for (let i = 0; i < (e.boss ? 6 : e.elite ? 3 : 0); i++) coinsFx.push({ x: e.x + rnd(-8, 8), y: e.y + rnd(-8, 8), t: 0 });
     deathSfx(e.k, e.boss);
   }
   if (e.split) for (let i = 0; i < 2; i++) makeEnemy(e.split, e.x + rnd(-10, 10), e.y + rnd(-10, 10));
