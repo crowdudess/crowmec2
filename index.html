@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.67.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.67.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1245,7 +1245,7 @@ const E = {
   magmaworm: { name: 'Magma Worm', shape: 'snake', col: ['#e0602a', '#8a2a10', '#ff0'], hp: 110, spd: 50, dmg: 16, gold: 8, r: 16, cost: 3, from: 2, burrow: true, armor: 3 },
   slime:     { name: 'Lava Slime', shape: 'slime', col: ['#f07a2a', '#b03a10', '#200'], hp: 60, spd: 40, dmg: 8, gold: 4, r: 15, cost: 2, from: 3, split: 'slimelet' },
   slimelet:  { name: 'Slimelet', shape: 'slime', col: ['#f09a4a', '#b05a20', '#200'], hp: 15, spd: 70, dmg: 3, gold: 1, r: 8, cost: 0, from: 99 },
-  golem:     { name: 'Obsidian Golem', shape: 'shell', col: ['#2a2a30', '#e0602a', '#f80'], hp: 200, spd: 28, dmg: 24, gold: 14, r: 22, cost: 5, from: 4, armor: 8 },
+  golem:     { name: 'Obsidian Golem', shape: 'golem', col: ['#2a2a30', '#e0602a', '#f80'], hp: 200, spd: 28, dmg: 24, gold: 14, r: 22, cost: 5, from: 4, armor: 8 },
   wyrm:      { name: 'Magma Dragon', shape: 'dragon', aura: '#ff7a1a', col: ['#d2401e', '#5a1410', '#ffd23a'], hp: 760, spd: 26, dmg: 60, gold: 160, r: 44, boss: true, armor: 6, lunge: true, fireballs: true, meteors: true, coinThief: true },
   venom:     { name: 'Venom Blob', shape: 'venom', col: ['#5ad83a', '#b4ff6a', '#eaffd0'], hp: 14, spd: 105, dmg: 4, gold: 1, r: 10, cost: 0, from: 99, fx: true, poison: true },
   fireball:  { name: 'Fireball', shape: 'fireball', col: ['#ff7a1a', '#ffd04a', '#fff6d0'], hp: 16, spd: 95, dmg: 7, gold: 1, r: 12, cost: 0, from: 99, fx: true },
@@ -3740,6 +3740,16 @@ function drawEnemy(e, time) {
       ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(-r * .2, -r * .3); for (let i = 0; i <= 4; i++) { const y = -r * .3 + i * r * .15; ctx.lineTo(i % 2 ? -r * .2 : -r * .42, y); ctx.lineTo(-r * .2, y + r * .075); } ctx.lineTo(r * .05, r * .3); ctx.lineTo(r * .05, -r * .3); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#d2543f'; ctx.beginPath(); ctx.arc(-r * .08, 0, r * .07, 0, TAU); ctx.fill(); ctx.fillStyle = '#7fb2c9'; ctx.beginPath(); ctx.arc(-r * .08, -r * .19, r * .045, 0, TAU); ctx.arc(-r * .08, r * .19, r * .045, 0, TAU); ctx.fill();
       ctx.restore();
+      break; }
+    case 'golem': {
+      const sw = Math.sin(time / 260 + e.ph), gl = .55 + Math.sin(time / 180 + e.ph) * .25, ol = '#120c10';
+      const rock = (pts, fill) => { ctx.fillStyle = fill; ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x * r, y * r) : ctx.moveTo(x * r, y * r)); ctx.closePath(); ctx.fill(); ctx.strokeStyle = ol; ctx.lineWidth = Math.max(1.5, r * .07); ctx.lineJoin = 'round'; ctx.stroke(); };
+      for (const sd of [-1, 1]) { const fx = .15 + sw * sd * .22; ctx.save(); ctx.translate(fx * r, sd * r * .82); rock([[-.28, -.22], [.18, -.3], [.34, 0], [.2, .28], [-.24, .26], [-.36, 0]], fl ? '#fff' : c0); ctx.strokeStyle = `rgba(255,140,40,${gl})`; ctx.lineWidth = Math.max(1, r * .05); ctx.beginPath(); ctx.moveTo(-.15 * r, -.1 * r); ctx.lineTo(.05 * r, .05 * r); ctx.lineTo(.15 * r, -.08 * r); ctx.stroke(); ctx.restore(); }
+      rock([[-.62, -.5], [-.1, -.68], [.42, -.52], [.58, 0], [.42, .52], [-.1, .68], [-.62, .5], [-.74, 0]], fl ? '#fff' : c0);
+      rock([[-.4, -.3], [.1, -.42], [.3, 0], [.1, .42], [-.4, .3]], fl ? '#fff' : '#3a3a44');
+      ctx.strokeStyle = `rgba(255,${120 + gl * 60 | 0},40,${gl})`; ctx.lineWidth = Math.max(1.5, r * .07); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-.55 * r, -.2 * r); ctx.lineTo(-.25 * r, .05 * r); ctx.lineTo(-.35 * r, .35 * r); ctx.moveTo(-.25 * r, .05 * r); ctx.lineTo(.05 * r, -.1 * r); ctx.stroke();
+      rock([[.38, -.3], [.78, -.24], [.86, 0], [.78, .24], [.38, .3]], fl ? '#fff' : c0);
+      ctx.fillStyle = c2; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(.7 * r, sd * .12 * r, r * .07, r * .05, 0, 0, TAU); ctx.fill(); }
       break; }
     case 'shroom': {
       const st = Math.sin(time / 110 + e.ph), bob = Math.abs(st) * r * .05;
