@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.63.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.63.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1777,9 +1777,10 @@ function makeEnemy(k, x, y, q = {}) {
 }
 
 // ---------- combat ----------
+const fxThreat = e => !e.dir || (-(e.x * e.dir[0] + e.y * e.dir[1]) > 0 && Math.abs(e.x * e.dir[1] - e.y * e.dir[0]) < NEST_R + 40);
 function nearest(x, y, maxD, skip) {
   let best = null, bd = maxD * maxD;
-  for (const e of enemies) { if (e.dead || e.under || e.ghostly || (skip && skip.has(e))) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
+  for (const e of enemies) { if (e.dead || e.under || e.ghostly || (skip && skip.has(e)) || (e.fx && !fxThreat(e))) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
   return best;
 }
 function fire(x, y, tx, ty, dmg, opts = {}) {
@@ -2003,7 +2004,7 @@ function update(dt) {
 
   // crow
   fireT -= dt;
-  let fxT = null; { let bd = P.range * P.range; for (const e of enemies) if (e.fx && !e.dead) { const dd = e.x * e.x + e.y * e.y; if (dd < bd) { bd = dd; fxT = e; } } }
+  let fxT = null; { let bd = P.range * P.range; for (const e of enemies) if (e.fx && !e.dead && fxThreat(e)) { const dd = e.x * e.x + e.y * e.y; if (dd < bd) { bd = dd; fxT = e; } } }
   const manual = save.autoFire === false && !api.sim;
   const tgt = manual ? null : fxT || nearest(0, 0, P.range);
   const want = manual ? (mouse.in || mouse.down ? Math.atan2(mouse.y, mouse.x) : null) : tgt ? Math.atan2(tgt.y, tgt.x) : null;
