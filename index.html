@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.63.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.63.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1777,7 +1777,7 @@ function makeEnemy(k, x, y, q = {}) {
 }
 
 // ---------- combat ----------
-const fxThreat = e => !e.dir || (-(e.x * e.dir[0] + e.y * e.dir[1]) > 0 && Math.abs(e.x * e.dir[1] - e.y * e.dir[0]) < NEST_R + 40);
+const fxThreat = e => { if (e.vel) return -(e.x * e.vel[0] + e.y * e.vel[1]) > 0; if (!e.dir) return true; return -(e.x * e.dir[0] + e.y * e.dir[1]) > 0 && Math.abs(e.x * e.dir[1] - e.y * e.dir[0]) < NEST_R + 40; };
 function nearest(x, y, maxD, skip) {
   let best = null, bd = maxD * maxD;
   for (const e of enemies) { if (e.dead || e.under || e.ghostly || (skip && skip.has(e)) || (e.fx && !fxThreat(e))) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
@@ -2117,10 +2117,16 @@ function update(dt) {
     if (e.hasteT > 0) { e.hasteT -= dt; if (!api.sim && Math.random() < dt * 10) parts.push({ x: e.x - ux * e.r, y: e.y - uy * e.r, vx: -ux * 60 + rnd(-15, 15), vy: -uy * 60 + rnd(-15, 15), t: .3, c: '#ffb050', r: 1.8 }); }
     e.ph += dt;
     if (e.fx) {
+      if (e.vel) {
+        const v = e.vel; v[0] += ux * 230 * dt; v[1] += uy * 230 * dt;
+        const along = v[0] * ux + v[1] * uy, px = v[0] - along * ux, py = v[1] - along * uy, damp = Math.max(0, 1 - 2.2 * dt);
+        v[0] = along * ux + px * damp; v[1] = along * uy + py * damp; const sp2 = Math.hypot(v[0], v[1]); if (sp2 > 190) { v[0] *= 190 / sp2; v[1] *= 190 / sp2; }
+        e.x += v[0] * dt * (e.frozen > 0 || e.stun > 0 ? .3 : 1); e.y += v[1] * dt * (e.frozen > 0 || e.stun > 0 ? .3 : 1);
+      } else {
       const cv2 = e.dir ? 0 : Math.sin(e.ph * 2 + e.seed) * .25, fdx = e.dir ? e.dir[0] : ux, fdy = e.dir ? e.dir[1] : uy;
       e.x += (fdx - fdy * cv2) * spd * dt; e.y += (fdy + fdx * cv2) * spd * dt;
+      }
       if (e.dir && d > 900) { e.dead = true; continue; }
-      if (e.turnT != null) { e.turnT -= dt; if (e.turnT <= 0) { e.turnT = null; e.dir = null; e.spd *= 1.35; if (!api.sim) rings.push({ x: e.x, y: e.y, r: 4, max: 22, t: .2, c: '255,200,80' }); } }
       if (!api.sim && Math.random() < dt * 30) parts.push({ x: e.x + rnd(-4, 4), y: e.y + rnd(-4, 4), vx: -ux * 40 + rnd(-20, 20), vy: -uy * 40 + rnd(-20, 20), t: rnd(.2, .45), c: Math.random() < .5 ? e.col[1] : e.col[0], r: rnd(1.5, 3) });
       if (d < NEST_R + e.r * .5) {
         biteNest(e);
@@ -2511,7 +2517,7 @@ function updateCheese(dt) {
     m.t += dt;
     if (m.t >= m.dur && !m.done) {
       m.done = true; const n = m.angry ? 6 : 5;
-      const aim = Math.atan2(-m.y, -m.x); for (let i = 0; i < n; i++) { const a = aim + i / n * TAU, f = makeEnemy('fireball', m.x + Math.cos(a) * 16, m.y + Math.sin(a) * 16); f.dir = [Math.cos(a), Math.sin(a)]; f.turnT = .7; f.hp = f.max = P.dmg * .8; f.spd *= .8; f.dmg *= .35; }
+      const aim = Math.atan2(-m.y, -m.x); for (let i = 0; i < n; i++) { const a = aim + i / n * TAU, f = makeEnemy('fireball', m.x + Math.cos(a) * 16, m.y + Math.sin(a) * 16); f.vel = [Math.cos(a) * 150, Math.sin(a) * 150]; f.hp = f.max = P.dmg * .8; f.dmg *= .25; }
       shake = Math.max(shake, 6);
       if (!api.sim) { tone(120, 50, .4, 'sawtooth', .07); rings.push({ x: m.x, y: m.y, r: 10, max: 70, t: 0, c: '255,150,40' }); for (let i = 0; i < 20; i++) parts.push({ x: m.x, y: m.y, vx: rnd(-180, 180), vy: rnd(-180, 180), t: rnd(.3, .6), c: i % 3 ? '#ff8a2a' : '#4a2a1a', r: rnd(2, 4) }); }
     }
@@ -3332,7 +3338,7 @@ function drawMeteors(time) {
   }
 }
 function drawEnemy(e, time) {
-  const a = e.dir ? Math.atan2(e.dir[1], e.dir[0]) : e.soar && e.dPhase !== 'down' ? Math.atan2(e.y, e.x) + Math.PI / 2 : e.fly && e.mode === 'out' ? e.retreatA : Math.atan2(-e.y, -e.x), r = e.r, fl = e.flash > 0;
+  const a = e.vel ? Math.atan2(e.vel[1], e.vel[0]) : e.dir ? Math.atan2(e.dir[1], e.dir[0]) : e.soar && e.dPhase !== 'down' ? Math.atan2(e.y, e.x) + Math.PI / 2 : e.fly && e.mode === 'out' ? e.retreatA : Math.atan2(-e.y, -e.x), r = e.r, fl = e.flash > 0;
   const [c0, c1, c2] = fl ? ['#fff', '#fff', e.col[2]] : e.col;
   if (e.airborne) {
     const z = e.airZ || 0, sr = r * (1.15 - z * .35);
