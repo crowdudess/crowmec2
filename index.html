@@ -729,7 +729,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.67.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.67.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3742,19 +3742,14 @@ function drawEnemy(e, time) {
       ctx.restore();
       break; }
     case 'shroom': {
-      const st = Math.sin(time / 110 + e.ph);
-      for (let i = 0; i < 4; i++) { const t = (time / 1300 + i / 4 + e.ph) % 1; ctx.fillStyle = `rgba(238,226,190,${(1 - t) * .55})`; ctx.beginPath(); ctx.arc(-r * (.9 + t * 1.6), Math.sin(i * 2.7 + time / 350) * r * (.2 + t * .5), r * (.07 + t * .1), 0, TAU); ctx.fill(); }
-      ctx.fillStyle = c1; for (const [py, k] of [[-.42, 1], [.42, -1]]) { ctx.beginPath(); ctx.ellipse(r * .1 + st * k * r * .28, r * py, r * .22, r * .14, 0, 0, TAU); ctx.fill(); }
-      ctx.fillStyle = '#b8a888'; ctx.beginPath(); ctx.ellipse(r * .55, 0, r * .4, r * .3, 0, 0, TAU); ctx.fill();
-      ctx.fillStyle = c1; ctx.beginPath(); ctx.ellipse(r * .7, 0, r * .36, r * .3, 0, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#1a1612'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(r * .92, sd * r * .12, r * .06, r * .085, 0, 0, TAU); ctx.fill(); }
-      ctx.fillStyle = '#fff'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .94, sd * r * .12 - r * .03, r * .025, 0, TAU); ctx.fill(); }
-      ctx.save(); ctx.translate(-r * .08, 0); ctx.rotate(Math.sin(time / 220 + e.ph) * .06);
-      const cap = ctx.createRadialGradient(-r * .25, -r * .3, r * .1, 0, 0, r * 1.05);
-      cap.addColorStop(0, fl ? '#fff' : '#ff7a6a'); cap.addColorStop(.6, c0); cap.addColorStop(1, fl ? '#fff' : '#7a1a1a');
-      ctx.fillStyle = cap; ctx.beginPath(); for (let i = 0; i <= 24; i++) { const a = i / 24 * TAU, k = 1 + (i % 2 ? -.04 : .02); ctx.lineTo(Math.cos(a) * r * .92 * k, Math.sin(a) * r * .95 * k); } ctx.fill();
-      ctx.strokeStyle = 'rgba(60,10,10,.45)'; ctx.lineWidth = Math.max(1, r * .06); ctx.beginPath(); ctx.arc(0, 0, r * .86, 0, TAU); ctx.stroke();
-      for (const [x, y, q] of [[.3, -.42, .2], [-.3, .3, .24], [.12, .48, .14], [-.42, -.32, .16], [.52, .14, .12], [-.05, -.05, .13], [-.62, .02, .1]]) { ctx.fillStyle = '#f4ead2'; ctx.beginPath(); ctx.arc(x * r, y * r, q * r, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(180,160,120,.5)'; ctx.beginPath(); ctx.arc(x * r + q * r * .25, y * r + q * r * .25, q * r * .5, 0, TAU); ctx.fill(); }
+      const st = Math.sin(time / 110 + e.ph), bob = Math.abs(st) * r * .05;
+      ctx.fillStyle = fl ? '#fff' : '#c8b898'; for (const [py, k] of [[-.4, 1], [.4, -1]]) { ctx.beginPath(); ctx.ellipse(r * .15 + st * k * r * .25, r * py, r * .2, r * .13, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = fl ? '#fff' : c1; ctx.beginPath(); ctx.ellipse(r * .6, 0, r * .38, r * .3, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#1a1612'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(r * .82, sd * r * .12, r * .07, 0, TAU); ctx.fill(); }
+      ctx.save(); ctx.translate(-r * .05 - bob, 0);
+      ctx.fillStyle = fl ? '#fff' : c0; ctx.beginPath(); ctx.arc(0, 0, r * .88, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#5a1414'; ctx.lineWidth = Math.max(1.5, r * .08); ctx.stroke();
+      ctx.fillStyle = fl ? '#fff' : '#f4ecdc'; for (const [x, y, q] of [[.32, -.38, .2], [-.32, .3, .22], [-.4, -.34, .15], [.38, .34, .14]]) { ctx.beginPath(); ctx.arc(r * x, r * y, r * q, 0, TAU); ctx.fill(); }
       ctx.restore();
       break; }
     case 'queenspider': {
