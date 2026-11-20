@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4766,7 +4766,7 @@ function playIntro(opts = {}) {
   const prevB = B; B = BIOMES[0]; makeDeco();
   const mk = (k, ang, role, i) => { const d = E[k]; return { k, ...d, x: Math.cos(ang) * 1200, y: Math.sin(ang) * 900, hp: 1, max: 1, ph: rnd(0, 7), seed: rnd(0, 7), trail: [], mode: 'in', stun: 0, frozen: 0, flash: 0, bite: 0, kx: 0, ky: 0, burn: 0, ang, role, i, dir: [-Math.cos(ang), -Math.sin(ang)], r: d.r * (role === 'boss' ? 1.15 : 1.6) }; };
   const actors = [mk('raccoon', -2.5, 'thief', 0), mk('snake', .35, 'thief', 1), mk('squirrel', 2.25, 'thief', 2), mk('beetle', -.9, 'lurk', 0), mk('beetle', 1.3, 'lurk', 1), mk('beetle', -1.9, 'lurk', 2), mk('cat', -.15, 'boss', 0)].filter(a => E[a.k]);
-  const eyes = Array.from({ length: 16 }, (_, i) => ({ a: i / 16 * TAU + rnd(-.15, .15), d: rnd(200, 290), t: 10.6 + rnd(0, 3.2), big: Math.random() < .2 }));
+  const eyes = Array.from({ length: 18 }, (_, i) => ({ a: i / 18 * TAU + rnd(-.15, .15), d: rnd(230, 330), t: 10.6 + rnd(0, 3.2), big: Math.random() < .2, per: rnd(2.2, 4.6), ph: rnd(0, 5), col: Math.random() < .25 ? '255,90,60' : '255,214,90' }));
   const motes = Array.from({ length: 40 }, () => ({ a: rnd(0, TAU), r: rnd(0, 22), sp: rnd(18, 40), ph: rnd(0, 1) }));
   const feathers = Array.from({ length: 14 }, () => ({ x: rnd(-60, 60), y: rnd(-40, 40), vx: rnd(-90, 90), vy: rnd(-120, -40), a: rnd(0, 7), va: rnd(-4, 4) }));
   let ac = null, out = null, drone = null;
@@ -4825,7 +4825,6 @@ function playIntro(opts = {}) {
       const boxH = box.querySelector('.st-box').getBoundingClientRect().height || 0, cy = (H - boxH - 20) / 2 + (P0.title ? H * .08 : 0);
       ictx.setTransform(pr * sc, 0, 0, pr * sc, (W / 2 + sx) * pr, (cy + sy) * pr);
       drawGround(B, now); ambBack(B.id, now);
-      for (const e of eyes) { const k = smooth(e.t, e.t + .6, t) * (1 - smooth(15, 16, t)); if (k <= 0) continue; const x = Math.cos(e.a) * e.d * 1.25, y = Math.sin(e.a) * e.d, bl = Math.sin(now / 400 + e.a * 7) > .96 ? .1 : 1, rr = e.big ? 6 : 4; ictx.fillStyle = `rgba(255,214,90,${.85 * k * bl})`; ictx.beginPath(); ictx.arc(x - rr * 1.7, y, rr, 0, TAU); ictx.arc(x + rr * 1.7, y, rr, 0, TAU); ictx.fill(); }
       const eggsLeft = 3 - [0, 1, 2].filter(i => t >= 16.9 + i * .7).length;
       const glow = smooth(3.6, 5, t) * (1 - smooth(16.9, 18.6, t)) * (.75 + .25 * Math.sin(now / 260));
       if (glow > 0) { const g = ictx.createRadialGradient(0, 4, 2, 0, 4, 120); g.addColorStop(0, `rgba(255,224,140,${.85 * glow})`); g.addColorStop(.3, `rgba(200,130,255,${.45 * glow})`); g.addColorStop(1, 'rgba(176,106,232,0)'); ictx.fillStyle = g; ictx.beginPath(); ictx.arc(0, 0, 130, 0, TAU); ictx.fill(); }
@@ -4848,8 +4847,21 @@ function playIntro(opts = {}) {
       if (t > 15.6 && t < 24) for (const f of feathers) { const k = Math.min(t, 19.6 + (t - 19.6) * .3) - 15.6; ictx.save(); ictx.translate(f.x + f.vx * k * .4, f.y + f.vy * k * .3 + k * k * 9); ictx.rotate(f.a + f.va * k); ictx.globalAlpha = Math.max(0, 1 - k / 8); ictx.fillStyle = '#20232a'; ictx.beginPath(); ictx.ellipse(0, 0, 9, 3, 0, 0, TAU); ictx.fill(); ictx.restore(); }
       ictx.globalAlpha = 1;
       ictx.setTransform(pr, 0, 0, pr, 0, 0);
-      ictx.fillStyle = `rgba(6,8,22,${t > 27.4 ? .14 : .24})`; ictx.fillRect(0, 0, W, H);
-      const vg = ictx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .7); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); ictx.fillStyle = vg; ictx.fillRect(0, 0, W, H);
+      // the night closes in around a small circle of light on the nest
+      const lightW = t < 10 ? 190 : t < 14.2 ? lerp(190, 125, smooth(10, 12, t)) : t < 21 ? lerp(125, 300, smooth(14.2, 15, t)) : t < 27.4 ? lerp(300, 170, smooth(21, 23, t)) : lerp(170, 260, smooth(27.4, 29, t));
+      const lx = W / 2 + sx, ly = cy + sy, lr = Math.min(lightW * sc, Math.min(W, H) * (t > 27.4 ? .5 : .36));
+      const dk = ictx.createRadialGradient(lx, ly, lr * .55, lx, ly, lr * 1.9); dk.addColorStop(0, 'rgba(3,4,12,.12)'); dk.addColorStop(.55, 'rgba(3,4,12,.72)'); dk.addColorStop(1, 'rgba(2,3,8,.95)'); ictx.fillStyle = dk; ictx.fillRect(0, 0, W, H);
+      // glowing eyes in the dark, each pair blinking on its own
+      const eyeK = t < 15.2 ? 1 - smooth(14.4, 15.1, t) : t > 23.5 && t < 27.2 ? .55 * smooth(23.6, 24.6, t) : 0;
+      if (eyeK > 0) for (const e of eyes) {
+        const k = (t < 15.2 ? smooth(e.t, e.t + .6, t) : 1) * eyeK; if (k <= 0) continue;
+        const ex = lx + Math.cos(e.a) * e.d * 1.25 * sc, ey = ly + Math.sin(e.a) * e.d * sc;
+        const cyc = ((now / 1000 + e.ph) % e.per) / e.per, closed = cyc > .955, rr = (e.big ? 5 : 3.6) * Math.max(.7, sc), gap = rr * 1.9;
+        const gl = ictx.createRadialGradient(ex, ey, 0, ex, ey, rr * 6); gl.addColorStop(0, `rgba(${e.col},${.35 * k})`); gl.addColorStop(1, `rgba(${e.col},0)`); ictx.fillStyle = gl; ictx.beginPath(); ictx.arc(ex, ey, rr * 6, 0, TAU); ictx.fill();
+        ictx.fillStyle = `rgba(${e.col},${.95 * k})`;
+        for (const side of [-1, 1]) { ictx.beginPath(); if (closed) ictx.ellipse(ex + side * gap, ey, rr * 1.1, rr * .18, 0, 0, TAU); else ictx.ellipse(ex + side * gap, ey, rr, rr * 1.15, side * .25, 0, TAU); ictx.fill(); }
+        if (!closed) { ictx.fillStyle = `rgba(20,10,0,${.8 * k})`; for (const side of [-1, 1]) { ictx.beginPath(); ictx.ellipse(ex + side * gap, ey, rr * .28, rr * .8, 0, 0, TAU); ictx.fill(); } }
+      }
       if (t > 15.2 && t < 15.6) { ictx.fillStyle = `rgba(210,84,63,${.35 * (1 - (t - 15.2) / .4)})`; ictx.fillRect(0, 0, W, H); }
       const fin = 1 - smooth(0, .7, el_); if (fin > 0) { ictx.fillStyle = `rgba(0,0,0,${fin})`; ictx.fillRect(0, 0, W, H); }
     } catch (err) { ctx = keep; finish(); showErr(err); return; }
