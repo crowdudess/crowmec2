@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.80.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.80.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4579,14 +4579,14 @@ const ITEM_GOALS = {
   judge: { t: 'kills', n: 3500 }, overcharge: { t: 'casts', n: 400 }, wind: { t: 'mon', k: 'crane', n: 50 }, storm: { t: 'clear', b: 'fairy' }, pecker: { t: 'kills', n: 5000 },
   phoenixf: { t: 'skin', s: 'phoenix', b: 'volcano' }, shrine: { t: 'coins', n: 5000 }, tempest: { t: 'rift', n: 20 },
   // legendary: late game
-  l_hydra: { t: 'clear', b: 'volcano' }, l_bastion: { t: 'skin', s: 'widow', b: 'spider' }, l_reaper: { t: 'kills', n: 7500 }, l_drum: { t: 'rift', n: 25 }, l_tome: { t: 'casts', n: 600 },
-  l_winter: { t: 'mon', k: 'bear', n: 3 }, l_storm: { t: 'kills', n: 9000 }, l_forge: { t: 'mon', k: 'golem', n: 30 }, l_aegis: { t: 'casts', n: 800 }, l_quiver: { t: 'rift', n: 30 }, l_moon: { t: 'mon', k: 'kitsune', n: 60 },
-  l_rook: { t: 'coins', n: 12000 }, l_vampire: { t: 'mon', k: 'bat', n: 300 }, l_spellblade: { t: 'skin', s: 'fae' }, l_titan: { t: 'mon', k: 'gorilla', n: 40 }, l_gilded: { t: 'coins', n: 8000 }, l_eagleking: { t: 'clear', b: 'sakura' },
+  l_hydra: { t: 'mon', k: 'snake', n: 150 }, l_bastion: { t: 'mon', k: 'turtle', n: 80 }, l_reaper: { t: 'kills', n: 3000 }, l_drum: { t: 'rift', n: 15 }, l_tome: { t: 'casts', n: 250 },
+  l_winter: { t: 'mon', k: 'wolf', n: 100 }, l_storm: { t: 'kills', n: 4500 }, l_forge: { t: 'mon', k: 'firebeetle', n: 80 }, l_aegis: { t: 'casts', n: 400 }, l_quiver: { t: 'rift', n: 20 }, l_moon: { t: 'mon', k: 'kitsune', n: 50 },
+  l_rook: { t: 'coins', n: 6000 }, l_vampire: { t: 'mon', k: 'bat', n: 150 }, l_spellblade: { t: 'mon', k: 'pixie', n: 80 }, l_titan: { t: 'mon', k: 'gorilla', n: 40 }, l_gilded: { t: 'coins', n: 3000 }, l_eagleking: { t: 'mon', k: 'hawk', n: 150 },
   // mythic: the hardest
   b_cat: { t: 'clear', b: 'forest' }, b_gator: { t: 'clear', b: 'marsh' }, b_bear: { t: 'clear', b: 'snow' }, b_ratking: { t: 'clear', b: 'city' }, b_emperor: { t: 'clear', b: 'dunes' }, b_kong: { t: 'clear', b: 'jungle' }, b_queen: { t: 'clear', b: 'spider' }, b_wyrm: { t: 'clear', b: 'volcano' }, b_faequeen: { t: 'clear', b: 'fairy' }, b_oni: { t: 'clear', b: 'sakura' }, b_maw: { t: 'clear', b: 'void' },
-  m_doom: { t: 'clear', b: 'void' }, m_sun: { t: 'skin', s: 'fae', b: 'fairy' }, m_glass: { t: 'skin', s: 'blossom', b: 'sakura' }, m_warp: { t: 'mon', k: 'maw', n: 3 }, m_storm: { t: 'casts', n: 1000 },
-  m_flock: { t: 'kills', n: 10000 }, m_midas: { t: 'skin', s: 'golden' }, m_nova: { t: 'rift', n: 35 }, m_parl: { t: 'skin', s: 'eclipse', b: 'void' },
-  m_twin: { t: 'kills', n: 15000 }, m_phoenix: { t: 'mon', k: 'wyrm', n: 3 }, m_void: { t: 'rift', n: 45 }, m_bloodmoon: { t: 'mon', k: 'oni', n: 3 }, m_chaos: { t: 'coins', n: 25000 },
+  m_doom: { t: 'casts', n: 1200 }, m_sun: { t: 'mon', k: 'firebeetle', n: 300 }, m_glass: { t: 'kills', n: 8000 }, m_warp: { t: 'mon', k: 'voidling', n: 300 }, m_storm: { t: 'casts', n: 900 },
+  m_flock: { t: 'kills', n: 10000 }, m_midas: { t: 'coins', n: 12000 }, m_nova: { t: 'rift', n: 30 }, m_parl: { t: 'mon', k: 'pigeon', n: 300 },
+  m_twin: { t: 'kills', n: 14000 }, m_phoenix: { t: 'mon', k: 'magmaworm', n: 200 }, m_void: { t: 'rift', n: 40 }, m_bloodmoon: { t: 'mon', k: 'bat', n: 500 }, m_chaos: { t: 'coins', n: 25000 },
 };
 function goalProg(g) {
   const sw = (save.skinWins || {})[g.s] || {};
