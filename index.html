@@ -705,7 +705,35 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   #menu .tab { flex: 1 1 0; min-width: 0; padding: 6px 2px 5px; font-size: 10px; gap: 2px; }
   #menu .tab svg { width: 18px; height: 18px; }
   #menu .tab .dot { top: 3px; right: 18%; width: 7px; height: 7px; }
-  #bioPrev { aspect-ratio: 21 / 8; }
+  #menu .panel > .row.spread { align-items: center; } #menu .panel h1 { font-size: 30px; } #menu .stat { line-height: 1.2; } #menu .stat b { font-size: 17px; }
+  /* Fly tab: biome picture on the left, difficulty and the start button on the right */
+  #tab-fly:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 14px; align-items: start; }
+  #tab-fly > * { grid-column: 1 / -1; }
+  #tab-fly > .biocar { grid-column: 1; grid-row: 1 / span 4; }
+  #tab-fly > .biodots { grid-column: 1; grid-row: 5; }
+  #tab-fly > #biomeInfo { grid-column: 2; grid-row: 1; margin-top: 0 !important; font-size: 13px; line-height: 1.4; }
+  #tab-fly > #diffBox { grid-column: 2; grid-row: 2; margin-top: 8px; }
+  #tab-fly > #challenges { grid-column: 2; grid-row: 3; margin-top: 8px !important; }
+  #tab-fly > .row.spread { grid-column: 2; grid-row: 4; margin-top: 10px !important; }
+  #tab-fly .diffrow { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+  #tab-fly .diffbox { gap: 4px; } #tab-fly .diffbox > .eyebrow { font-size: 10px; }
+  #tab-fly .dcard { padding: 6px 2px 5px; border-radius: 10px; gap: 1px; } #tab-fly .dcard .dm { display: none; } #tab-fly .dcard .dn { font-size: 12px; }
+  #tab-fly .dcard .skulls { height: 14px; } #tab-fly .dcard .skulls svg { width: 14px; height: 14px; } #tab-fly .dcard .dwon { top: 2px; right: 4px; font-size: 10px; }
+  #tab-fly .diffbox > p, #tab-fly #challenges p { font-size: 12px; line-height: 1.35; }
+  #spellPop .monpop .row canvas { width: 72px !important; height: 72px !important; } #spellPop .stat, #spellPop [class*=stats] > div { padding: 6px 10px; }
+  #tab-fly .biocap h3 { font-size: 24px; } #tab-fly .bioarrow { width: 36px; height: 36px; }
+  #startBtn { width: 100%; padding: 13px 16px; }
+  /* smaller cards so more fit on screen */
+  #monList .grid, #skinList { grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; }
+  #monList .card, #skinList .card { padding: 8px; gap: 4px; }
+  #monList .card .nm, #skinList .card .nm { font-size: 13px; } #monList .card .ds, #skinList .card .ds { font-size: 11px; }
+  #monList .card canvas, #skinList .card canvas { max-height: 78px; object-fit: contain; }
+  /* monster and spell popups: picture beside the text, and they scroll inside */
+  .monpop { max-height: calc(100vh - 12px); overflow-y: auto; width: min(760px, 100%); padding: 14px; gap: 10px; }
+  #monPop .monpop { display: grid; grid-template-columns: 42% minmax(0, 1fr); column-gap: 14px; align-content: start; }
+  #monPop .monpop > * { grid-column: 2; }
+  #monPop .monpop > canvas { grid-column: 1; grid-row: 1 / span 8; position: sticky; top: 0; }
+  .monpop h2 { font-size: 28px; } .monpop .lore { font-size: 13px; } .monpop .abil li { font-size: 12px; padding: 6px 10px 6px 26px; }
   /* nest and egg reveal fit without scrolling */
   #shop .panel { zoom: .8; }
   #over .panel { zoom: .72; gap: 10px; } #overIcon { display: none; }
@@ -852,7 +880,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.3</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.4</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
