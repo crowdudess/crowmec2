@@ -946,7 +946,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.6</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.84.0</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1816,6 +1816,7 @@ addEventListener('fullscreenchange', () => { try { syncSettings(); } catch (e) {
 
 // ---------- state ----------
 let P, run, B, enemies = [], shots = [], parts = [], texts = [], rings = [], coinsFx = [], zones = [], spawnQ = [], state = 'menu', paused = false;
+let bossDeaths = [];
 let fireT = 0, cawT = 0, shake = 0, crowAng = -Math.PI / 2, magpieA = 0, offers = [], rerollCost = 2, healCost = 6, healsLeft = 2;
 let armed = null, mouse = { x: 0, y: 0, in: false, down: false }, spellCds = {};
 const api = { sim: false };
@@ -2102,9 +2103,9 @@ function kill(e) {
   if (P.burnHeal && e.burn > 0) run.hp = Math.min(run.maxHp, run.hp + P.burnHeal);
   if (P.killCdr) for (const k in spellCds) spellCds[k] = Math.max(0, spellCds[k] - P.killCdr);
   if (!api.sim) {
-    for (let i = 0; i < (e.boss ? 40 : 8); i++) parts.push({ x: e.x, y: e.y, vx: rnd(-140, 140), vy: rnd(-140, 140), t: rnd(.3, .7), c: e.col[0], r: rnd(2, 4) });
+    if (!(e.boss && !e.minib)) for (let i = 0; i < (e.boss ? 40 : 8); i++) parts.push({ x: e.x, y: e.y, vx: rnd(-140, 140), vy: rnd(-140, 140), t: rnd(.3, .7), c: e.col[0], r: rnd(2, 4) });
     for (let i = 0; i < (e.boss ? 6 : e.elite ? 3 : 0); i++) coinsFx.push({ x: e.x + rnd(-8, 8), y: e.y + rnd(-8, 8), t: 0 });
-    deathSfx(e.k, e.boss);
+    if (!(e.boss && !e.minib)) deathSfx(e.k, e.boss);
   }
   if (e.split) for (let i = 0; i < 2; i++) makeEnemy(e.split, e.x + rnd(-10, 10), e.y + rnd(-10, 10));
   if (e.elite) { addCoins(Math.round(6 * B.coin * (run.coinX || 1) * P.goldMult * (run.chGold || 1))); }
@@ -2116,7 +2117,8 @@ function kill(e) {
     toast(T('x_defeated', e.name), T('plus_coins', c));
     if (run.hp / run.maxHp < .15) grant('glass');
     run.bossKilledThisWave = true;
-    if (run.sandbox || run.goldenWave !== run.wave) { run.goldenWave = run.wave; goldenPop(); }
+    const wantGold = run.sandbox || run.goldenWave !== run.wave; if (wantGold) run.goldenWave = run.wave;
+    if (!api.sim && !e.minib) { bossDeaths.push({ e: { ...e, dead: false, flash: 0, stun: 0 }, t: 0, gold: wantGold }); } else if (wantGold) goldenPop();
   }
   if (run.coins >= 150) grant('hoard');
   if (save.stats.kills >= 2500) grant('kills');
@@ -2305,7 +2307,37 @@ function zoneSlow(e, dt) {
 }
 
 // ---------- update ----------
+const BOSS_DIE = 2;
+function updateBossDeaths(dt) {
+  for (const d of bossDeaths) {
+    const e = d.e, was = d.t; d.t += dt;
+    e.flash = d.t < 1.3 && Math.sin(d.t * 38) > 0 ? .1 : 0;
+    if (was < .05 && d.t >= .05) { shake = Math.max(shake, 10); tone(220, 60, .9, 'sawtooth', .07); }
+    if (Math.floor(was * 5) !== Math.floor(d.t * 5) && d.t < 1.3) { for (let i = 0; i < 6; i++) parts.push({ x: e.x + rnd(-e.r, e.r), y: e.y + rnd(-e.r, e.r), vx: rnd(-90, 90), vy: rnd(-90, 90), t: rnd(.3, .6), c: e.col[i % 2], r: rnd(2, 4) }); tone(500 + Math.random() * 300, 200, .12, 'square', .03); }
+    if (was < 1.3 && d.t >= 1.3) {
+      shake = Math.max(shake, 16); deathSfx(e.k, true);
+      for (let i = 0; i < 70; i++) { const a = rnd(0, TAU), sp = rnd(80, 340); parts.push({ x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: rnd(.5, 1.1), c: i % 3 ? e.col[0] : '#fff6d0', r: rnd(2, 5) }); }
+      rings.push({ x: e.x, y: e.y, r: e.r, max: e.r * 6, t: 0, c: '255,240,200' });
+      for (let i = 0; i < 6; i++) coinsFx.push({ x: e.x + rnd(-10, 10), y: e.y + rnd(-10, 10), t: 0 });
+    }
+  }
+  const done = bossDeaths.filter(d => d.t >= BOSS_DIE); bossDeaths = bossDeaths.filter(d => d.t < BOSS_DIE);
+  for (const d of done) if (d.gold) goldenPop();
+}
+function drawBossDeaths(time) {
+  for (const d of bossDeaths) {
+    const e = d.e, k = d.t < 1.3 ? 0 : (d.t - 1.3) / (BOSS_DIE - 1.3), wob = d.t < 1.3 ? (1 - d.t / 1.3 * .3) * 4 : 0;
+    if (k >= 1) continue;
+    ctx.save(); ctx.translate(e.x + rnd(-wob, wob), e.y + rnd(-wob, wob)); ctx.rotate(d.t * .25); ctx.scale(1 - k * .7, 1 - k * .7); ctx.translate(-e.x, -e.y);
+    ctx.globalAlpha = 1 - k;
+    if (d.t < 1.3) { const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 2.6); g.addColorStop(0, `rgba(255,240,200,${.15 + d.t * .35})`); g.addColorStop(1, 'rgba(255,200,120,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(e.x, e.y, e.r * 2.6, 0, TAU); ctx.fill();
+      ctx.strokeStyle = `rgba(255,245,210,${.25 + d.t * .4})`; ctx.lineWidth = 3; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + d.t * 2, l = e.r * (1.2 + d.t * 1.4); ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * e.r * .6, e.y + Math.sin(a) * e.r * .6); ctx.lineTo(e.x + Math.cos(a) * l, e.y + Math.sin(a) * l); ctx.stroke(); } }
+    try { drawEnemy(e, 0); } catch (err) {}
+    ctx.restore();
+  }
+}
 function update(dt) {
+  if (state === 'wave' && bossDeaths.length) updateBossDeaths(dt);
   if (state !== 'wave') { updateFx(dt); if (run) run.lastHp = run.hp; return; }
   if (run.lastHp != null && run.hp < run.lastHp - .5) { const lost = run.lastHp - run.hp; buzz(lost >= run.maxHp * .12 ? 140 : lost >= 15 ? 70 : 35); }
   run.lastHp = run.hp;
@@ -2639,7 +2671,7 @@ function update(dt) {
   if (run.hp <= 0 && P.rebirth && (run.reborns || 0) < +P.rebirth) { run.reborns = (run.reborns || 0) + 1; run.hp = run.maxHp * .5; shake = 12; toast(T('phoenix_t'), T('reborn')); if (!api.sim) for (let i = 0; i < 40; i++) parts.push({ x: rnd(-40, 40), y: rnd(-40, 40), vx: rnd(-200, 200), vy: rnd(-200, 200), t: rnd(.4, .9), c: i % 2 ? '#ffd040' : '#ff7a2a', r: rnd(2, 4) }); }
   if (run.hp <= 0) return endRun(false);
   updateCheese(dt); updateQuakes(dt); updateFrost(dt); updateForm(dt);
-  if (run.sandbox) { sandboxTick(); } else if (!spawnQ.length && !enemies.length && !cheeses.some(c => c.t < c.dur)) waveCleared();
+  if (run.sandbox) { sandboxTick(); } else if (!spawnQ.length && !enemies.length && !cheeses.some(c => c.t < c.dur)) { if (!bossDeaths.length && !run.goldPause) waveCleared(); }
 }
 const NEST_R = 50;
 function splash(e) {
@@ -3354,7 +3386,7 @@ function draw(time) {
   drawQuakes(); drawFrostGround();
   for (const c of cheeses) if (c.t >= c.dur) drawCheeseWedge(c.x, c.y, 17, c.rot, Math.min(1, c.dur + c.life - c.t));
   for (const e of enemies) { ctx.globalAlpha = e.storm > 0 ? .06 + Math.sin(time / 90) * .03 : e.ghostly && !e.soar ? .25 : 1; drawEnemy(e, time); }
-  ctx.globalAlpha = 1; drawMeteors(time);
+  ctx.globalAlpha = 1; drawBossDeaths(time); drawMeteors(time);
   ctx.globalAlpha = 1; for (const c of cheeses) if (c.t < c.dur) { const k = c.t / c.dur, x = c.x0 + (c.x - c.x0) * k, y = c.y0 + (c.y - c.y0) * k, h = Math.sin(k * Math.PI) * 90; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y, 18, 9, 0, 0, TAU); ctx.fill(); drawCheeseWedge(x, y - h, 18 + Math.sin(k * Math.PI) * 6, c.rot + c.t * c.spin, 1); }
   ctx.globalAlpha = 1;
   for (const z of zones) drawZone(z, time, false);
@@ -4816,6 +4848,7 @@ function playBossStory(biome, onDone, mode = 'win') {
     bctx.restore();
   };
   const sil = document.createElement('canvas'), sctx = sil.getContext('2d');
+  const bossReal = E[biome.boss] ? { ...E[biome.boss], k: biome.boss, hp: 1, max: 1, ph: 0, seed: 1, trail: [], mode: 'in', stun: 0, frozen: 0, flash: 0, bite: 0, kx: 0, ky: 0, burn: 0 } : null;
   const bossE = E[biome.boss] ? { ...E[biome.boss], k: biome.boss, hp: 1, max: 1, ph: 0, seed: 1, trail: [], mode: 'in', stun: 0, frozen: 0, flash: 0, bite: 0, kx: 0, ky: 0, burn: 0, col: ['#07080c', '#0d0e14', '#ff4030'], aura: null, r: (E[biome.boss].r || 40) * 1.05 } : null;
   let ac = null, out = null; try { initAudio(); ac = actx; if (ac && !muted) { out = ac.createGain(); out.gain.value = Math.max(.3, vol.sfx); out.connect(master); musicBus.gain.setTargetAtTime(.0001, ac.currentTime, .4); if (enter) { introNote(ac, out, ac.currentTime + .05, 55, 50, 3, 'sine', .14, .6); } else { introNote(ac, out, ac.currentTime + .05, 220, 55, 1.6, 'sawtooth', .07, .01); introNote(ac, out, ac.currentTime + .05, 110, 40, 2, 'sine', .2, .01); } } } catch (e) {}
   let pi = 0, pStart = performance.now(), sceneStart = pStart, typed = 0, full = pages[0].text, nextCharAt = pStart + 500, lastBlip = 0, done = false;
@@ -4865,7 +4898,12 @@ function playBossStory(biome, onDone, mode = 'win') {
       // the beaten boss: a shadow with fading eyes, sinking away
       const fade = enter ? smooth(1.05, 2.2, t) : 1 - .65 * smooth(.3, 2.4, t) - .35 * smooth(2.4, 3.2, t), bx = Math.cos(bossA) * bossD * 1.2, by = Math.sin(bossA) * bossD + (enter ? 0 : (1 - fade) * 30);
       // the boss as a pure black silhouette with a red rim of light and glowing eyes
-      if (fade > 0 && bossE) {
+      if (!enter && fade > 0 && bossReal) {
+        bctx.save(); bctx.globalAlpha = fade; bctx.translate(bx, by + (1 - fade) * 24); bctx.rotate((1 - fade) * .6); const sk = .85 + fade * .15; bctx.scale(sk, sk); bctx.translate(-bx, -by);
+        bossReal.x = bx; bossReal.y = by; bossReal.dir = [-bx, -by]; bossReal.flash = t < 1.2 && Math.sin(now / 70) > .3 ? .1 : 0; ctx = bctx; try { drawEnemy(bossReal, 0); } catch (e) {}
+        bctx.restore();
+      }
+      if (enter && fade > 0 && bossE) {
         // drawn once as a still shape: a shadow should not wiggle its legs
         const OS = Math.ceil(bossR * 7 * sc * pr); if (sil.width !== OS) { sil.width = sil.height = OS;
           sctx.globalCompositeOperation = 'source-over'; sctx.setTransform(sc * pr, 0, 0, sc * pr, OS / 2, OS / 2);
@@ -5330,6 +5368,7 @@ $('stayBtn').onclick = () => { run.endless = true; openShop(); };
 // ---------- flow ----------
 function begin() {
   if (introOn) return;
+  bossDeaths = [];
   const lvl = BIOMES[save.biome]; save.entered = save.entered || {};
   if (lvl && lvl.boss && !lvl.mode && !lvl.dlc && !save.entered[lvl.id] && !biomeState(lvl.id).cleared) { save.entered[lvl.id] = Date.now(); persist(); playBossStory(lvl, () => setTimeout(begin, 80), 'enter'); return; }
   newRun(save.biome);
@@ -6637,7 +6676,7 @@ requestAnimationFrame(frame);
 
 // Test hook for automated balance runs. Not used by the game itself.
 Object.assign(api, { paintUpIcon, replayStory, playBossStory, playIntro, bossCard, showEnding, playEggStage, toastSmall, goldenPop, openGift, startForm, startSandbox, icyRoar, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
-  get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
+  get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost, bossDeaths }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
   audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS, ITEMS });
 window.__nestguard = api;
