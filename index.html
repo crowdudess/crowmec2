@@ -574,6 +574,10 @@ canvas.manualaim { cursor: crosshair; }
 .eggstage .es-tile.win { transform: scale(1.08); box-shadow: 0 0 26px rgba(var(--rgb), 1), inset 0 0 20px rgba(var(--rgb), .5); border-color: rgb(var(--rgb)); }
 .eggstage.reeling .es-egg { opacity: 0; transform: scale(1.5); transition: opacity .25s, transform .3s; }
 .eggstage.reeling .es-aura { opacity: .55; }
+.eggstage.full { background: radial-gradient(circle at 50% 42%, #1c2216, #070906 75%); backdrop-filter: none; }
+.eggstage .es-next { position: absolute; right: 24px; bottom: 24px; display: inline-flex; gap: 10px; align-items: center; font-size: 17px; padding: 14px 22px; }
+.eggstage .es-next[hidden] { display: none; }
+.es-side .es-stamp { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) rotate(-18deg); padding: 4px 12px; border: 4px solid #e8604a; border-radius: 8px; color: #ff7a64; font-family: var(--display); font-size: 30px; letter-spacing: .06em; text-transform: uppercase; background: rgba(40,8,6,.55); text-shadow: 0 2px 0 #3a0a06; z-index: 2; white-space: nowrap; }
 .eggstage .es-sides { position: absolute; left: 50%; top: 42%; width: 0; height: 0; pointer-events: none; }
 .es-side { position: absolute; top: -110px; width: 170px; padding: 12px 10px; display: grid; justify-items: center; gap: 4px; border-radius: 14px; background: linear-gradient(180deg, rgba(var(--rgb), .2), rgba(10,12,8,.92)); border: 2px dashed rgba(var(--rgb), .8); opacity: 0; animation: esside .5s cubic-bezier(.2,1.5,.4,1) forwards; filter: saturate(.85); }
 .es-side.left { left: -380px; --rot: -14deg; --dx: 80px; } .es-side.right { left: 210px; --rot: 14deg; --dx: -80px; }
@@ -751,7 +755,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.72.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.0</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4436,11 +4440,11 @@ function runReel(win, lab, it, left) {
   };
   step();
 }
-function playEggStage(it, others = []) {
+function playEggStage(it, others = [], fromShop = false) {
   let st = $('eggStage');
-  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-hint"></div>'; document.body.append(st); st.onclick = () => { if (st.classList.contains('open')) closeEggStage(); }; }
+  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (st.classList.contains('open') && !st.dataset.next) closeEggStage(); }; st.querySelector('.es-next').onclick = () => stageNext(); }
   const egg = st.querySelector('.es-egg'), aura = st.querySelector('.es-aura'), glow = st.querySelector('.es-glow'), item = st.querySelector('.es-item'), reel = st.querySelector('.es-reel'), strip = st.querySelector('.es-strip');
-  st.hidden = false; st.className = 'eggstage shake'; item.innerHTML = ''; const sides = st.querySelector('.es-sides'); if (sides) sides.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
+  st.hidden = false; st.className = 'eggstage shake' + (fromShop ? ' full' : ''); st.dataset.next = fromShop ? '1' : ''; st.querySelector('.es-next').hidden = true; clearInterval(st._cd); item.innerHTML = ''; const sides = st.querySelector('.es-sides'); if (sides) sides.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
   const setR = r => { aura.dataset.rar = r; glow.style.setProperty('--rgb', RAR_RGB[r]); aura.style.setProperty('--rgb', RAR_RGB[r]); };
   setR(0); drawEgg(egg, it, 'whole');
   const token = (run.stageToken = (run.stageToken || 0) + 1), alive = () => run.stageToken === token && !st.hidden;
@@ -4464,15 +4468,24 @@ function playEggStage(it, others = []) {
   }, EGG_SHAKE);
   setTimeout(() => {
     if (!alive()) return;
-    setR(it.rar); st.className = 'eggstage open';
+    setR(it.rar); st.className = 'eggstage open' + (fromShop ? ' full' : '');
     item.innerHTML = ''; item.append(upIcon(it.id, 160));
     st.querySelector('.es-rar').textContent = T('rar' + it.rar); st.querySelector('.es-rar').style.color = `rgb(${RAR_RGB[it.rar]})`;
     st.querySelector('.es-name').textContent = (ITEMS.find(x => x.id === it.id) || it).name; st.querySelector('.es-hint').textContent = T('egg_tapon');
     if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; if (it.rar >= 3) setTimeout(() => tone(top, top * 1.5, .3, 'triangle', .06), 60); if (it.rar >= 4) setTimeout(() => tone(top * 1.5, top * 2, .45, 'sine', .06), 240); }
     shake = Math.max(shake, 4 + it.rar * 2);
-    const sd = st.querySelector('.es-sides'); if (sd) { sd.innerHTML = ''; others.slice(0, 2).forEach((o, i) => { const base = ITEMS.find(x => x.id === o.id) || o, c = el('div', 'es-side ' + (i ? 'right' : 'left')); c.style.setProperty('--rgb', RAR_RGB[o.rar]); c.style.animationDelay = (350 + i * 250) + 'ms'; const au = el('span', 'aura'); au.dataset.rar = o.rar; au.style.setProperty('--rgb', RAR_RGB[o.rar]); au.append(upIcon(o.id, 84)); c.append(el('b', 'es-miss', T('egg_missed')), au, el('span', 'es-srar', T('rar' + o.rar)), el('span', 'es-sname', base.name)); sd.append(c); setTimeout(() => { if (alive() && actx && !muted && o.rar > it.rar) tone(300, 180, .35, 'sawtooth', .04); }, 350 + i * 250); }); }
-    setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, STAGE_HOLD + (others.length ? 900 : 0));
+    const sd = st.querySelector('.es-sides'); if (sd) { sd.innerHTML = ''; others.slice(0, 2).forEach((o, i) => { const base = ITEMS.find(x => x.id === o.id) || o, c = el('div', 'es-side ' + (i ? 'right' : 'left')); c.style.setProperty('--rgb', RAR_RGB[o.rar]); c.style.animationDelay = (350 + i * 250) + 'ms'; const au = el('span', 'aura'); au.dataset.rar = o.rar; au.style.setProperty('--rgb', RAR_RGB[o.rar]); au.append(upIcon(o.id, 84)); c.append(el('b', 'es-stamp', T('egg_missed')), au, el('span', 'es-srar', T('rar' + o.rar)), el('span', 'es-sname', base.name)); sd.append(c); setTimeout(() => { if (alive() && actx && !muted && o.rar > it.rar) tone(300, 180, .35, 'sawtooth', .04); }, 350 + i * 250); }); }
+    if (fromShop) {
+      const nb = st.querySelector('.es-next'); nb.hidden = false; const end = performance.now() + 5000 + (others.length ? 900 : 0);
+      const upd = () => { if (!alive()) { clearInterval(st._cd); return; } const left = Math.max(0, Math.ceil((end - performance.now()) / 1000)); nb.innerHTML = ''; nb.append(el('span', '', left <= 5 ? T('next_in', left) : T('next_wave')), el('span', 'kbd', T('space'))); if (performance.now() >= end) { clearInterval(st._cd); stageNext(); } };
+      upd(); st._cd = setInterval(upd, 200);
+    } else setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, STAGE_HOLD + (others.length ? 900 : 0));
   }, CRACK_MS);
+}
+function stageNext() {
+  const st = $('eggStage'); if (!st || st.hidden || !st.classList.contains('open')) return;
+  clearInterval(st._cd); st.dataset.next = ''; closeEggStage();
+  if (state === 'shop' && !mustPick()) nextWave(); else if (state === 'shop') renderShop();
 }
 function setNextLabel(n) { const sp = $('nextBtn') && $('nextBtn').querySelector('[data-i18n="next_wave"]'); if (sp) sp.textContent = n != null && n <= 5 ? T('next_in', n) : T('next_wave'); }
 function closeEggStage() {
@@ -4691,7 +4704,7 @@ function buy(i) {
   persist(); run.items[it.id] = itemCount(it.id) + 1; run.bought++; it.apply();
   if (run.bought >= 12) grant('shopper');
   if (P.magpies >= 3) grant('murder');
-  if (!api.sim) { sfx.spell(); playEggStage(it, offers.filter((o, j) => j !== i)); renderShop(); }
+  if (!api.sim) { sfx.spell(); playEggStage(it, offers.filter((o, j) => j !== i), true); renderShop(); }
   return true;
 }
 function reroll() { }
@@ -5001,7 +5014,7 @@ for (const evn of ['pointerup', 'pointercancel']) cv.addEventListener(evn, () =>
 addEventListener('blur', () => { mouse.down = false; });
 cv.addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => {
-  if ($('eggStage') && !$('eggStage').hidden) { e.preventDefault(); return; }
+  if ($('eggStage') && !$('eggStage').hidden) { e.preventDefault(); if (e.code === 'Space' && !e.repeat && $('eggStage').classList.contains('open') && $('eggStage').dataset.next) stageNext(); return; }
   if (run && run.goldPause) { e.preventDefault(); return; }
   if (state === 'shop' && e.code === 'Space' && !$('shop').hidden && $('pause').hidden) { e.preventDefault(); if (!e.repeat && performance.now() - (run.shopAt || 0) > 400 && !mustPick() && !(run.picked >= 0 && performance.now() - run.crackAt < CRACK_MS + STAGE_HOLD) && !(run.golden && performance.now() - run.golden.crackAt < CRACK_MS + STAGE_HOLD)) nextWave(); return; }
   if (state !== 'wave') return;
