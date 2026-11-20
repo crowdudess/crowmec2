@@ -707,6 +707,14 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   #menu .tab .dot { top: 3px; right: 18%; width: 7px; height: 7px; }
   #menu .panel > .row.spread { align-items: center; } #menu .panel h1 { font-size: 30px; } #menu .stat { line-height: 1.2; } #menu .stat b { font-size: 17px; }
   /* Fly tab: biome picture on the left, difficulty and the start button on the right */
+  /* pause menu fits on one screen: settings in two columns, no name or hint rows */
+  #pause .panel { gap: 8px; padding: 10px 16px 12px; } #pause h2 { font-size: 26px; } #pause #pauseInfo { font-size: 12px; }
+  #pause .row .btn, #pause .row .ghost { padding: 8px 16px; }
+  #settingsPause .setgrid { grid-template-columns: 1fr 1fr; column-gap: 18px; row-gap: 6px; margin-top: 2px !important; }
+  #settingsPause .setrow { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 8px; font-size: 12px; }
+  #settingsPause .setrow select { padding: 4px 6px; font-size: 12px; }
+  #settingsPause .setrow input[type=checkbox] { width: 17px; height: 17px; }
+  #settingsPause .setrow:has(#p-name), #settingsPause .sethint, #settingsPause .setgrid > p { display: none; }
   #tab-fly:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 14px; align-items: start; }
   #tab-fly > * { grid-column: 1 / -1; }
   #tab-fly > .biocar { grid-column: 1; grid-row: 1 / span 4; }
@@ -880,7 +888,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.4</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.5</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -5079,6 +5087,16 @@ document.addEventListener('visibilitychange', () => {
   else { try { actx && actx.state === 'suspended' && actx.resume(); } catch (e) {} }
 });
 addEventListener('pagehide', () => { try { actx && actx.suspend(); } catch (e) {} });
+// Keep the screen awake while a run is going (the phone would otherwise dim and sleep mid-wave).
+let wakeLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && !wakeLock && navigator.wakeLock && !document.hidden) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+    else if (!on && wakeLock) { const w = wakeLock; wakeLock = null; await w.release(); }
+  } catch (e) { wakeLock = null; }
+}
+setInterval(() => { keepAwake(!!run && (state === 'wave' || state === 'shop') && !document.hidden); }, 2000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && run && (state === 'wave' || state === 'shop')) keepAwake(true); });
 // On phones, try to lock the screen sideways (works in the Android app and in full screen browsers).
 function lockSideways() { try { if (matchMedia('(pointer: coarse)').matches && screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} }
 addEventListener('pointerdown', lockSideways, { once: true });
@@ -5152,6 +5170,7 @@ function buildSettings(box, pre) {
   check('cbm', T('set_cbm'), () => !!save.cbm, on => { save.cbm = on; });
   check('lowfx', T('set_lowfx'), () => lowFx(), on => { save.lowFx = on; resize(); });
   g.append(el('p', 'muted sethint', T('set_lowfx_hint')));
+  if (matchMedia('(pointer: coarse)').matches) { box.append(g); return; }
   const kh = el('div', 'eyebrow', T('set_keys')); kh.style.marginTop = '10px'; g.append(kh);
   const kg = el('div', 'keygrid');
   for (const a of Object.keys(KEY_DEF)) {

@@ -26,4 +26,20 @@ const man = path.join(__dirname, 'android', 'app', 'src', 'main', 'AndroidManife
 let m = fs.readFileSync(man, 'utf8');
 if (!m.includes('android:screenOrientation')) m = m.replace('<activity', '<activity\n            android:screenOrientation="sensorLandscape"');
 fs.writeFileSync(man, m);
+// Keep the screen on while the game is open, so the phone doesn't dim and sleep mid-run.
+const act = path.join(__dirname, 'android', 'app', 'src', 'main', 'java', 'com', 'crowdude', 'nestguard', 'MainActivity.java');
+fs.writeFileSync(act, `package com.crowdude.nestguard;
+
+import android.os.Bundle;
+import android.view.WindowManager;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+}
+`);
 console.log('Android project set to version', v, '(code ' + code + ')');
