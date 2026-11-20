@@ -897,7 +897,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.7</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.8</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1918,7 +1918,6 @@ function startWave() {
     if (run.riftPair) q.side = riftSideOf(k);
     return q;
   });
-  if (fresh.length && !api.sim) toastSmall(fresh.map(k => E[k].name).join(', '), ['New enemy', 'Nouvel ennemi', 'Nuevo enemigo', 'Neuer Gegner'][li()], 'enemy');
   const mid = spawnQ.length ? spawnQ[Math.floor(spawnQ.length * .4)].t : 2;
   let bossKeys = isBoss ? [B.boss] : [], miniBoss = false;
   if (run.endless && (isBoss || w % 3 === 0)) {
