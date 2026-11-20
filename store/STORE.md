@@ -8,7 +8,7 @@ Everything needed to fill in a Steam or itch.io page. The images in this folder 
 
 ## Short description (Steam allows 300 characters)
 
-You are a crow, and everything wants your eggs. Hold the nest for 30 waves, crack the magpie's eggs for wild items, cast spells and face 12 bosses, each with its own tricks. A roguelike nest defence with 13 biomes, 106 items and an endless Chaos Rift.
+You are a crow, and everything wants your eggs. Hold the nest for 30 waves, crack the magpie's eggs for wild items, cast spells and face 12 bosses, each with its own tricks. A roguelike nest defence with 13 biomes, 116 items and an endless Chaos Rift.
 
 ## Long description
 
@@ -18,7 +18,7 @@ Beetles, snakes, raccoons, frogs, spiders, bats and much worse come from every s
 
 **Crack the magpie's eggs.** After every wave the magpie leaves three eggs in your nest. Pick one and watch it roll, from Common all the way to Mythic. The other two crack open too, so you can see what you missed. Bosses drop golden eggs with much better odds.
 
-**Build something broken.** 106 items stack together in strange ways. Bouncing feathers, a sun that sets everything on fire, magpies that fight for you, a nest that bites back. No two runs end with the same build.
+**Build something broken.** 116 items stack together in strange ways. Bouncing feathers, a sun that sets everything on fire, magpies that fight for you, a nest that bites back. No two runs end with the same build.
 
 **12 bosses with their own tricks.** A Frost Bear that freezes your crow in ice. A Maw that splits in two. A Magma Dragon that takes flight and rains fireballs. An Oni whose shockwave breaks your spells. Learn them, or lose your eggs.
 
@@ -31,7 +31,7 @@ Beetles, snakes, raccoons, frogs, spiders, bats and much worse come from every s
 ### Features
 
 - 13 biomes and 12 bosses, plus mini bosses on waves 10 and 20
-- 106 items across six rarities, hatched from eggs
+- 116 items across six rarities, hatched from eggs
 - 26 spells, five slots per run
 - 29 crow skins, each with its own passive, feathers, nest and caw
 - Endless Chaos Rift with 10 chaos levels
