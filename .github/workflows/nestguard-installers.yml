@@ -1,6 +1,6 @@
 name: Nestguard installers
 
-# Builds desktop installers for the Nestguard game.
+# Builds desktop installers and the Android app for the Nestguard game.
 # - Push to main (or the claude/beautiful-euler-b2t7tl branch) with a change to the game or the desktop app:
 #   builds the installers and publishes them on a release named after the version in desktop/package.json.
 #   Bump that version to make a new release; the same version updates the existing release.
@@ -14,6 +14,7 @@ on:
     paths:
       - "index.html"
       - "desktop/**"
+      - "mobile/**"
       - ".github/workflows/nestguard-installers.yml"
     tags:
       - "v*"
@@ -64,9 +65,54 @@ jobs:
             desktop/release/*.AppImage
           if-no-files-found: error
 
+  android:
+    name: Build (android)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set version
+        id: ver
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then V="${GITHUB_REF_NAME#nestguard-}"; V="${V#v}"; else V="$(node -p "require('../desktop/package.json').version")"; fi
+          npm version "$V" --no-git-tag-version --allow-same-version
+          echo "v=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Make Android project
+        run: npm run android
+
+      - name: Build APK
+        working-directory: mobile/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Name APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk "Nestguard-${{ steps.ver.outputs.v }}-android.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nestguard-android
+          path: mobile/*.apk
+          if-no-files-found: error
+
   release:
     name: Publish release
-    needs: build
+    needs: [build, android]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -100,3 +146,4 @@ jobs:
             - **Windows:** download the `.exe` and run it. If SmartScreen warns, click **More info → Run anyway** (the installer is not code-signed).
             - **macOS:** download the `.dmg`, drag Nestguard to Applications, then right-click it and choose **Open** the first time.
             - **Linux:** download the `.AppImage`, make it executable (`chmod +x`), and run it.
+            - **Android:** download the `.apk` on your phone and open it. Allow installing from your browser when Android asks. Updates install over the old version and keep your save.

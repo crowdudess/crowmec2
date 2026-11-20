@@ -106,7 +106,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
       <div class="dl">
         <a class="big" id="bigBtn" href="https://github.com/crowdudess/crowmec2/releases/latest">
           <svg id="bigIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
-          <span><span id="bigLabel">Download Nestguard</span><small id="bigSub">Free · Windows &amp; Linux</small></span>
+          <span><span id="bigLabel">Download Nestguard</span><small id="bigSub">Free · Windows, Linux &amp; Android</small></span>
         </a>
         <div class="alts">
           <a class="alt" id="altPlay" href="play/"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>Play in your browser</a>
@@ -124,7 +124,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
 <section id="download">
   <div class="wrap">
     <h2>Download</h2>
-    <p class="lead">Free, no account, no ads. Pick your system. Your progress is saved on your computer.</p>
+    <p class="lead">Free, no account, no ads. Pick your system. Your progress is saved on your device.</p>
     <div class="plat">
       <div class="pc" id="pcWin">
         <div class="top"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3zm0 13 7.5 1.1v-7H3zm8.5 1.3L21 21.2V12.5h-9.5zm0-15.6v7.3H21V2.8z"/></svg><h3>Windows</h3><span class="tag" hidden>For you</span></div>
@@ -139,6 +139,13 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
         <a class="get" id="getLinux" href="https://github.com/crowdudess/crowmec2/releases/latest">Download .AppImage</a>
         <div class="file" id="fileLinux"></div>
         <ol><li>Make it runnable: <code>chmod +x Nestguard-*.AppImage</code></li><li>Double-click it, or run it from a terminal.</li></ol>
+      </div>
+      <div class="pc" id="pcAndroid">
+        <div class="top"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.6 9.48 19.44 6.3a.38.38 0 0 0-.66-.38l-1.86 3.22A11.5 11.5 0 0 0 12 8.1c-1.77 0-3.43.37-4.92 1.04L5.22 5.92a.38.38 0 1 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg><h3>Android</h3><span class="tag" hidden>For you</span></div>
+        <p>App for Android phones and tablets. Plays offline, full screen.</p>
+        <a class="get" id="getAndroid" href="https://github.com/crowdudess/crowmec2/releases/latest">Download .apk</a>
+        <div class="file" id="fileAndroid"></div>
+        <ol><li>Open the <code>.apk</code> on your phone.</li><li>If Android asks, allow your browser to install apps, then tap <b>Install</b>. New versions install over the old one and keep your save.</li></ol>
       </div>
       <div class="pc" id="pcWeb">
         <div class="top"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16 16 0 0 0 0 4zm.8 2h3a15.6 15.6 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.4-3.6A15.6 15.6 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14.6 14.6 0 0 1 0-4h4.6a14.6 14.6 0 0 1 0 4zm.2 5.6a15.6 15.6 0 0 0 1.4-3.6h3a8 8 0 0 1-4.4 3.6zm1.8-5.6a16 16 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z"/></svg><h3>Browser</h3><span class="tag" hidden>For you</span></div>
@@ -208,20 +215,22 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
   const REPO = 'crowdudess/crowmec2';
   const ua = navigator.userAgent, plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
   const mobile = /Android|iPhone|iPad|iPod/i.test(ua);
-  const os = mobile ? 'web' : /Win/i.test(plat + ua) ? 'win' : /Linux|X11/i.test(plat + ua) ? 'linux' : 'web';
+  const os = /Android/i.test(ua) ? 'android' : mobile ? 'web' : /Win/i.test(plat + ua) ? 'win' : /Linux|X11/i.test(plat + ua) ? 'linux' : 'web';
   const ICON_PLAY = '<path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>';
-  const card = { win: 'pcWin', linux: 'pcLinux', web: 'pcWeb' }[os];
+  const card = { win: 'pcWin', linux: 'pcLinux', android: 'pcAndroid', web: 'pcWeb' }[os];
   const c = document.getElementById(card); c.classList.add('rec'); c.querySelector('.tag').hidden = false;
   const big = document.getElementById('bigBtn'), lab = document.getElementById('bigLabel'), sub = document.getElementById('bigSub');
   if (os === 'win') { lab.textContent = 'Download for Windows'; sub.textContent = 'Free · .exe installer'; }
   else if (os === 'linux') { lab.textContent = 'Download for Linux'; sub.textContent = 'Free · .AppImage'; }
+  else if (os === 'android') { lab.textContent = 'Download for Android'; sub.textContent = 'Free · .apk, plays offline'; }
   else { lab.textContent = 'Play in your browser'; sub.textContent = mobile ? 'Free · works on phones and tablets' : 'Free · no install needed'; big.href = 'play/'; document.getElementById('bigIcon').innerHTML = ICON_PLAY; document.getElementById('altPlay').hidden = true; }
   const mb = n => (n / 1048576).toFixed(0) + ' MB';
   fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then(r => r.ok ? r.json() : Promise.reject()).then(rel => {
-    const win = rel.assets.find(a => /\.exe$/i.test(a.name)), lin = rel.assets.find(a => /\.AppImage$/i.test(a.name));
+    const win = rel.assets.find(a => /\.exe$/i.test(a.name)), lin = rel.assets.find(a => /\.AppImage$/i.test(a.name)), apk = rel.assets.find(a => /\.apk$/i.test(a.name));
     document.getElementById('verLine').textContent = `Version ${rel.tag_name.replace(/^v/, '')} · released ${new Date(rel.published_at).toLocaleDateString()}`;
     if (win) { document.getElementById('getWin').href = win.browser_download_url; document.getElementById('fileWin').textContent = `${win.name} · ${mb(win.size)}`; if (os === 'win') big.href = win.browser_download_url; }
     if (lin) { document.getElementById('getLinux').href = lin.browser_download_url; document.getElementById('fileLinux').textContent = `${lin.name} · ${mb(lin.size)}`; if (os === 'linux') big.href = lin.browser_download_url; }
+    if (apk) { document.getElementById('getAndroid').href = apk.browser_download_url; document.getElementById('fileAndroid').textContent = `${apk.name} · ${mb(apk.size)}`; if (os === 'android') big.href = apk.browser_download_url; }
   }).catch(() => {});
 })();
 </script>
