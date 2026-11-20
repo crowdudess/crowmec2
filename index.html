@@ -564,6 +564,25 @@ canvas.manualaim { cursor: crosshair; }
 .eggstage .es-egg { position: absolute; left: 50%; top: 42%; width: 260px; height: 260px; margin: -130px 0 0 -130px; animation: espop .45s cubic-bezier(.2,1.7,.4,1); }
 .eggstage.shake .es-egg { animation: espop .45s cubic-bezier(.2,1.7,.4,1), eggshake .11s linear .45s infinite; }
 .eggstage.open .es-egg { opacity: .9; transform: translateY(70px) scale(.8); transition: transform .4s, opacity .4s; }
+.eggstage .es-reel { position: absolute; left: 50%; top: 42%; width: min(92vw, 780px); height: 128px; transform: translate(-50%, -50%); overflow: hidden; border-radius: 16px; background: rgba(8,10,6,.92); border: 2px solid rgba(232,184,74,.55); box-shadow: 0 0 40px rgba(0,0,0,.6), inset 0 0 30px rgba(0,0,0,.8); opacity: 0; pointer-events: none; transition: opacity .2s; -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
+.eggstage.reeling .es-reel { opacity: 1; }
+.eggstage .es-reel::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: linear-gradient(#ffe27a, #e8b84a); box-shadow: 0 0 12px rgba(255,216,74,.9); }
+.eggstage .es-reel::before { content: ''; position: absolute; left: 50%; top: -2px; margin-left: -10px; border: 10px solid transparent; border-top-color: #ffe27a; z-index: 2; }
+.eggstage .es-strip { display: flex; gap: 8px; padding: 12px 0; will-change: transform; }
+.eggstage .es-tile { flex: none; width: 96px; height: 100px; border-radius: 12px; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, rgba(var(--rgb), .28), #161c12 70%); border: 2px solid rgba(var(--rgb), .5); border-bottom-width: 6px; transition: transform .25s, box-shadow .25s; }
+.eggstage .es-tile canvas { width: 64px; height: 64px; }
+.eggstage .es-tile.win { transform: scale(1.08); box-shadow: 0 0 26px rgba(var(--rgb), 1), inset 0 0 20px rgba(var(--rgb), .5); border-color: rgb(var(--rgb)); }
+.eggstage.reeling .es-egg { opacity: 0; transform: scale(1.5); transition: opacity .25s, transform .3s; }
+.eggstage.reeling .es-aura { opacity: .55; }
+.eggstage .es-sides { position: absolute; left: 50%; top: 42%; width: 0; height: 0; pointer-events: none; }
+.es-side { position: absolute; top: -110px; width: 170px; padding: 12px 10px; display: grid; justify-items: center; gap: 4px; border-radius: 14px; background: linear-gradient(180deg, rgba(var(--rgb), .2), rgba(10,12,8,.92)); border: 2px dashed rgba(var(--rgb), .8); opacity: 0; animation: esside .5s cubic-bezier(.2,1.5,.4,1) forwards; filter: saturate(.85); }
+.es-side.left { left: -380px; --rot: -14deg; --dx: 80px; } .es-side.right { left: 210px; --rot: 14deg; --dx: -80px; }
+@keyframes esside { from { opacity: 0; transform: translateX(var(--dx)) rotate(0deg) scale(.4); } to { opacity: .9; transform: translateX(0) rotate(var(--rot)) scale(.92); } }
+.es-side .es-miss { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--bone-dim); }
+.es-side .aura { width: 84px; height: 84px; }
+.es-side .es-srar { font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: rgb(var(--rgb)); }
+.es-side .es-sname { font-size: 14px; font-weight: 800; color: var(--bone); text-align: center; }
+@media (max-width: 640px) { .es-side { width: 110px; top: -80px; padding: 8px 6px; } .es-side.left { left: -200px; } .es-side.right { left: 92px; } .es-side .aura, .es-side .aura canvas { width: 56px; height: 56px; } .es-side .es-sname { font-size: 11px; } }
 .eggstage .es-item { position: absolute; left: 50%; top: 42%; width: 160px; height: 160px; margin: -80px 0 0 -80px; display: grid; place-items: center; }
 .eggstage.open .es-item { animation: esitem .6s cubic-bezier(.2,1.8,.4,1) both; filter: drop-shadow(0 0 22px rgba(var(--rgb), 1)); }
 .eggstage.open .es-item canvas { border-radius: 24px; box-shadow: 0 0 0 4px rgba(255,255,255,.12), 0 0 40px rgba(0,0,0,.6); }
@@ -732,7 +751,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.71.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.72.0</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4401,7 +4420,7 @@ function rollOffers() {
   offers = picks; run.picked = null; run.crackT = 0; run.popSeen = new Set(); run.golden = null;
   if (Math.random() < goldenChance()) { const g = rollItem(new Set(picks.map(x => x.id)), 5, true); if (g) run.golden = { ...g, golden: true, cracked: false, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }; }
 }
-const CRACK_MS = 2300, STAGE_HOLD = 1700;
+const CRACK_MS = 4000, STAGE_HOLD = 1700, EGG_SHAKE = 650, EGG_SPIN = 2800;
 function runReel(win, lab, it, left) {
   const pool = ITEMS.filter(x => itemOpen(x.id)), t0 = performance.now(), end = t0 + Math.max(0, left - 150);
   let delay = 55;
@@ -4417,33 +4436,43 @@ function runReel(win, lab, it, left) {
   };
   step();
 }
-function playEggStage(it) {
+function playEggStage(it, others = []) {
   let st = $('eggStage');
-  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-hint"></div>'; document.body.append(st); st.onclick = () => { if (st.classList.contains('open')) closeEggStage(); }; }
-  const egg = st.querySelector('.es-egg'), aura = st.querySelector('.es-aura'), glow = st.querySelector('.es-glow'), item = st.querySelector('.es-item');
-  st.hidden = false; st.className = 'eggstage shake'; item.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
-  drawEgg(egg, it, 'whole');
-  const t0 = performance.now(), token = (run.stageToken = (run.stageToken || 0) + 1); let delay = 70, k = 0;
+  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-hint"></div>'; document.body.append(st); st.onclick = () => { if (st.classList.contains('open')) closeEggStage(); }; }
+  const egg = st.querySelector('.es-egg'), aura = st.querySelector('.es-aura'), glow = st.querySelector('.es-glow'), item = st.querySelector('.es-item'), reel = st.querySelector('.es-reel'), strip = st.querySelector('.es-strip');
+  st.hidden = false; st.className = 'eggstage shake'; item.innerHTML = ''; const sides = st.querySelector('.es-sides'); if (sides) sides.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
   const setR = r => { aura.dataset.rar = r; glow.style.setProperty('--rgb', RAR_RGB[r]); aura.style.setProperty('--rgb', RAR_RGB[r]); };
-  const step = () => {
-    if (run.stageToken !== token || st.hidden) return;
-    const el2 = performance.now() - t0;
-    if (el2 + delay >= CRACK_MS) { setTimeout(reveal, Math.max(0, CRACK_MS - el2)); return; }
-    const r = k++ % 6; setR(r); if (el2 > CRACK_MS * .45) drawEgg(egg, it, 'crack');
-    if (actx && !muted) tone(420 + r * 110, 420 + r * 110, .05, 'square', .025);
-    delay *= 1.1; setTimeout(step, delay);
-  };
-  const reveal = () => {
-    if (run.stageToken !== token || st.hidden) return;
-    setR(it.rar); st.className = 'eggstage open'; drawEgg(egg, it, 'open');
+  setR(0); drawEgg(egg, it, 'whole');
+  const token = (run.stageToken = (run.stageToken || 0) + 1), alive = () => run.stageToken === token && !st.hidden;
+  // build the reel: random fillers, a teaser next to the prize, the prize at WIN
+  const pool = ITEMS.filter(x => itemOpen(x.id)), pick = () => { const r = Math.random(), want = r < .55 ? 0 : r < .75 ? 1 : r < .88 ? 2 : r < .95 ? 3 : r < .98 ? 4 : 5, p2 = pool.filter(x => x.rar === want); return (p2.length ? p2 : pool)[Math.floor(Math.random() * (p2.length || pool.length))]; };
+  const WIN = 36, N = 42, tiles = [];
+  for (let i = 0; i < N; i++) tiles.push(i === WIN ? it : pick());
+  const tease = pool.filter(x => x.rar >= Math.max(3, it.rar + 1)); if (tease.length) tiles[WIN + (Math.random() < .5 ? 1 : -1)] = tease[Math.floor(Math.random() * tease.length)];
+  strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
+  tiles.forEach((x, i) => { const t = el('div', 'es-tile'); t.style.setProperty('--rgb', RAR_RGB[x.rar]); t.append(upIcon(x.id, 64)); if (i === WIN) t.classList.add('prize'); strip.append(t); });
+  setTimeout(() => {
+    if (!alive()) return;
+    drawEgg(egg, it, 'open'); st.className = 'eggstage reeling'; shake = Math.max(shake, 4);
+    if (actx && !muted) tone(220, 90, .25, 'sawtooth', .05);
+    const TW = 104, w = reel.clientWidth, target = WIN * TW + TW / 2 - w / 2 + rnd(-30, 30);
+    void strip.offsetWidth; strip.style.transition = `transform ${EGG_SPIN}ms cubic-bezier(.08,.72,.16,1)`; strip.style.transform = `translateX(${-target}px)`;
+    let last = -1; const t0 = performance.now();
+    const tick = () => { if (!alive() || performance.now() - t0 > EGG_SPIN + 50) return; const m = new DOMMatrixReadOnly(getComputedStyle(strip).transform), idx = Math.floor((-m.m41 + w / 2) / TW); if (idx !== last) { last = idx; const x = tiles[idx]; if (x) setR(x.rar); if (actx && !muted) tone(700 + (x ? x.rar : 0) * 80, 700 + (x ? x.rar : 0) * 80, .03, 'square', .025); } requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    setTimeout(() => { if (!alive()) return; setR(it.rar); strip.children[WIN].classList.add('win'); if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); } }, EGG_SPIN);
+  }, EGG_SHAKE);
+  setTimeout(() => {
+    if (!alive()) return;
+    setR(it.rar); st.className = 'eggstage open';
     item.innerHTML = ''; item.append(upIcon(it.id, 160));
     st.querySelector('.es-rar').textContent = T('rar' + it.rar); st.querySelector('.es-rar').style.color = `rgb(${RAR_RGB[it.rar]})`;
     st.querySelector('.es-name').textContent = (ITEMS.find(x => x.id === it.id) || it).name; st.querySelector('.es-hint').textContent = T('egg_tapon');
-    if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); if (it.rar >= 3) setTimeout(() => tone(top, top * 1.5, .3, 'triangle', .06), 160); if (it.rar >= 4) setTimeout(() => tone(top * 1.5, top * 2, .45, 'sine', .06), 340); }
+    if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; if (it.rar >= 3) setTimeout(() => tone(top, top * 1.5, .3, 'triangle', .06), 60); if (it.rar >= 4) setTimeout(() => tone(top * 1.5, top * 2, .45, 'sine', .06), 240); }
     shake = Math.max(shake, 4 + it.rar * 2);
-    setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, STAGE_HOLD);
-  };
-  step();
+    const sd = st.querySelector('.es-sides'); if (sd) { sd.innerHTML = ''; others.slice(0, 2).forEach((o, i) => { const base = ITEMS.find(x => x.id === o.id) || o, c = el('div', 'es-side ' + (i ? 'right' : 'left')); c.style.setProperty('--rgb', RAR_RGB[o.rar]); c.style.animationDelay = (350 + i * 250) + 'ms'; const au = el('span', 'aura'); au.dataset.rar = o.rar; au.style.setProperty('--rgb', RAR_RGB[o.rar]); au.append(upIcon(o.id, 84)); c.append(el('b', 'es-miss', T('egg_missed')), au, el('span', 'es-srar', T('rar' + o.rar)), el('span', 'es-sname', base.name)); sd.append(c); setTimeout(() => { if (alive() && actx && !muted && o.rar > it.rar) tone(300, 180, .35, 'sawtooth', .04); }, 350 + i * 250); }); }
+    setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, STAGE_HOLD + (others.length ? 900 : 0));
+  }, CRACK_MS);
 }
 function setNextLabel(n) { const sp = $('nextBtn') && $('nextBtn').querySelector('[data-i18n="next_wave"]'); if (sp) sp.textContent = n != null && n <= 5 ? T('next_in', n) : T('next_wave'); }
 function closeEggStage() {
@@ -4662,7 +4691,7 @@ function buy(i) {
   persist(); run.items[it.id] = itemCount(it.id) + 1; run.bought++; it.apply();
   if (run.bought >= 12) grant('shopper');
   if (P.magpies >= 3) grant('murder');
-  if (!api.sim) { sfx.spell(); playEggStage(it); renderShop(); }
+  if (!api.sim) { sfx.spell(); playEggStage(it, offers.filter((o, j) => j !== i)); renderShop(); }
   return true;
 }
 function reroll() { }
