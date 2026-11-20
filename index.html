@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.7</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.8</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4771,6 +4771,7 @@ function playIntro(opts = {}) {
     document.body.append(box);
   }
   const frameEl = box.querySelector('.st-frame'), cvs = box.querySelector('canvas'), ictx = cvs.getContext('2d'), textEl = box.querySelector('.st-text'), nextEl = box.querySelector('.st-next'), title = box.querySelector('.in-title'), skip = box.querySelector('.in-skip');
+  try { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); } catch (e) {}
   skip.textContent = T('in_skip'); box.hidden = false; box.classList.remove('out'); title.classList.remove('on');
   const prevB = B; B = BIOMES[0]; makeDeco();
   const mk = (k, ang, role, i) => { const d = E[k]; return { k, ...d, x: Math.cos(ang) * 1200, y: Math.sin(ang) * 900, hp: 1, max: 1, ph: rnd(0, 7), seed: rnd(0, 7), trail: [], mode: 'in', stun: 0, frozen: 0, flash: 0, bite: 0, kx: 0, ky: 0, burn: 0, ang, role, i, dir: [-Math.cos(ang), -Math.sin(ang)], r: d.r * (role === 'boss' ? 1.15 : 1.6) }; };
@@ -4793,13 +4794,15 @@ function playIntro(opts = {}) {
     if (done) return; done = true; introOn = false;
     box.classList.add('out'); setTimeout(() => { box.hidden = true; }, 500);
     try { if (drone) drone.forEach(d => { d.g.gain.setTargetAtTime(.0001, ac.currentTime, .2); d.o.stop(ac.currentTime + 1); }); if (out) setTimeout(() => out.disconnect(), 1200); applyVolumes(); } catch (e) {}
-    B = prevB; makeDeco(); save.sawIntro = Date.now(); persist();
-    removeEventListener('keydown', onKey, true); box.removeEventListener('pointerdown', onTap);
+    if (state === 'menu' && B === BIOMES[0]) { B = prevB; makeDeco(); } save.sawIntro = Date.now(); persist();
+    removeEventListener('keydown', onKey, true); removeEventListener('keyup', onKeyUp, true); box.removeEventListener('pointerdown', onTap);
+    const swallow = ev => { ev.stopPropagation(); ev.preventDefault(); }; addEventListener('click', swallow, true); setTimeout(() => removeEventListener('click', swallow, true), 450);
     if (opts.onDone) opts.onDone();
   };
   const onKey = ev => { ev.stopImmediatePropagation(); if (ev.repeat) return; if (ev.key === 'Escape') { ev.preventDefault(); finish(); } else if (['Space', 'Enter', 'KeyZ', 'ArrowRight'].includes(ev.code)) { ev.preventDefault(); advance(); } };
   const onTap = ev => { if (ev.target === skip) return; ev.preventDefault(); advance(); };
-  addEventListener('keydown', onKey, true); box.addEventListener('pointerdown', onTap); skip.onclick = finish;
+  const onKeyUp = ev => { ev.stopImmediatePropagation(); if (['Space', 'Enter'].includes(ev.code)) ev.preventDefault(); };
+  addEventListener('keydown', onKey, true); addEventListener('keyup', onKeyUp, true); box.addEventListener('pointerdown', onTap); skip.onpointerdown = ev => { ev.stopPropagation(); }; skip.onclick = ev => { ev.stopPropagation(); finish(); };
   const thiefPos = (a, t) => {
     const grabT = 16.9 + a.i * .7, R = t < 11 ? 1200 : t < 15.2 ? lerp(1200, 205, smooth(11, 14.6, t)) : t < grabT ? lerp(205, NEST_R + 10, smooth(15.2, grabT, t)) : lerp(NEST_R + 4, 1300, smooth(grabT + .25, grabT + 3.4, t));
     const ang = a.ang + (t > 15.2 && t < grabT ? Math.sin(t * 9 + a.i) * .05 : 0);
@@ -5145,6 +5148,7 @@ $('stayBtn').onclick = () => { run.endless = true; openShop(); };
 
 // ---------- flow ----------
 function begin() {
+  if (introOn) return;
   newRun(save.biome);
   makeDeco();
   ['menu', 'over', 'shop', 'pause', 'choice'].forEach(id => $(id).hidden = true);
