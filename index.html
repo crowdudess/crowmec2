@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.81.5</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.81.6</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2612,8 +2612,8 @@ function update(dt) {
       e.bite = Math.max(e.bite, .35);
     } else {
       e.bite -= dt;
-      // Bosses hit harder but back off further after a bite, so they don't chain-bite the nest every two seconds.
-      if (e.bite <= 0) { if (e.boss) { const d0 = e.dmg; e.dmg *= 1.5; biteNest(e); e.dmg = d0; } else biteNest(e); e.bite = 1; e.backT = e.boss ? 1.2 : .85; e.x -= ux * (e.boss ? 40 : 10); e.y -= uy * (e.boss ? 40 : 10); }
+      // Bosses hit twice as hard but back off further after a bite, so they don't chain-bite the nest every two seconds.
+      if (e.bite <= 0) { if (e.boss) { const d0 = e.dmg; e.dmg *= 2; biteNest(e); e.dmg = d0; } else biteNest(e); e.bite = 1; e.backT = e.boss ? 1.2 : .85; e.x -= ux * (e.boss ? 40 : 10); e.y -= uy * (e.boss ? 40 : 10); }
     }
     if (e.shape === 'snake' || e.shape === 'gator' || e.shape === 'wyrm') { const l = e.trail[0]; if (!l || Math.hypot(l.x - e.x, l.y - e.y) > (e.shape === 'wyrm' ? e.r * .42 : 5)) { e.trail.unshift({ x: e.x, y: e.y }); e.trail.length = Math.min(e.trail.length, e.shape === 'gator' ? 6 : e.shape === 'wyrm' ? 14 : 9); } }
   }
