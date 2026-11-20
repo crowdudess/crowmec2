@@ -946,7 +946,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.84.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.84.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4783,13 +4783,13 @@ function playEggStage(it, others = [], fromShop = false) {
     const sd = st.querySelector('.es-sides'); if (sd) { sd.innerHTML = ''; others.slice(0, 2).forEach((o, i) => { const base = ITEMS.find(x => x.id === o.id) || o, c = el('div', 'es-side ' + (i ? 'right' : 'left')); c.style.setProperty('--rgb', RAR_RGB[o.rar]); c.style.animationDelay = (350 + i * 250) + 'ms'; const au = el('span', 'aura'); au.dataset.rar = o.rar; au.style.setProperty('--rgb', RAR_RGB[o.rar]); au.append(upIcon(o.id, 84)); c.append(el('b', 'es-stamp', T('egg_missed')), au, el('span', 'es-srar', T('rar' + o.rar)), el('span', 'es-sname', base.name), el('span', 'es-sdesc', base.desc)); sd.append(c); setTimeout(() => { if (alive() && actx && !muted && o.rar > it.rar) tone(300, 180, .35, 'sawtooth', .04); }, 350 + i * 250); }); }
     if (fromShop) {
       const nb = st.querySelector('.es-next'); nb.hidden = false; const end = performance.now() + 8000 + (others.length ? 900 : 0);
-      const upd = () => { if (!alive()) { clearInterval(st._cd); return; } const left = Math.max(0, Math.ceil((end - performance.now()) / 1000)); nb.innerHTML = ''; nb.append(el('span', '', T('next_in', left)), el('span', 'kbd', T('space'))); if (performance.now() >= end) { clearInterval(st._cd); stageNext(); } };
+      const upd = () => { if (!aliveR()) { clearInterval(st._cd); return; } const left = Math.max(0, Math.ceil((end - performance.now()) / 1000)); nb.innerHTML = ''; nb.append(el('span', '', T('next_in', left)), el('span', 'kbd', T('space'))); if (performance.now() >= end) { clearInterval(st._cd); stageNext(); } };
       upd(); st._cd = setInterval(upd, 200);
     } else setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, STAGE_HOLD + (others.length ? 900 : 0));
   };
   setTimeout(reveal, CRACK_MS);
   // skip the roll: tap, click or Space jumps straight to the item you got
-  st._skip = () => { if (st._revealed || !aliveR()) return; st._skipped = true; strip.style.transition = 'none'; if (actx && !muted) tone(660, 990, .12, 'triangle', .05); reveal(); };
+  st._skip = () => { if (st._revealed || !aliveR()) return; st._skipped = true; strip.style.transition = 'none'; drawEgg(egg, it, 'open'); shake = Math.max(shake, 6); if (actx && !muted) tone(660, 990, .12, 'triangle', .05); reveal(); };
 }
 function stageNext() {
   const st = $('eggStage'); if (!st || st.hidden || !st.classList.contains('open')) return;
