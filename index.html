@@ -760,7 +760,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.3</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.4</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1903,7 +1903,7 @@ function kill(e) {
     toast(T('x_defeated', e.name), T('plus_coins', c));
     if (run.hp / run.maxHp < .15) grant('glass');
     run.bossKilledThisWave = true;
-    if (run.goldenWave !== run.wave) { run.goldenWave = run.wave; goldenPop(); }
+    if (run.sandbox || run.goldenWave !== run.wave) { run.goldenWave = run.wave; goldenPop(); }
   }
   if (run.coins >= 150) grant('hoard');
   if (save.stats.kills >= 2500) grant('kills');
