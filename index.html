@@ -760,7 +760,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.5</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.6</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4457,14 +4457,14 @@ function playEggStage(it, others = [], fromShop = false) {
   const pool = ITEMS.filter(x => itemOpen(x.id)), pick = () => { const r = Math.random(), want = r < .55 ? 0 : r < .75 ? 1 : r < .88 ? 2 : r < .95 ? 3 : r < .98 ? 4 : 5, p2 = pool.filter(x => x.rar === want); return (p2.length ? p2 : pool)[Math.floor(Math.random() * (p2.length || pool.length))]; };
   const WIN = 36, N = 42, tiles = [];
   for (let i = 0; i < N; i++) tiles.push(i === WIN ? it : pick());
-  const tease = pool.filter(x => x.rar >= Math.max(3, it.rar + 1)); if (tease.length) tiles[WIN - 1] = tease[Math.floor(Math.random() * tease.length)];
+  const tease = pool.filter(x => x.rar >= Math.max(3, it.rar + 1)); const mode = Math.random(), stopAt = mode < .5 ? 'left' : mode < .8 ? 'right' : 'mid'; if (tease.length) tiles[stopAt === 'left' ? WIN - 1 : stopAt === 'right' ? WIN + 1 : WIN + (Math.random() < .5 ? 1 : -1)] = tease[Math.floor(Math.random() * tease.length)];
   strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
   tiles.forEach((x, i) => { const t = el('div', 'es-tile'); t.style.setProperty('--rgb', RAR_RGB[x.rar]); t.append(upIcon(x.id, 64)); if (i === WIN) t.classList.add('prize'); strip.append(t); });
   setTimeout(() => {
     if (!alive()) return;
     drawEgg(egg, it, 'open'); st.className = 'eggstage reeling'; shake = Math.max(shake, 4);
     if (actx && !muted) tone(220, 90, .25, 'sawtooth', .05);
-    const TW = 104, w = reel.clientWidth, target = WIN * TW + rnd(10, 30) - w / 2;
+    const TW = 104, w = reel.clientWidth, target = WIN * TW + (stopAt === 'left' ? rnd(6, 26) : stopAt === 'right' ? rnd(TW - 34, TW - 14) : rnd(30, TW - 38)) - w / 2;
     void strip.offsetWidth; strip.style.transition = `transform ${EGG_SPIN}ms cubic-bezier(.04,.78,.08,1)`; strip.style.transform = `translateX(${-target}px)`;
     setTimeout(() => { if (!alive()) return; st.classList.add('crawl'); if (actx && !muted) for (let i = 0; i < 4; i++) setTimeout(() => { if (alive()) tone(70, 50, .22, 'sine', .09); }, i * 480); }, SPIN_FAST);
     let last = -1; const t0 = performance.now();
