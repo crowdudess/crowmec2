@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1749,7 +1749,7 @@ const SKINS = [
   { id: 'bananacrow', name: 'Banana Crow', body: '#e8c43a', wing: '#c8a028', sheen: 'rgba(255,250,200,.7)', beak: '#5a4010', eye: '#222', cond: 'Defeat the Monkey King.', has: s => !!s.ach.kong },
   { id: 'ch-jungle', name: 'Canopy', body: '#1e4a24', wing: '#14361a', sheen: 'rgba(240,208,64,.7)', beak: '#f0d040', eye: '#fff', cond: 'Complete all 3 Banana Jungle challenges.', has: s => chDone(s, 'jungle') },
   { id: 'ch-office', name: 'Middle Manager', body: '#3a4252', wing: '#262c38', sheen: 'rgba(240,240,240,.6)', beak: '#c8a050', eye: '#fff', crown: false, cond: 'Complete all 3 Corporate Office challenges.', has: s => chDone(s, 'office') },
-  { id: 'shard', name: 'Shardbearer', body: '#141026', wing: '#0c0a18', sheen: 'rgba(255,214,120,.75)', beak: '#f4cf6a', eye: '#ffe6a0', glow: '#ffb84a', crown: true, cond: 'Recover all the egg shards (beat every boss).', has: s => BIOMES.filter(b => b.boss && !b.mode && !b.dlc).every(b => s.biomes && s.biomes[b.id] && s.biomes[b.id].cleared) },
+  { id: 'shard', name: 'Shardbearer', rainbow: true, body: '#141026', wing: '#0c0a18', sheen: 'rgba(255,214,120,.75)', beak: '#f4cf6a', eye: '#ffe6a0', glow: '#ffb84a', crown: true, cond: 'Recover all the egg shards (beat every boss).', has: s => BIOMES.filter(b => b.boss && !b.mode && !b.dlc).every(b => s.biomes && s.biomes[b.id] && s.biomes[b.id].cleared) },
   { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
 ];
 
@@ -3570,6 +3570,8 @@ function drawNest(skinId, eggsN, dark) {
 }
 const skinOf = id => SKINS.find(s => s.id === id) || SKINS[0];
 function drawCrow(S, a, flap, bob, time) {
+  // rainbow skins shift through every colour, like the Mythic items
+  if (S.rainbow) { const h = ((time || performance.now()) / 18) % 360; S = { ...S, body: `hsl(${h},70%,42%)`, wing: `hsl(${(h + 40) % 360},75%,30%)`, sheen: `hsla(${(h + 180) % 360},95%,72%,.8)`, glow: `hsl(${(h + 90) % 360},100%,60%)`, beak: `hsl(${(h + 200) % 360},90%,65%)` }; }
   ctx.save(); ctx.rotate(a);
   if (S.glow) { ctx.shadowColor = S.glow; ctx.shadowBlur = 18 + Math.sin(time / 200) * 6; }
   ctx.fillStyle = S.wing;
