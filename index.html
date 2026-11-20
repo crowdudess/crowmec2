@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.81.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.81.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -6331,12 +6331,39 @@ function renderMonsters() {
   bg.append(g); box.append(bg);
 }
 const UP_ICON = { u_spark: ['star', '#ffe27a'], u_ember: ['flame', '#ff9a4a'], u_bramble: ['leaf', '#7a9a3a'], u_plume: ['feather', '#e8d070'], u_echo: ['orb', '#a0c8e0'], u_moth: ['petal', '#d8c8a0'], u_marrow: ['shard', '#efe2c8'], u_twine: ['leaf', '#b89060'], u_gale: ['feather', '#cfe8f0'], u_cinder: ['shard', '#e06a3a'], l_storm: ['ice', '#9ad8ff'], l_forge: ['flame', '#ff8a2a'], l_aegis: ['leaf', '#c8a060'], l_quiver: ['feather', '#ffb050'], l_moon: ['petal', '#d8e0ff'], l_rook: ['feather', '#3a3e5a'], l_vampire: ['orb', '#a01a2a'], l_spellblade: ['gem', '#b88ae0'], l_titan: ['shard', '#8a7a6a'], u_talon: ['shard', '#c8b08a'], u_pine: ['leaf', '#4a8a4a'], u_shiny: ['gem', '#d8e8f0'], u_owl: ['feather', '#b89a70'], u_throat: ['orb', '#d07a60'], u_sap: ['leaf', '#c8902a'], u_hazel: ['petal', '#9a7ad0'], u_perch: ['feather', '#8ab0c8'], u_bone: ['shard', '#e8e0c8'], u_scraps: ['cap', '#c0a040'], l_hydra: ['feather', '#4ad0a0'], l_bastion: ['orb', '#c89050'], l_reaper: ['feather', '#3a3a4a'], l_drum: ['star', '#d06030'], l_tome: ['gem', '#7a6ae0'], l_winter: ['snowflake', '#a8e0ff'], l_gilded: ['coin', '#ffc830'], l_eagleking: ['star', '#f0d080'], m_twin: ['feather', '#20222c'], m_phoenix: ['flame', '#ff6a2a'], m_void: ['shard', '#b88ae0'], m_bloodmoon: ['orb', '#d0303a'], m_chaos: ['gem', '#ff5ad0'], sharp: ['feather', '#e6e1d2'], wings: ['feather', '#9ad0f0'], thorn: ['shard', '#8a9a5a'], mud: ['orb', '#a07a50'], eye: ['gem', '#e8c860'], caps: ['cap', '#e0402a'], lungs: ['orb', '#ece6d6'], iron: ['shard', '#9aa4b0'], twin: ['feather', '#cfd6e6'], needle: ['ice', '#ffffff'], magpie: ['feather', '#6a8ab0'], scare: ['star', '#c9a36a'], ember: ['flame', '#ff7a2a'], moss: ['leaf', '#6aa040'], golden: ['coin', '#f0c030'], ink: ['orb', '#8a5ac0'], rune: ['gem', '#7fb2c9'], murder: ['star', '#b88ae0'], storm: ['ice', '#f2e27a'], echo: ['orb', '#a0f0e0'], wind: ['petal', '#cfe8f0'], slay: ['shard', '#d2543f'], eagle: ['feather', '#e8b84a'], blood: ['petal', '#c8322a'], shell: ['shard', '#9fc6c2'], mana: ['orb', '#7fb2c9'], pecker: ['star', '#e8b84a'], judge: ['shard', '#b88ae0'], shrine: ['gem', '#e8b84a'], feast: ['orb', '#9fc6c2'], quiver: ['feather', '#c8a060'], lucky: ['leaf', '#4aa040'], swift: ['feather', '#f0d040'], scav: ['coin', '#c8a060'], frostbite: ['snowflake', '#bfe6ff'], barbs: ['shard', '#c86a3a'], doublecaw: ['orb', '#ece6d6'], overcharge: ['orb', '#f2e27a'], guardian: ['gem', '#e8b84a'], pebble: ['orb', '#9aa4b0'], shout: ['star', '#f2e6c8'], bark: ['shard', '#8a6a44'], dew: ['petal', '#9fdcff'], flint: ['shard', '#e8823a'], whistle: ['star', '#e8d8a0'], twigs: ['leaf', '#a07a50'], glint: ['gem', '#bfe6ff'], acorn: ['coin', '#a0703a'], hex: ['star', '#b88ae0'], vamp: ['shard', '#c8322a'], coldsnap: ['snowflake', '#9fdcff'], phoenixf: ['flame', '#ff9a3a'], tempest: ['feather', '#a0f0e0'], crownthorn: ['shard', '#6a8a3a'], m_parl: ['feather', '#6a8ab0'], m_glass: ['ice', '#e8f4ff'], b_cat: ['star', '#ff9a4a'], b_gator: ['shard', '#7aa860'], b_bear: ['orb', '#a8e0ff'], b_ratking: ['star', '#e8c060'], b_emperor: ['shard', '#e8b84a'], b_kong: ['feather', '#f0d040'], b_queen: ['orb', '#d8c8f0'], b_wyrm: ['flame', '#ff7030'], b_faequeen: ['star', '#ff9ad8'], b_oni: ['petal', '#ff6a6a'], b_maw: ['orb', '#b06ae8'], m_sun: ['star', '#ffc040'], m_storm: ['ice', '#fff6a0'], m_nova: ['star', '#ffb04a'], m_warp: ['orb', '#9a7ae8'], m_midas: ['coin', '#ffd84a'], m_flock: ['feather', '#6a5aa8'], m_doom: ['flame', '#e83a5a'] };
+// Item icons keep the old projectile look, with a few touches so no two items look alike:
+// a small second shape for the item's second effect, extra copies for multi-shot items, and a slightly different angle per rarity.
+const ICON_ACCENT = [
+  [/fire|burn|flame|sun/i, 'flame', '#ff8a3a'], [/slow|freez|frost|cold|winter/i, 'snowflake', '#a8e0ff'], [/coin|gold/i, 'coin', '#f4cf6a'],
+  [/stun/i, 'star', '#ffe27a'], [/crit/i, 'gem', '#9fe8ff'], [/heal|mend|regrow|HP per second/i, 'leaf', '#7ac860'], [/caw/i, 'orb', '#efe6d2'],
+  [/spell/i, 'petal', '#c890ff'], [/pierce|armour/i, 'shard', '#e8e2d0'], [/bounce|lightning/i, 'ice', '#a0d0ff'], [/magpie/i, 'plane', '#e8eef4'],
+  [/max nest HP|shield|less damage|block/i, 'cap', '#e05a4a'], [/attack speed|faster|fly/i, 'feather', '#cfe8f0'], [/bosses|elites/i, 'shuriken', '#d0d0d8'],
+  [/bite|biter/i, 'web', '#e8e4f0'], [/damage/i, 'shard', '#ff9a6a'],
+];
+const ICON_X = (() => {
+  const out = {}, used = new Set();
+  for (const it of ITEMS) {
+    const [kind, col] = UP_ICON[it.id] || ['orb', '#ece6d6'], d = it.desc || '';
+    const m = d.match(/\+(\d) feathers?|Throw \+(\d)|second crow|\+(\d) magpies?/i);
+    const n = m ? Math.min(3, 1 + (+(m[1] || m[2] || m[3] || 1) >= 2 ? 2 : 1)) : 1;
+    const accents = ICON_ACCENT.filter(([re, k]) => re.test(d) && k !== kind);
+    let pick = null, ang = -Math.PI / 4 + (it.rar - 2) * .14;
+    const sig = (acc, a) => [kind, col, acc ? acc[1] : '-', n, a.toFixed(2)].join('|');
+    for (const acc of [...accents, null]) { if (!used.has(sig(acc, ang))) { pick = acc; break; } }
+    let tries = 0; while (used.has(sig(pick, ang)) && tries++ < 12) ang += .35;
+    used.add(sig(pick, ang));
+    out[it.id] = { n, ang, acc: pick ? [pick[1], pick[2]] : null };
+  }
+  return out;
+})();
 function paintUpIcon(cv2, id) {
   const [kind, col] = UP_ICON[id] || ['orb', '#ece6d6'], pc = cv2.getContext('2d'), keep = ctx, S = cv2.width;
   ctx = pc; pc.setTransform(1, 0, 0, 1, 0, 0); pc.clearRect(0, 0, S, S);
   if (/^l_/.test(id)) { const g = pc.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); g.addColorStop(0, 'rgba(255,190,80,.55)'); g.addColorStop(1, 'rgba(255,140,30,0)'); pc.fillStyle = g; pc.fillRect(0, 0, S, S); pc.strokeStyle = '#ffa030'; pc.lineWidth = S / 26; pc.beginPath(); pc.arc(S / 2, S / 2, S * .42, 0, TAU); pc.stroke(); }
   if (/^[mb]_/.test(id)) { const g = pc.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); g.addColorStop(0, 'rgba(255,220,120,.55)'); g.addColorStop(.55, 'rgba(232,90,180,.22)'); g.addColorStop(1, 'rgba(0,0,0,0)'); pc.fillStyle = g; pc.fillRect(0, 0, S, S); pc.lineWidth = S / 28; for (let i = 0; i < 6; i++) { pc.strokeStyle = `hsl(${i * 60},90%,68%)`; pc.beginPath(); pc.arc(S / 2, S / 2, S * .42, i / 6 * TAU, (i + .75) / 6 * TAU); pc.stroke(); } }
-  pc.setTransform(S / 26.7, 0, 0, S / 26.7, S / 2, S / 2); try { drawProj(kind, col, -Math.PI / 4, 1.2, 0); } catch (e) {}
+  const X = ICON_X[id] || { n: 1, ang: -Math.PI / 4, acc: null }, sc = X.acc ? .92 : 1;
+  for (let i = 0; i < X.n; i++) { const off = X.n > 1 ? (i - (X.n - 1) / 2) : 0; pc.setTransform(S / 26.7 * sc, 0, 0, S / 26.7 * sc, S / 2 - (X.acc ? S * .06 : 0) + off * S * .1, S / 2 - (X.acc ? S * .06 : 0) - off * S * .06); try { drawProj(kind, col, X.ang + off * .32, X.n > 1 ? 1 : 1.2, 0); } catch (e) {} }
+  if (X.acc) { pc.setTransform(1, 0, 0, 1, 0, 0); pc.fillStyle = 'rgba(10,8,6,.55)'; pc.beginPath(); pc.arc(S * .76, S * .76, S * .17, 0, TAU); pc.fill(); pc.setTransform(S / 62, 0, 0, S / 62, S * .76, S * .76); try { drawProj(X.acc[0], X.acc[1], -Math.PI / 4, 1, 0); } catch (e) {} }
   pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep;
 }
 function upIcon(id, size) { const c = document.createElement('canvas'); c.width = c.height = size; c.className = 'upic'; paintUpIcon(c, id); return c; }
