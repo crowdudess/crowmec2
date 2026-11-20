@@ -911,7 +911,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.11</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.12</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3041,8 +3041,18 @@ function makeDeco() {
   deco.ponds = ring(3, 230, 360, () => ({ rx: rnd(50, 75), ry: rnd(28, 42), a: rnd(0, 3), cr: Array.from({ length: 5 }, () => [rnd(-1, 1), rnd(-1, 1), rnd(0, 7), rnd(.3, .7)]) }));
   deco.drifts = Array.from({ length: 22 }, () => { const a = rnd(0, 7), d = rnd(120, 820); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, rx: rnd(40, 110), ry: rnd(16, 34), a: rnd(-.4, .4) }; });
   deco.sparkle = Array.from({ length: 60 }, () => { const a = rnd(0, 7), d = rnd(60, 820); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, ph: rnd(0, 7), sp: rnd(.6, 1.6) }; });
-  deco.desks = ring(14, 330, 470, () => ({ rot: Math.floor(rnd(0, 4)) * Math.PI / 2, mug: Math.random() < .6, glow: rnd(0, 7), wood: Math.random() < .5 }));
-  deco.plants = ring(8, 230, 420, () => ({ s: rnd(14, 22), a: rnd(0, 7) }));
+  // Office: desks sit in pods of four (two pairs back to back), lined up with the floor tiles, with clear floor around the nest.
+  deco.desks = []; deco.plants = [];
+  const pods = [[-432, -324], [-144, -324], [144, -324], [432, -324], [-432, 324], [-144, 324], [144, 324], [432, 324], [-648, 0], [648, 0]];
+  const podWood = () => Math.random() < .5;
+  for (const [px, py] of pods) {
+    const wood = podWood();
+    for (const [dx, dy, rot] of [[-64, 44, 0], [64, 44, 0], [-64, -44, Math.PI], [64, -44, Math.PI]]) {
+      if (Math.random() < .1) continue; // an empty spot now and then
+      deco.desks.push({ x: px + dx, y: py + dy, rot, mug: Math.random() < .6, glow: rnd(0, 7), wood, chairX: rnd(-8, 8), chairY: rnd(-2, 10), chairA: rnd(-.5, .5), flipL: dx > 0 });
+    }
+    if (Math.random() < .7) deco.plants.push({ x: px + (Math.random() < .5 ? -1 : 1) * 152, y: py + rnd(-20, 20), s: rnd(15, 20), a: rnd(0, 7) });
+  }
   deco.papers = Array.from({ length: 50 }, () => { const a = rnd(0, 7), d = rnd(90, 760); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, a: rnd(0, 3), sticky: Math.random() < .25, c: Math.floor(rnd(0, 3)) }; });
   deco.rivers = Array.from({ length: 4 }, (_, i) => { const a0 = i / 4 * TAU + rnd(-.4, .4), pts = []; let a = a0; for (let k = 0; k <= 10; k++) { const d = 900 - k * 58; a += rnd(-.16, .16); pts.push({ x: Math.cos(a) * d * 1.35, y: Math.sin(a) * d }); } return { pts, w: rnd(16, 26), ph: rnd(0, 7) }; });
   deco.pools = deco.rivers.map(r => { const e = r.pts[r.pts.length - 1]; return { x: e.x, y: e.y, rx: rnd(46, 70), ry: rnd(30, 44), a: rnd(0, 3), ph: rnd(0, 7) }; });
@@ -3162,7 +3172,7 @@ function drawOfficeFloor(time) {
   const SN = ['#f2d84a', '#f2a0c0', '#9fdcff'];
   for (const p of deco.papers) { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); if (p.sticky) { ctx.fillStyle = SN[p.c]; ctx.fillRect(-6, -6, 12, 12); } else { ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(-7, -9, 16, 20); ctx.fillStyle = '#f2efe6'; ctx.fillRect(-8, -10, 16, 20); ctx.fillStyle = '#9aa4b8'; for (let l = 0; l < 4; l++) ctx.fillRect(-5, -6 + l * 4, 10, 1.2); } ctx.restore(); }
   for (const d of deco.desks) {
-    ctx.save(); ctx.translate(d.x, d.y); ctx.rotate(d.rot);
+    ctx.save(); ctx.translate(d.x, d.y); ctx.rotate(d.rot); if (d.flipL) ctx.scale(-1, 1);
     ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-58, -36, 124, 82);
     ctx.fillStyle = '#5a6068'; ctx.fillRect(-64, -44, 128, 8); ctx.fillRect(-64, -44, 8, 86);
     ctx.fillStyle = d.wood ? '#a07850' : '#c8c4b8'; ctx.fillRect(-54, -34, 108, 44);
@@ -3174,10 +3184,12 @@ function drawOfficeFloor(time) {
     ctx.fillStyle = '#3a3e46'; ctx.beginPath(); ctx.ellipse(26, -9, 4, 6, 0, 0, TAU); ctx.fill();
     if (d.mug) { ctx.fillStyle = '#e8e4dc'; ctx.beginPath(); ctx.arc(-38, -20, 6, 0, TAU); ctx.fill(); ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.arc(-38, -20, 4, 0, TAU); ctx.fill(); }
     ctx.fillStyle = '#f2efe6'; ctx.save(); ctx.translate(38, -18); ctx.rotate(.2); ctx.fillRect(-7, -9, 14, 18); ctx.restore();
+    ctx.save(); ctx.translate(d.chairX || 0, d.chairY || 0); ctx.rotate(d.chairA || 0);
     ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(3, 33, 17, 0, TAU); ctx.fill();
     ctx.fillStyle = '#2a2e36'; ctx.beginPath(); ctx.arc(0, 30, 16, 0, TAU); ctx.fill();
     ctx.fillStyle = '#3a404a'; ctx.beginPath(); ctx.arc(0, 30, 11, 0, TAU); ctx.fill();
     ctx.fillStyle = '#2a2e36'; ctx.beginPath(); ctx.ellipse(0, 46, 15, 5, 0, 0, TAU); ctx.fill();
+    ctx.restore();
     ctx.restore();
   }
   for (const p of deco.plants) {
