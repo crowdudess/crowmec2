@@ -897,7 +897,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.6</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.7</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2029,7 +2029,6 @@ function kill(e) {
   e.dead = true; run.kills++; save.stats.kills++;
   save.seen = save.seen || {};
   if (!save.seen[e.k] && !e.fx) {
-    toastSmall(E[e.k].name, T('toast_newmon'), 'enemy');
     if (run.unlocks) run.unlocks.push(T('unl_mon', E[e.k].name));
   }
   save.seen[e.k] = (save.seen[e.k] || 0) + 1;
