@@ -572,7 +572,12 @@ canvas.manualaim { cursor: crosshair; }
 .eggstage .es-tile { flex: none; width: 96px; height: 100px; border-radius: 12px; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, rgba(var(--rgb), .28), #161c12 70%); border: 2px solid rgba(var(--rgb), .5); border-bottom-width: 6px; transition: transform .25s, box-shadow .25s; }
 .eggstage .es-tile canvas { width: 64px; height: 64px; }
 .eggstage .es-tile.win { transform: scale(1.08); box-shadow: 0 0 26px rgba(var(--rgb), 1), inset 0 0 20px rgba(var(--rgb), .5); border-color: rgb(var(--rgb)); }
-.eggstage.reeling .es-egg { opacity: 0; transform: scale(1.5); transition: opacity .25s, transform .3s; }
+.eggstage.reeling .es-egg { opacity: .85; transform: translateY(165px) scale(.6); transition: transform .45s cubic-bezier(.2,1.2,.4,1); }
+.eggstage.shake2 .es-egg { animation: eggshake .07s linear infinite !important; filter: drop-shadow(0 0 18px rgba(255,240,190,.6)); }
+.es-burst { position: absolute; left: 50%; top: 42%; width: 420px; height: 420px; margin: -210px 0 0 -210px; border-radius: 50%; background: radial-gradient(circle, rgba(255,250,220,.95), rgba(255,230,160,.4) 35%, transparent 70%); pointer-events: none; animation: esburst .6s ease-out forwards; }
+@keyframes esburst { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+.es-shard { position: absolute; left: 50%; top: 42%; width: 22px; height: 16px; margin: -8px 0 0 -11px; clip-path: polygon(0 40%, 45% 0, 100% 30%, 80% 100%, 20% 90%); pointer-events: none; animation: esshard .75s cubic-bezier(.2,.7,.4,1) forwards; }
+@keyframes esshard { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rr)); opacity: 0; } }
 .eggstage.reeling .es-aura { opacity: .55; }
 .eggstage.crawl .es-reel { border-color: rgba(255,226,122,.95); box-shadow: 0 0 50px rgba(255,216,74,.35), inset 0 0 30px rgba(0,0,0,.8); animation: crawlpulse .48s ease-in-out infinite; }
 @keyframes crawlpulse { 50% { box-shadow: 0 0 70px rgba(255,216,74,.6), inset 0 0 30px rgba(0,0,0,.8); } }
@@ -760,7 +765,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.6</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.7</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4429,7 +4434,7 @@ function rollOffers() {
   offers = picks; run.picked = null; run.crackT = 0; run.popSeen = new Set(); run.golden = null;
   if (Math.random() < goldenChance()) { const g = rollItem(new Set(picks.map(x => x.id)), 5, true); if (g) run.golden = { ...g, golden: true, cracked: false, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }; }
 }
-const EGG_SHAKE = 650, SPIN_FAST = 3300, SPIN_SLOW = 2000, EGG_SPIN = SPIN_FAST + SPIN_SLOW, CRACK_MS = EGG_SHAKE + EGG_SPIN + 550, STAGE_HOLD = 1700;
+const EGG_SHAKE = 1600, SPIN_FAST = 3300, SPIN_SLOW = 2000, EGG_SPIN = SPIN_FAST + SPIN_SLOW, CRACK_MS = EGG_SHAKE + EGG_SPIN + 550, STAGE_HOLD = 1700;
 function runReel(win, lab, it, left) {
   const pool = ITEMS.filter(x => itemOpen(x.id)), t0 = performance.now(), end = t0 + Math.max(0, left - 150);
   let delay = 55;
@@ -4452,6 +4457,8 @@ function playEggStage(it, others = [], fromShop = false) {
   st.hidden = false; st.className = 'eggstage shake' + (fromShop ? ' full' : ''); st.dataset.next = fromShop ? '1' : ''; st.querySelector('.es-next').hidden = true; clearInterval(st._cd); item.innerHTML = ''; const sides = st.querySelector('.es-sides'); if (sides) sides.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-desc').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
   const setR = r => { aura.dataset.rar = r; glow.style.setProperty('--rgb', RAR_RGB[r]); aura.style.setProperty('--rgb', RAR_RGB[r]); };
   setR(0); drawEgg(egg, it, 'whole');
+  setTimeout(() => { if (alive()) { drawEgg(egg, it, 'crack'); if (actx && !muted) tone(900, 700, .06, 'square', .04); } }, 550);
+  setTimeout(() => { if (alive()) { drawEgg(egg, it, 'crack2'); st.classList.add('shake2'); if (actx && !muted) tone(800, 600, .07, 'square', .05); } }, 1050);
   const token = (run.stageToken = (run.stageToken || 0) + 1), alive = () => run.stageToken === token && !st.hidden;
   // build the reel: random fillers, a teaser next to the prize, the prize at WIN
   const pool = ITEMS.filter(x => itemOpen(x.id)), pick = () => { const r = Math.random(), want = r < .55 ? 0 : r < .75 ? 1 : r < .88 ? 2 : r < .95 ? 3 : r < .98 ? 4 : 5, p2 = pool.filter(x => x.rar === want); return (p2.length ? p2 : pool)[Math.floor(Math.random() * (p2.length || pool.length))]; };
@@ -4462,7 +4469,8 @@ function playEggStage(it, others = [], fromShop = false) {
   tiles.forEach((x, i) => { const t = el('div', 'es-tile'); t.style.setProperty('--rgb', RAR_RGB[x.rar]); t.append(upIcon(x.id, 64)); if (i === WIN) t.classList.add('prize'); strip.append(t); });
   setTimeout(() => {
     if (!alive()) return;
-    drawEgg(egg, it, 'open'); st.className = 'eggstage reeling'; shake = Math.max(shake, 4);
+    drawEgg(egg, it, 'open'); st.className = 'eggstage reeling' + (fromShop ? ' full' : ''); shake = Math.max(shake, 6);
+    { const fx = el('div', 'es-burst'); st.append(fx); setTimeout(() => fx.remove(), 700); for (let i = 0; i < 10; i++) { const sh = el('span', 'es-shard'); const a = i / 10 * TAU + rnd(-.2, .2), d = rnd(140, 260); sh.style.setProperty('--dx', Math.cos(a) * d + 'px'); sh.style.setProperty('--dy', Math.sin(a) * d + 'px'); sh.style.setProperty('--rr', rnd(-300, 300) + 'deg'); sh.style.background = it.shell ? it.shell[0] : '#efe6d2'; st.append(sh); setTimeout(() => sh.remove(), 800); } }
     if (actx && !muted) tone(220, 90, .25, 'sawtooth', .05);
     const TW = 104, w = reel.clientWidth, target = WIN * TW + (stopAt === 'left' ? rnd(6, 26) : stopAt === 'right' ? rnd(TW - 34, TW - 14) : rnd(30, TW - 38)) - w / 2;
     void strip.offsetWidth; strip.style.transition = `transform ${EGG_SPIN}ms cubic-bezier(.04,.78,.08,1)`; strip.style.transform = `translateX(${-target}px)`;
@@ -4528,6 +4536,7 @@ function drawEgg(cv2, egg, state) {
   const g = c.createRadialGradient(-12, -20, 4, 0, 0, 52); g.addColorStop(0, '#fff'); g.addColorStop(.35, shell); g.addColorStop(1, dot); c.fillStyle = g; eggPath(); c.fill();
   c.save(); eggPath(); c.clip(); c.fillStyle = dot; for (let i = 0; i < 14; i++) { const a = egg.seed + i * 2.39, d = 8 + (i * 13 % 34); c.globalAlpha = .55; c.beginPath(); c.ellipse(Math.cos(a) * d, Math.sin(a) * d * 1.2, 2.5 + i % 3, 1.8 + i % 2, a, 0, TAU); c.fill(); } c.restore();
   if (egg.golden) { c.fillStyle = 'rgba(255,255,255,.9)'; for (const [x, y, r] of [[-14, -22, 3], [12, -8, 2.2], [-4, 14, 2.6], [18, 20, 1.8], [-22, 6, 1.8]]) { c.beginPath(); c.moveTo(x, y - r * 2.2); c.lineTo(x + r * .5, y - r * .5); c.lineTo(x + r * 2.2, y); c.lineTo(x + r * .5, y + r * .5); c.lineTo(x, y + r * 2.2); c.lineTo(x - r * .5, y + r * .5); c.lineTo(x - r * 2.2, y); c.lineTo(x - r * .5, y - r * .5); c.closePath(); c.fill(); } }
+  if (state === 'crack2') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-36, -6); c.lineTo(-22, 4); c.lineTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.lineTo(32, 2); c.moveTo(-10, -10); c.lineTo(-14, -26); c.lineTo(-6, -36); c.moveTo(14, -8); c.lineTo(22, -24); c.moveTo(2, 4); c.lineTo(6, 22); c.lineTo(-4, 34); c.moveTo(-22, 4); c.lineTo(-28, 20); c.moveTo(22, -24); c.lineTo(14, -38); c.stroke(); c.fillStyle = 'rgba(255,240,190,.55)'; c.beginPath(); c.moveTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.closePath(); c.fill(); }
   if (state === 'crack') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-34, 0); c.lineTo(-20, 8); c.lineTo(-8, -4); c.lineTo(4, 8); c.lineTo(16, -2); c.lineTo(30, 6); c.moveTo(-8, -4); c.lineTo(-4, -18); c.moveTo(16, -2); c.lineTo(20, -16); c.stroke(); }
   c.restore();
 }
