@@ -787,25 +787,23 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
 .savecode { width: 100%; box-sizing: border-box; font: 12px/1.4 var(--mono); resize: vertical; word-break: break-all; }
 .savemove > .btn { justify-self: start; }
 .savemsg:empty { display: none; } .savemsg.ok { color: #9fe0a8; } .savemsg.bad { color: #ff8a7a; } .savemsg.warn { color: var(--shine); }
-.intro { position: fixed; inset: 0; z-index: 95; background: #000; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 18px; padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(22px + env(safe-area-inset-bottom, 0px)); transition: opacity .5s; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.intro { position: fixed; inset: 0; z-index: 95; background: #000; transition: opacity .5s; cursor: pointer; user-select: none; -webkit-user-select: none; overflow: hidden; }
 .intro[hidden] { display: none; } .intro.out { opacity: 0; pointer-events: none; }
-.st-frame { position: relative; width: min(820px, 100%); height: 100%; max-height: 62vh; border: 4px solid #f2f2f2; background: #000; overflow: hidden; align-self: end; }
+.st-frame { position: absolute; inset: 0; }
 .st-frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.st-box { position: relative; width: min(820px, 100%); min-height: 7.2em; box-sizing: border-box; border: 4px solid #f2f2f2; background: #000; padding: 16px 22px 18px; font: 400 clamp(20px, 2.6vw, 28px)/1.35 "VT323", var(--mono); color: #fff; letter-spacing: .02em; }
+.st-box { position: absolute; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(860px, calc(100% - 32px)); min-height: 6.4em; box-sizing: border-box; border: 4px solid #f2f2f2; background: rgba(0,0,0,.84); padding: 14px 22px 18px; font: 400 clamp(20px, 2.6vw, 28px)/1.35 "VT323", var(--mono); color: #fff; letter-spacing: .02em; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
 .st-text { margin: 0; white-space: pre-wrap; }
 .st-text::before { content: '* '; color: #fff; }
 .st-next { position: absolute; right: 16px; bottom: 8px; font-size: 16px; color: #fff; opacity: 0; }
 .st-next.on { animation: stnext .8s steps(2) infinite; }
 @keyframes stnext { 0% { opacity: 1; } 100% { opacity: 0; } }
-.intro .in-title { position: absolute; left: 0; right: 0; top: 8%; text-align: center; font: 800 clamp(48px, 9vw, 104px)/1 var(--display); color: #f4cf6a; text-shadow: 0 0 40px rgba(232,140,40,.55), 0 4px 0 #3a2208, 0 8px 24px #000; opacity: 0; transform: scale(.92); transition: opacity 1.2s, transform 2.4s cubic-bezier(.2,.8,.3,1); pointer-events: none; }
+.intro .in-title { position: absolute; left: 0; right: 0; top: 10%; text-align: center; font: 800 clamp(52px, 10vw, 120px)/1 var(--display); color: #f4cf6a; text-shadow: 0 0 40px rgba(232,140,40,.55), 0 4px 0 #3a2208, 0 8px 24px #000; opacity: 0; transform: scale(.92); transition: opacity 1.2s, transform 2.4s cubic-bezier(.2,.8,.3,1); pointer-events: none; }
 .intro .in-title.on { opacity: 1; transform: none; }
-.intro .in-skip { position: absolute; right: max(14px, env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); padding: 6px 14px; border: 2px solid #f2f2f2; background: #000; color: #f2f2f2; font: 400 20px "VT323", var(--mono); letter-spacing: .04em; cursor: pointer; }
+.intro .in-skip { position: absolute; right: max(14px, env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); padding: 6px 14px; border: 2px solid #f2f2f2; background: rgba(0,0,0,.6); color: #f2f2f2; font: 400 20px "VT323", var(--mono); letter-spacing: .04em; cursor: pointer; }
 .intro .in-skip:hover { background: #222; }
 @media (max-height: 500px) and (orientation: landscape) {
-  .intro { grid-template-rows: none; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: center; gap: 14px; padding: calc(12px + env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); }
-  .st-frame { max-height: none; height: calc(100vh - 28px); align-self: center; border-width: 3px; }
-  .st-box { min-height: 0; height: auto; border-width: 3px; padding: 12px 14px 22px; font-size: 21px; }
-  .intro .in-title { font-size: 46px; top: 6%; } .intro .in-skip { font-size: 17px; padding: 4px 10px; }
+  .st-box { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: min(680px, calc(100% - 28px)); min-height: 0; border-width: 3px; padding: 8px 14px 14px; font-size: 20px; }
+  .intro .in-title { font-size: 46px; top: 7%; } .intro .in-skip { font-size: 17px; padding: 4px 10px; }
 }
 .bosscard { position: fixed; left: 0; right: 0; top: 30%; z-index: 30; pointer-events: none; display: grid; place-items: center; opacity: 0; }
 .bosscard.show { animation: bcshow 2.4s ease-in-out forwards; }
@@ -936,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4817,14 +4815,15 @@ function playIntro(opts = {}) {
     if (typed < full.length) { const want = Math.min(full.length, Math.floor(el_ * 38)); if (want > typed) { typed = want; textEl.textContent = full.slice(0, typed); if (ac && out && now - lastBlip > 55 && /\S/.test(full[typed - 1])) { lastBlip = now; introNote(ac, out, ac.currentTime, 520 + Math.random() * 60, 500, .045, 'square', .025, .003); } } if (typed >= full.length) nextEl.classList.add('on'); }
     const r = frameEl.getBoundingClientRect(), W = Math.max(10, r.width), H = Math.max(10, r.height), pr = Math.min(devicePixelRatio || 1, 2);
     if (cvs.width !== Math.round(W * pr) || cvs.height !== Math.round(H * pr)) { cvs.width = Math.round(W * pr); cvs.height = Math.round(H * pr); }
-    const base = Math.min(W, H * 1.4) / 740;
+    const base = (H <= 500 && W > H ? Math.min(W, H * 1.25) : Math.min(W, H)) / 740;
     const zoom = t < 10 ? lerp(2.7, 2.3, t / 10) : t < 15.2 ? lerp(2.3, 1.05, smooth(10, 14, t)) : t < 21 ? 1.05 : t < 27 ? lerp(1.05, 2.1, smooth(21, 26.5, t)) : lerp(2.1, 1.8, smooth(27, 30.5, t));
     const shk = t > 15.3 && t < 19.2 ? (1 - (t - 15.3) / 3.9) * 6 : 0, sx = rnd(-shk, shk), sy = rnd(-shk, shk);
     const keep = ctx; ctx = ictx;
     try {
       const sc = base * zoom;
       ictx.setTransform(pr, 0, 0, pr, 0, 0); ictx.fillStyle = B.ground[2]; ictx.fillRect(0, 0, W, H);
-      ictx.setTransform(pr * sc, 0, 0, pr * sc, (W / 2 + sx) * pr, (H / 2 + sy + (P0.title ? H * .12 : 0)) * pr);
+      const boxH = box.querySelector('.st-box').getBoundingClientRect().height || 0, cy = (H - boxH - 20) / 2 + (P0.title ? H * .08 : 0);
+      ictx.setTransform(pr * sc, 0, 0, pr * sc, (W / 2 + sx) * pr, (cy + sy) * pr);
       drawGround(B, now); ambBack(B.id, now);
       for (const e of eyes) { const k = smooth(e.t, e.t + .6, t) * (1 - smooth(15, 16, t)); if (k <= 0) continue; const x = Math.cos(e.a) * e.d * 1.25, y = Math.sin(e.a) * e.d, bl = Math.sin(now / 400 + e.a * 7) > .96 ? .1 : 1, rr = e.big ? 6 : 4; ictx.fillStyle = `rgba(255,214,90,${.85 * k * bl})`; ictx.beginPath(); ictx.arc(x - rr * 1.7, y, rr, 0, TAU); ictx.arc(x + rr * 1.7, y, rr, 0, TAU); ictx.fill(); }
       const eggsLeft = 3 - [0, 1, 2].filter(i => t >= 16.9 + i * .7).length;
