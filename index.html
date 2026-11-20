@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.82.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.82.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4786,6 +4786,21 @@ function playBossStory(biome, onDone, mode = 'win') {
   const pages = enter ? [{ to: 1, text: T('be_1', bn(biome)) }, { to: 2.6, text: T('be_' + biome.boss) }]
     : [{ to: 2.4, text: T('bs_' + biome.boss) }, { to: 4.6, text: T('bs_shard', have, total), cue: 'chime' }, { to: 6.4, text: lastLine, cue: 'calm' }];
   const bossR = (E[biome.boss] ? E[biome.boss].r : 40) * 1.2, bossA = -.35, bossD = 165, slots = Array.from({ length: total }, (_, i) => Math.PI / 2 + i / total * TAU);
+  const lvls = shardBiomes(), myIdx = lvls.indexOf(biome);
+  const SHARD_COL = { cat: '#ff9a4a', gator: '#7ad05a', bear: '#9fe0ff', ratking: '#f4cf6a', emperor: '#ffb040', kong: '#ffe85a', queen: '#c8a8ff', wyrm: '#ff5a3a', faequeen: '#ff8ad8', oni: '#ff4a6a', maw: '#b06ae8' };
+  const shardPoly = lvls.map((b, i) => { let sd = (i + 1) * 9301; const rn = () => ((sd = (sd * 49297 + 233280) % 233280) / 233280); const n = 4 + (i % 3); return Array.from({ length: n }, (_, j) => { const a = j / n * TAU + rn() * .5, r = 4.5 + rn() * 3.5; return [Math.cos(a) * r, Math.sin(a) * r * 1.25]; }); });
+  const drawShard = (x, y, i, sc, glow, now) => {
+    const col = SHARD_COL[lvls[i] && lvls[i].boss] || '#ffe6a0', pts = shardPoly[i] || shardPoly[0];
+    bctx.save(); bctx.translate(x, y); bctx.rotate(i * .9 + (glow ? Math.sin(now / 900 + i) * .12 : 0)); bctx.scale(sc, sc);
+    if (glow) { const pulse = .65 + .35 * Math.sin(now / 260 + i * 1.7); const g = bctx.createRadialGradient(0, 0, 0, 0, 0, 16); g.addColorStop(0, col + 'aa'); g.addColorStop(1, col + '00'); bctx.globalAlpha = pulse; bctx.fillStyle = g; bctx.beginPath(); bctx.arc(0, 0, 16, 0, TAU); bctx.fill(); bctx.globalAlpha = 1; bctx.shadowColor = col; bctx.shadowBlur = 12 * pulse; }
+    bctx.beginPath(); pts.forEach(([px, py], j) => j ? bctx.lineTo(px, py) : bctx.moveTo(px, py)); bctx.closePath();
+    if (glow) { bctx.fillStyle = col; bctx.fill(); bctx.shadowBlur = 0; bctx.strokeStyle = 'rgba(255,255,255,.75)'; bctx.lineWidth = .9; bctx.stroke(); bctx.fillStyle = 'rgba(255,255,255,.55)'; bctx.beginPath(); bctx.moveTo(pts[0][0] * .6, pts[0][1] * .6); bctx.lineTo(pts[1][0] * .6, pts[1][1] * .6); bctx.lineTo(0, 0); bctx.closePath(); bctx.fill();
+      const sp = Math.sin(now / 520 + i * 2.3); if (sp > .8) { const k = (sp - .8) / .2; bctx.rotate(-i * .9); bctx.strokeStyle = `rgba(255,255,255,${k})`; bctx.lineWidth = .8; bctx.beginPath(); bctx.moveTo(-9 * k, -6); bctx.lineTo(9 * k, -6); bctx.moveTo(0, -6 - 9 * k); bctx.lineTo(0, -6 + 9 * k); bctx.stroke(); } }
+    else { bctx.strokeStyle = 'rgba(255,255,255,.22)'; bctx.setLineDash([2, 2]); bctx.lineWidth = .9; bctx.stroke(); bctx.setLineDash([]); }
+    bctx.restore();
+  };
+  const sil = document.createElement('canvas'), sctx = sil.getContext('2d');
+  const bossE = E[biome.boss] ? { ...E[biome.boss], k: biome.boss, hp: 1, max: 1, ph: 0, seed: 1, trail: [], mode: 'in', stun: 0, frozen: 0, flash: 0, bite: 0, kx: 0, ky: 0, burn: 0, col: ['#07080c', '#0d0e14', '#ff4030'], aura: null, r: (E[biome.boss].r || 40) * 1.05 } : null;
   let ac = null, out = null; try { initAudio(); ac = actx; if (ac && !muted) { out = ac.createGain(); out.gain.value = Math.max(.3, vol.sfx); out.connect(master); musicBus.gain.setTargetAtTime(.0001, ac.currentTime, .4); if (enter) { introNote(ac, out, ac.currentTime + .05, 55, 50, 3, 'sine', .14, .6); } else { introNote(ac, out, ac.currentTime + .05, 220, 55, 1.6, 'sawtooth', .07, .01); introNote(ac, out, ac.currentTime + .05, 110, 40, 2, 'sine', .2, .01); } } } catch (e) {}
   let pi = 0, pStart = performance.now(), sceneStart = pStart, typed = 0, full = pages[0].text, nextCharAt = pStart + 500, lastBlip = 0, done = false;
   textEl.textContent = ''; nextEl.classList.remove('on');
@@ -4830,21 +4845,33 @@ function playBossStory(biome, onDone, mode = 'win') {
       drawGround(biome, now); ambBack(biome.id, now);
       drawNest(undefined, 0);
       // the shard ring: one slot per boss, the ones you have glow
-      const fly = enter ? 0 : smooth(2.6, 3.9, t), justGot = enter ? -1 : have - 1;
-      slots.forEach((a, i) => { const x = Math.cos(a) * (NEST_R + 26), y = Math.sin(a) * (NEST_R + 26), got = i < justGot || (i === justGot && fly >= 1);
-        bctx.fillStyle = got ? `rgba(255,214,120,${.85 + .15 * Math.sin(now / 300 + i)})` : 'rgba(255,255,255,.12)'; if (got) { bctx.shadowColor = 'rgba(255,190,90,.9)'; bctx.shadowBlur = 10; }
-        bctx.save(); bctx.translate(x, y); bctx.rotate(a); bctx.beginPath(); bctx.moveTo(-5, -4); bctx.lineTo(4, -6); bctx.lineTo(6, 3); bctx.lineTo(-2, 6); bctx.closePath(); bctx.fill(); bctx.restore(); bctx.shadowBlur = 0; });
+      const fly = enter ? 0 : smooth(2.6, 3.9, t), justGot = enter ? -1 : myIdx;
       // the beaten boss: a shadow with fading eyes, sinking away
       const fade = enter ? smooth(1.05, 2.2, t) : 1 - .65 * smooth(.3, 2.4, t) - .35 * smooth(2.4, 3.2, t), bx = Math.cos(bossA) * bossD * 1.2, by = Math.sin(bossA) * bossD + (enter ? 0 : (1 - fade) * 30);
-      if (fade > 0) { bctx.save(); bctx.globalAlpha = fade; bctx.translate(bx, by); bctx.fillStyle = 'rgba(5,6,12,.92)'; bctx.shadowColor = 'rgba(0,0,0,.9)'; bctx.shadowBlur = 16; bctx.beginPath(); bctx.ellipse(0, 0, bossR * 1.3, bossR * .9, 0, 0, TAU); bctx.fill(); bctx.shadowBlur = 8; bctx.shadowColor = 'rgba(255,80,60,.9)'; bctx.fillStyle = `rgba(255,80,60,${.9 * fade})`; const blinkB = enter && ((now / 1000) % 3.2) > 3.05; for (const sd of [-1, 1]) { bctx.beginPath(); bctx.ellipse(sd * bossR * .32, -bossR * .2, bossR * .12, blinkB ? bossR * .02 : bossR * .12 * Math.max(.15, enter ? 1 : fade), 0, 0, TAU); bctx.fill(); } bctx.restore(); }
+      // the boss as a pure black silhouette with a red rim of light and glowing eyes
+      if (fade > 0 && bossE) {
+        const OS = Math.ceil(bossR * 7 * sc * pr); if (sil.width !== OS) { sil.width = sil.height = OS; } else sctx.clearRect(0, 0, OS, OS);
+        sctx.globalCompositeOperation = 'source-over'; sctx.setTransform(sc * pr, 0, 0, sc * pr, OS / 2, OS / 2);
+        bossE.x = 0; bossE.y = 0; bossE.dir = [-bx, -by]; ctx = sctx; try { drawEnemy(bossE, now); } catch (e) {} ctx = bctx;
+        sctx.setTransform(1, 0, 0, 1, 0, 0); sctx.globalCompositeOperation = 'source-in'; sctx.fillStyle = '#05060a'; sctx.fillRect(0, 0, OS, OS);
+        bctx.save(); bctx.setTransform(1, 0, 0, 1, 0, 0); bctx.globalAlpha = fade; bctx.shadowColor = `rgba(255,50,30,${.8 + .2 * Math.sin(now / 280)})`; bctx.shadowBlur = 26 * pr;
+        bctx.drawImage(sil, (W / 2 + bx * sc) * pr - OS / 2, (cy + by * sc) * pr - OS / 2); bctx.restore();
+        const dl = Math.hypot(bx, by) || 1, ux2 = -bx / dl, uy2 = -by / dl, ex = bx + ux2 * bossR * .55, ey = by + uy2 * bossR * .55, blinkB = ((now / 1000) % 3.4) > 3.25;
+        bctx.save(); bctx.globalAlpha = fade; bctx.shadowColor = 'rgba(255,60,40,1)'; bctx.shadowBlur = 14 * pr; bctx.fillStyle = '#ff5038';
+        for (const sd of [-1, 1]) { bctx.beginPath(); bctx.ellipse(ex - uy2 * sd * bossR * .24, ey + ux2 * sd * bossR * .24, bossR * .1, blinkB ? bossR * .02 : bossR * .1, Math.atan2(uy2, ux2), 0, TAU); bctx.fill(); }
+        bctx.restore();
+      }
       // the new shard: glows where the boss fell, then flies into its slot
-      if (!enter && t > 1.6 && fly < 1) { const ta = slots[justGot] || 0, tx = Math.cos(ta) * (NEST_R + 26), ty = Math.sin(ta) * (NEST_R + 26), k = fly, x = lerp(bx, tx, k), y = lerp(by, ty, k) - Math.sin(k * Math.PI) * 60, g = smooth(1.6, 2.2, t);
+      if (!enter && t > 1.6 && fly < 1) { const ta = slots[Math.max(0, justGot)] || 0, tx = Math.cos(ta) * (NEST_R + 26), ty = Math.sin(ta) * (NEST_R + 26), k = fly, x = lerp(bx, tx, k), y = lerp(by, ty, k) - Math.sin(k * Math.PI) * 60, g = smooth(1.6, 2.2, t);
         const gl = bctx.createRadialGradient(x, y, 0, x, y, 30); gl.addColorStop(0, `rgba(255,224,150,${.8 * g})`); gl.addColorStop(1, 'rgba(255,200,120,0)'); bctx.fillStyle = gl; bctx.beginPath(); bctx.arc(x, y, 30, 0, TAU); bctx.fill();
-        bctx.fillStyle = '#ffe6a0'; bctx.save(); bctx.translate(x, y); bctx.rotate(now / 300); bctx.beginPath(); bctx.moveTo(-6, -5); bctx.lineTo(5, -7); bctx.lineTo(7, 4); bctx.lineTo(-2, 7); bctx.closePath(); bctx.fill(); bctx.restore(); }
+        drawShard(x, y, Math.max(0, justGot), 1.3, true, now); }
       if (!enter && fly >= 1 && t < 4.4) { const k = (t - 3.9) / .5; if (k > 0 && k < 1) { bctx.strokeStyle = `rgba(255,214,120,${.8 * (1 - k)})`; bctx.lineWidth = 3; bctx.beginPath(); bctx.arc(0, 0, NEST_R + 26 + k * 40, 0, TAU); bctx.stroke(); } }
       bctx.save(); bctx.translate(0, -NEST_R - 4); drawCrow(skinOf(save.skin), enter && t > 1.2 ? Math.atan2(by + NEST_R, bx) : t > 2.6 && t < 4.2 && justGot >= 0 ? Math.atan2(Math.sin(slots[justGot]), Math.cos(slots[justGot])) : -Math.PI / 2, t > 3.85 && t < 4.2 ? 1 : 0, Math.sin(now / 300) * 1.2, now); bctx.restore();
       bctx.setTransform(pr, 0, 0, pr, 0, 0);
       const lr = Math.min(W, H) * (pi === 2 ? .5 : .4), dk = bctx.createRadialGradient(W / 2, cy, lr * .5, W / 2, cy, lr * 1.9); dk.addColorStop(0, 'rgba(3,4,12,.08)'); dk.addColorStop(.6, 'rgba(3,4,12,.6)'); dk.addColorStop(1, 'rgba(2,3,8,.9)'); bctx.fillStyle = dk; bctx.fillRect(0, 0, W, H);
+      bctx.setTransform(pr * sc, 0, 0, pr * sc, W / 2 * pr, cy * pr);
+      slots.forEach((a, i) => { const got = lvls[i] && biomeState(lvls[i].id).cleared && !(i === justGot && fly < 1); drawShard(Math.cos(a) * (NEST_R + 28), Math.sin(a) * (NEST_R + 28), i, 1, got, now); });
+      bctx.setTransform(pr, 0, 0, pr, 0, 0);
       const fin = 1 - smooth(0, .6, (now - sceneStart) / 1000); if (fin > 0) { bctx.fillStyle = `rgba(0,0,0,${fin})`; bctx.fillRect(0, 0, W, H); }
     } catch (err) { ctx = keep; finish(); showErr(err); return; }
     ctx = keep; requestAnimationFrame(frame);
@@ -6567,7 +6594,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Test hook for automated balance runs. Not used by the game itself.
-Object.assign(api, { paintUpIcon, playBossStory, playIntro, bossCard, showEnding, playEggStage, toastSmall, goldenPop, openGift, startForm, startSandbox, icyRoar, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
+Object.assign(api, { paintUpIcon, replayStory, playBossStory, playIntro, bossCard, showEnding, playEggStage, toastSmall, goldenPop, openGift, startForm, startSandbox, icyRoar, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
   get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
   audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS, ITEMS });
