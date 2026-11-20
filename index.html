@@ -667,7 +667,7 @@ canvas.manualaim { cursor: crosshair; }
 .endroll .end-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .3em; text-transform: uppercase; color: #b88ae0; }
 .endroll h2 { font-family: var(--display); font-size: clamp(40px, 8vw, 66px); color: #f4cf6a; text-shadow: 0 0 30px rgba(232,184,74,.5); margin: 0; }
 .endroll p { color: var(--bone); line-height: 1.6; font-size: 16px; }
-.end-credit { display: grid; gap: 2px; } .end-credit span { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--bone-dim); } .end-credit b { font-family: var(--display); font-size: 26px; color: var(--bone); }
+.end-credit { display: grid; gap: 2px; } .end-credits-row { display: grid; gap: 14px; justify-items: center; } .end-credit span { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--bone-dim); } .end-credit b { font-family: var(--display); font-size: 26px; color: var(--bone); }
 .endroll .end-stats { color: var(--bone-dim); font-size: 14px; }
 .keygrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; }
 .keyrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--night); border-radius: 8px; padding: 6px 6px 6px 12px; font-size: 13px; color: var(--bone-dim); }
@@ -718,6 +718,13 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   #settingsPause .setrow select { padding: 4px 6px; font-size: 12px; }
   #settingsPause .setrow input[type=checkbox] { width: 17px; height: 17px; }
   #settingsPause .setrow:has(#p-name), #settingsPause .sethint, #settingsPause .setgrid > p { display: none; }
+  /* ending after The Void: compact, and it can scroll if the screen is very short */
+  .ending { place-items: start center; overflow-y: auto; padding: 12px 16px; }
+  .endroll { gap: 6px; width: min(640px, 94vw); }
+  .endroll h2 { font-size: 34px; } .endroll p { font-size: 12px; line-height: 1.45; margin: 0; } .endroll .end-eyebrow { font-size: 10px; }
+  .endroll .end-credits-row { display: flex; gap: 22px; justify-content: center; }
+  .end-credit b { font-size: 18px; } .end-credit span { font-size: 9px; }
+  .endroll .btn { padding: 8px 18px; }
   /* first-launch welcome: picture on the left, text and buttons on the right */
   .welcome { width: min(760px, 100%); padding: 12px 16px; }
   #welStep2:not([hidden]) { display: grid; grid-template-columns: 34% minmax(0, 1fr); column-gap: 16px; row-gap: 5px; align-items: start; }
@@ -904,7 +911,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.10</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.11</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4670,7 +4677,7 @@ function showEnding() {
   let o = $('ending'); if (!o) { o = el('div', 'ending'); o.id = 'ending'; document.body.append(o); }
   o.innerHTML = ''; const roll = el('div', 'endroll');
   roll.append(el('div', 'end-eyebrow', T('end_eyebrow')), el('h2', '', T('end_title')), el('p', '', T('end_text')));
-  for (const [h, v] of [[T('end_made'), 'crowdude'], [T('end_crow'), T('end_you')], [T('end_thanks'), T('end_thanks2')]]) { const d = el('div', 'end-credit'); d.append(el('span', '', h), el('b', '', v)); roll.append(d); }
+  const cr = el('div', 'end-credits-row'); for (const [h, v] of [[T('end_made'), 'crowdude'], [T('end_crow'), T('end_you')], [T('end_thanks'), T('end_thanks2')]]) { const d = el('div', 'end-credit'); d.append(el('span', '', h), el('b', '', v)); cr.append(d); } roll.append(cr);
   const st = save.stats || {}; roll.append(el('p', 'end-stats', T('end_stats', (st.kills || 0).toLocaleString(), (st.runs || 0) + 1, Object.keys(save.ach || {}).length)));
   const btn = el('button', 'btn', T('end_btn')); btn.type = 'button'; btn.onclick = () => { o.hidden = true; }; roll.append(btn);
   o.append(roll); o.hidden = false;
@@ -6104,7 +6111,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Test hook for automated balance runs. Not used by the game itself.
-Object.assign(api, { bossCard, showEnding, playEggStage, toastSmall, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
+Object.assign(api, { bossCard, showEnding, playEggStage, toastSmall, goldenPop, openGift, startForm, startSandbox, icyRoar, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
   get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
   audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS, ITEMS });
