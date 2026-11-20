@@ -5971,7 +5971,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Test hook for automated balance runs. Not used by the game itself.
-Object.assign(api, { bossCard, showEnding, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
+Object.assign(api, { bossCard, showEnding, playEggStage, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
   get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
   audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS, ITEMS });
