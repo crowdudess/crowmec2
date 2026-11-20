@@ -812,6 +812,11 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
 /* menu lists scroll with a finger, even when the swipe starts on a card */
 #menu .card, #menu .card *, #skinList, #skinList * { touch-action: pan-y; }
 #menu { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.mscroll { position: fixed; z-index: 40; right: max(4px, env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: 26px; display: none; touch-action: none; }
+.mscroll.on { display: block; }
+.mscroll::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; margin-left: -2px; border-radius: 4px; background: rgba(236,230,214,.12); }
+.mscroll i { position: absolute; left: 50%; width: 10px; margin-left: -5px; min-height: 36px; border-radius: 6px; background: var(--shine); box-shadow: 0 0 0 2px rgba(10,13,9,.8); }
+.mscroll.drag i { width: 14px; margin-left: -7px; }
 .bosscard { position: fixed; left: 0; right: 0; top: 30%; z-index: 30; pointer-events: none; display: grid; place-items: center; opacity: 0; }
 .bosscard.show { animation: bcshow 2.4s ease-in-out forwards; }
 .bosscard .bc-bar { position: absolute; left: 0; right: 0; top: 50%; height: 110px; margin-top: -55px; background: linear-gradient(90deg, transparent, rgba(8,6,6,.85) 20%, rgba(8,6,6,.85) 80%, transparent); border-top: 2px solid color-mix(in srgb, var(--bc) 70%, transparent); border-bottom: 2px solid color-mix(in srgb, var(--bc) 70%, transparent); }
@@ -941,7 +946,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.5</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.6</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -5511,6 +5516,24 @@ function applyLook() {
 const lowFx = () => save.lowFx != null ? !!save.lowFx : matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 600;
 try { applyLook(); } catch (e) {}
 try { if (matchMedia('(pointer: coarse)').matches) for (const h of document.querySelectorAll('[data-i18n="howto"]')) h.dataset.i18n = 'howto_touch'; } catch (e) {}
+// A scroll bar you can drag on the right of the menu, for phones where swiping lists is awkward.
+(function () {
+  if (!matchMedia('(pointer: coarse)').matches) return;
+  const bar = el('div', 'mscroll'), thumb = el('i'); bar.append(thumb); bar.setAttribute('aria-hidden', 'true'); document.body.append(bar);
+  const menu = $('menu'); let drag = null;
+  const sync = () => {
+    const open = !menu.hidden && state === 'menu' && !introOn, max = menu.scrollHeight - menu.clientHeight;
+    bar.classList.toggle('on', open && max > 40); if (!open || max <= 40) return;
+    const H = bar.clientHeight, th = Math.max(36, H * menu.clientHeight / menu.scrollHeight);
+    thumb.style.height = th + 'px'; thumb.style.top = ((H - th) * menu.scrollTop / max) + 'px';
+  };
+  const move = y => { const r = bar.getBoundingClientRect(), th = thumb.offsetHeight, k = Math.max(0, Math.min(1, (y - r.top - drag) / (r.height - th))); menu.scrollTop = k * (menu.scrollHeight - menu.clientHeight); sync(); };
+  bar.addEventListener('pointerdown', ev => { ev.preventDefault(); try { bar.setPointerCapture(ev.pointerId); } catch (e) {} const tr = thumb.getBoundingClientRect(); drag = ev.clientY >= tr.top && ev.clientY <= tr.bottom ? ev.clientY - tr.top : thumb.offsetHeight / 2; bar.classList.add('drag'); move(ev.clientY); });
+  bar.addEventListener('pointermove', ev => { if (drag != null) move(ev.clientY); });
+  for (const n of ['pointerup', 'pointercancel']) bar.addEventListener(n, () => { drag = null; bar.classList.remove('drag'); });
+  menu.addEventListener('scroll', sync, { passive: true }); addEventListener('resize', sync);
+  (function loop() { sync(); setTimeout(loop, 250); })();
+})();
 // Stop the music and pause the run when the game goes to the background (switching apps, locking the phone).
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { try { if (state === 'wave' && !paused) setPause(true); } catch (e) {} try { actx && actx.state === 'running' && actx.suspend(); } catch (e) {} }
