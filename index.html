@@ -715,6 +715,15 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   #settingsPause .setrow select { padding: 4px 6px; font-size: 12px; }
   #settingsPause .setrow input[type=checkbox] { width: 17px; height: 17px; }
   #settingsPause .setrow:has(#p-name), #settingsPause .sethint, #settingsPause .setgrid > p { display: none; }
+  /* first-launch welcome: picture on the left, text and buttons on the right */
+  .welcome { width: min(760px, 100%); padding: 12px 16px; }
+  #welStep2:not([hidden]) { display: grid; grid-template-columns: 34% minmax(0, 1fr); column-gap: 16px; row-gap: 5px; align-items: start; }
+  #welStep2 > * { grid-column: 2; margin: 0 !important; }
+  #welStep2 > #welArt { grid-column: 1; grid-row: 1 / span 9; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; align-self: center; }
+  #welStep2 h2 { font-size: 26px; } #welStep2 p { font-size: 12px; line-height: 1.4; } #welStep2 .sign { font-size: 13px; }
+  #welStep2 .namebox { display: grid; gap: 3px; padding: 7px 12px; } #welStep2 .namebox label { font-size: 12px; } #welStep2 .namebox .codein { padding: 6px 10px; } #welStep2 .namebox p { display: none; }
+  #welStep2 .row .btn, #welStep2 .row .ghost { padding: 8px 16px; }
+  #welStep1 h2 { font-size: 30px; }
   #tab-fly:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 14px; align-items: start; }
   #tab-fly > * { grid-column: 1 / -1; }
   #tab-fly > .biocar { grid-column: 1; grid-row: 1 / span 4; }
@@ -888,7 +897,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.5</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.6</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
