@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -6001,11 +6001,15 @@ function roostBuy(u, many) {
   save.up[u.id] = lvl; if (lvl >= u.max) grant('fledged');
   persist(); roostChime(n); renderMenu(); roostBuyFx(u.id);
 }
+// Menu pictures of a rainbow crow keep redrawing so its colours keep moving.
+const liveCrows = new Set();
+function liveCrow(cv, paint) { liveCrows.add({ cv, paint }); paint(performance.now()); }
+(function liveLoop(now) { for (const L of liveCrows) { if (!L.cv.isConnected) { liveCrows.delete(L); continue; } const keep = ctx; try { L.paint(now); } catch (e) {} ctx = keep; } requestAnimationFrame(liveLoop); })(0);
 function renderRoost() {
   const box = $('roost'); box.innerHTML = '';
   const refund = roostRefund();
   const stats = el('div', 'rstats'), cv2 = document.createElement('canvas'); cv2.width = cv2.height = 120; cv2.className = 'rcrow';
-  { const pc = cv2.getContext('2d'), keep = ctx; ctx = pc; pc.setTransform(2.4, 0, 0, 2.4, 60, 64); try { drawCrow(skinOf(save.skin), -Math.PI / 2, 0, 0, 0); } catch (e) {} pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep; }
+  { const pc = cv2.getContext('2d'), paint = now => { const keep = ctx; ctx = pc; pc.setTransform(1, 0, 0, 1, 0, 0); pc.clearRect(0, 0, 120, 120); pc.setTransform(2.4, 0, 0, 2.4, 60, 64); try { drawCrow(skinOf(save.skin), -Math.PI / 2, 0, 0, now); } catch (e) {} pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep; }; if (skinOf(save.skin).rainbow) liveCrow(cv2, paint); else paint(0); }
   const sg = el('div', 'rsgrid'); for (const [k, v] of roostStats()) { const c = el('div', 'rs'); c.append(el('b', '', String(v)), el('span', '', T(k))); sg.append(c); }
   const sh = el('div', 'rshead'); sh.append(el('div', 'eyebrow', T('roost_crow')), sg);
   stats.append(cv2, sh); box.append(stats);
@@ -6160,11 +6164,13 @@ function renderSkins() {
     if (has) c.onclick = () => { save.skin = s.id; persist(); initAudio(); cawSound(s.id); renderSkins(); };
     else c.disabled = true;
     box.append(c);
-    const pc = cvs.getContext('2d'); pc.setTransform(2.2, 0, 0, 2.2, 160, 96);
-    ctx = pc; pc.save(); pc.scale(.6, .6); drawNest(s.id, 3, !has); pc.restore();
-    drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, 0);
-    if (has) { const [kind, col] = projOf(s.id); for (const [x, y] of [[44, -12], [56, -30]]) { pc.save(); pc.translate(x, y); drawProj(kind, col, -Math.PI / 2, 1.1, 400 + x * 9); pc.restore(); } }
-    ctx = mainCtx;
+    const pc = cvs.getContext('2d');
+    const paintCard = now => { ctx = pc; pc.setTransform(1, 0, 0, 1, 0, 0); pc.clearRect(0, 0, 320, 192); pc.setTransform(2.2, 0, 0, 2.2, 160, 96);
+      pc.save(); pc.scale(.6, .6); drawNest(s.id, 3, !has); pc.restore();
+      drawCrow(has ? s : { body: '#2a2f28', wing: '#222720', sheen: 'rgba(0,0,0,0)', beak: '#2a2f28', eye: '#2a2f28' }, -Math.PI / 2, 0, 0, now);
+      if (has) { const [kind, col] = projOf(s.id); for (const [x, y] of [[44, -12], [56, -30]]) { pc.save(); pc.translate(x, y); drawProj(kind, col, -Math.PI / 2, 1.1, 400 + x * 9); pc.restore(); } }
+      ctx = mainCtx; };
+    if (has && s.rainbow) liveCrow(cvs, paintCard); else paintCard(0);
   }
 }
 const LORE = {
