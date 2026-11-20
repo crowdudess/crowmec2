@@ -24,6 +24,6 @@ if (!g.includes('nestguardRelease')) {
 fs.writeFileSync(gradle, g);
 const man = path.join(__dirname, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
 let m = fs.readFileSync(man, 'utf8');
-if (!m.includes('android:screenOrientation')) m = m.replace('<activity', '<activity\n            android:screenOrientation="fullUser"');
+if (!m.includes('android:screenOrientation')) m = m.replace('<activity', '<activity\n            android:screenOrientation="sensorLandscape"');
 fs.writeFileSync(man, m);
 console.log('Android project set to version', v, '(code ' + code + ')');
