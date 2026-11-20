@@ -2,6 +2,14 @@
 
 A roguelike nest defence game by crowdude. You are a crow, and everything in the forest wants your eggs.
 
+<p align="center">
+  <a href="https://github.com/crowdudess/crowmec2/releases/latest"><img alt="Download for Windows" src="https://img.shields.io/badge/Download-Windows-e8b84a?style=for-the-badge&logo=windows&logoColor=1a1408&labelColor=e8b84a&color=1d261b"></a>
+  <a href="https://github.com/crowdudess/crowmec2/releases/latest"><img alt="Download for Linux" src="https://img.shields.io/badge/Download-Linux-e8b84a?style=for-the-badge&logo=linux&logoColor=1a1408&labelColor=e8b84a&color=1d261b"></a>
+  <a href="https://crowdudess.github.io/crowmec2/play/"><img alt="Play in your browser" src="https://img.shields.io/badge/Play-in%20your%20browser-9fd0a8?style=for-the-badge&labelColor=9fd0a8&color=1d261b"></a>
+</p>
+
+<p align="center"><b><a href="https://crowdudess.github.io/crowmec2/">Visit the Nestguard website</a></b></p>
+
 ![Nestguard trailer](media/trailer.gif)
 
 ▶ **[Watch the trailer in full quality (MP4)](media/trailer.mp4)**
@@ -20,11 +28,10 @@ A roguelike nest defence game by crowdude. You are a crow, and everything in the
 
 | | |
 |---|---|
-| ![Choosing a biome](media/screenshots/01-menu.png) | ![Defending the nest in Whispering Wood](media/screenshots/02-forest.png) |
-| ![The Magma Wyrm in Cinder Peak](media/screenshots/03-boss-wyrm.png) | ![The Spider Queen laying egg sacs](media/screenshots/03-boss-queen.png) |
-| ![The Monkey King in Banana Jungle](media/screenshots/03-boss-kong.png) | ![The Fairy Queen in Glimmer Glade](media/screenshots/03-boss-faequeen.png) |
-| ![The shop with mythic upgrades](media/screenshots/04-shop.png) | ![A mythic build with lightning and supernovas](media/screenshots/05-mythic-build.png) |
-| ![Three bosses at once in the Chaos Rift](media/screenshots/06-chaos-rift.png) | ![The monster index](media/screenshots/07-monster-index.png) |
+| ![The Frost Bear freezing the crow](media/screenshots/03-boss-bear.png) | ![The Maw splitting in two](media/screenshots/03-boss-maw.png) |
+| ![The Oni's shockwave](media/screenshots/03-boss-oni.png) | ![The Emperor Scorpion's sandstorm](media/screenshots/03-boss-emperor.png) |
+| ![The shop with locked items in chains](media/screenshots/04-shop.png) | ![A mythic build](media/screenshots/05-mythic-build.png) |
+| ![Three bosses in the Chaos Rift](media/screenshots/06-chaos-rift.png) | ![Choosing a biome](media/screenshots/01-menu.png) |
 
 ## Play
 
@@ -34,10 +41,9 @@ A roguelike nest defence game by crowdude. You are a crow, and everything in the
 | System | File |
 |---|---|
 | Windows | `Nestguard-<version>-win-x64.exe` |
-| macOS | `Nestguard-<version>-mac-universal.dmg` |
 | Linux | `Nestguard-<version>-linux-x86_64.AppImage` |
 
-The installers are not code-signed. On Windows, click **More info → Run anyway** if SmartScreen warns. On macOS, right-click the app and choose **Open** the first time.
+The installers are not code-signed. On Windows, click **More info → Run anyway** if SmartScreen warns. On Mac, play in your browser.
 
 ## Make a release
 
@@ -51,6 +57,7 @@ Pushing a tag such as `v1.2.0` also builds a release with that name. You can run
 ## Project layout
 
 - `index.html` is the whole game: one file, no images or libraries.
-- `media/` holds the trailer and screenshots used in this README.
+- `media/` holds the trailer and screenshots.
+- `site/` is the download website. `.github/workflows/website.yml` publishes it with GitHub Pages, together with a playable copy of the game at `/play/`. Turn it on once in **Settings → Pages → Source: GitHub Actions**.
 - `desktop/` packages the game as a desktop app with Electron (`npm install`, then `npm start` to play or `npm run dist` to build an installer).
 - `.github/workflows/nestguard-installers.yml` builds the installers.
