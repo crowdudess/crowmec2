@@ -713,8 +713,8 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   #shop .panel { gap: 8px; } #shopNote, #shopOdds { display: none; } #shop .eggprompt { margin: 0; }
   #shop .eggnest { height: 170px; } #shop .eggnest .nestbg, #shop .eggnest .nestfront { height: 118px; } #shop .eggnest .nestrow { bottom: 34px; }
   #shop .nestegg, #shop .nestegg canvas { width: 92px; height: 92px; }
-  html body .ach { right: auto; left: 50%; bottom: auto; top: calc(64px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -8px) scale(.85); }
-  html body .ach.show { transform: translate(-50%, 0) scale(.85); }
+  html body .ach { top: calc(58px + env(safe-area-inset-top, 0px)); left: max(10px, env(safe-area-inset-left, 0px)); min-width: 0; max-width: 270px; padding: 6px 12px 6px 6px; grid-template-columns: 32px minmax(0, 1fr); column-gap: 9px; }
+  html body .ach .ai { width: 32px; height: 32px; } html body .ach .ai svg { width: 19px; height: 19px; } html body .ach .at { font-size: 12px; }
   .eggstage > * { zoom: .6; }
 }
 /* phones held upright: ask to turn the phone */
@@ -741,9 +741,13 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
 .toast { position: fixed; left: 50%; top: 30%; transform: translate(-50%, -50%); font-family: var(--display); font-size: clamp(40px, 9vw, 72px); color: var(--bone); pointer-events: none; text-shadow: 0 4px 24px rgba(0,0,0,.7); opacity: 0; transition: opacity .3s; white-space: nowrap; text-align: center; }
 .toast.show { opacity: 1; }
 .toast small { display: block; font-family: var(--body); font-size: 15px; color: var(--shine); letter-spacing: .14em; text-transform: uppercase; }
-.ach { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateY(12px); background: var(--moss); border: 1px solid var(--coin); border-radius: 12px; padding: 10px 16px; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity .25s, transform .25s; z-index: 50; max-width: min(320px, calc(100% - 32px)); }
+.ach { --kc: #e8b84a; position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); top: calc(92px + env(safe-area-inset-top, 0px)); display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 12px; align-items: center; min-width: 220px; max-width: min(340px, calc(100% - 32px)); padding: 9px 16px 9px 9px; background: linear-gradient(100deg, rgba(24,30,20,.97), rgba(14,18,12,.94)); border: 1px solid color-mix(in srgb, var(--kc) 45%, transparent); border-left: 4px solid var(--kc); border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 22px color-mix(in srgb, var(--kc) 18%, transparent); pointer-events: none; opacity: 0; transform: translateX(-28px); transition: opacity .25s, transform .3s cubic-bezier(.2,.9,.3,1.2); z-index: 50; }
 .ach.show { opacity: 1; transform: none; }
-.ach b { color: var(--coin); display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.ach .ai { grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--kc) 20%, transparent); color: var(--kc); }
+.ach .ai svg { width: 24px; height: 24px; }
+.ach b { color: var(--kc); display: block; font: 800 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; line-height: 1.3; }
+.ach .at { color: var(--bone); font: 600 14px/1.3 var(--body); overflow-wrap: anywhere; }
+.ach.nohead .ai { grid-row: auto; }
 @media (max-width: 560px) { .panel { padding: 18px; } .stat b { font-size: 22px; } .sp { min-width: 0; } .hide-sm { display: none; } }
 @media (prefers-reduced-motion: reduce) { .card, .hpbar i, .toast, .ach { transition: none; } }
 
@@ -848,7 +852,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.75.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1819,7 +1823,7 @@ function drawRiftCrack(v, time) {
 }
 function startWave() {
   if (P && P.waveShield) { run.shield = (run.shield || 0) + P.waveShield; }
-  if (run && !run.sandbox && !api.sim) { const nw = (run.wave || 0) + 1, idx = SLOT_WAVE.indexOf(nw); if (idx >= 2 && loadout()[idx]) setTimeout(() => toastSmall((SPELLS.find(q => q.id === loadout()[idx]) || {}).name || '', T('slot_open', idx + 1)), 400); }
+  if (run && !run.sandbox && !api.sim) { const nw = (run.wave || 0) + 1, idx = SLOT_WAVE.indexOf(nw); if (idx >= 2 && loadout()[idx]) setTimeout(() => toastSmall((SPELLS.find(q => q.id === loadout()[idx]) || {}).name || '', T('slot_open', idx + 1), 'spell'), 400); }
   if (run.wave > 0 && P && (save.up.rhythm || 0) > 0 && !run.sandbox) { const k = .004 * save.up.rhythm; P.dmg += P.baseDmg * k; P.rate += P.baseRate * k; }
   if (run.prevBest == null) run.prevBest = biomeState(B.id).best || 0;
   run.wave++;
@@ -1837,7 +1841,7 @@ function startWave() {
     run.riftPair = [rp[ia].id, rp[ib].id]; run.riftAng = rnd(0, TAU); run.riftFlash = 1; run.riftSurge = 14 + rnd(0, 8);
     const pA = rp[ia].enemies, pB = rp[ib].enemies, cap = Math.max(3, Math.min(5, Math.ceil(w / 2) + 1));
     pool = [...pA.slice(0, cap), ...pB.slice(0, cap)];
-    if (!api.sim) { toastSmall(bn(rp[ia]) + '  ✕  ' + bn(rp[ib]), ['Rift shift', 'La faille bascule', 'La grieta cambia', 'Riss-Wechsel'][li()]); shake = Math.max(shake, 10); }
+    if (!api.sim) { toastSmall(bn(rp[ia]) + '  ✕  ' + bn(rp[ib]), ['Rift shift', 'La faille bascule', 'La grieta cambia', 'Riss-Wechsel'][li()], 'rift'); shake = Math.max(shake, 10); }
   }
   const isBoss = isBossWave(w), isChamp = isChampWave(w), isElite = !isBoss && !isChamp && (run.endless ? w % 2 === 0 : w % (chaosOn(9) ? 3 : 5) === 0);
   const pure = chaosOn(11);
@@ -1869,7 +1873,7 @@ function startWave() {
     if (run.riftPair) q.side = riftSideOf(k);
     return q;
   });
-  if (fresh.length && !api.sim) toastSmall(fresh.map(k => E[k].name).join(', '), ['New enemy', 'Nouvel ennemi', 'Nuevo enemigo', 'Neuer Gegner'][li()]);
+  if (fresh.length && !api.sim) toastSmall(fresh.map(k => E[k].name).join(', '), ['New enemy', 'Nouvel ennemi', 'Nuevo enemigo', 'Neuer Gegner'][li()], 'enemy');
   const mid = spawnQ.length ? spawnQ[Math.floor(spawnQ.length * .4)].t : 2;
   let bossKeys = isBoss ? [B.boss] : [], miniBoss = false;
   if (run.endless && (isBoss || w % 3 === 0)) {
@@ -1980,7 +1984,7 @@ function kill(e) {
   e.dead = true; run.kills++; save.stats.kills++;
   save.seen = save.seen || {};
   if (!save.seen[e.k] && !e.fx) {
-    toastSmall(E[e.k].name, T('toast_newmon'));
+    toastSmall(E[e.k].name, T('toast_newmon'), 'enemy');
     if (run.unlocks) run.unlocks.push(T('unl_mon', E[e.k].name));
   }
   save.seen[e.k] = (save.seen[e.k] || 0) + 1;
@@ -4408,12 +4412,24 @@ function toast(big, small) {
   t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
 }
 const achQueue = []; let achBusy = false;
-function toastSmall(text, head = '') { if (api.sim) return; achQueue.push([head, text]); pumpAch(); }
+const ACH_KINDS = {
+  ach: ['#e8b84a', '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/>'],
+  skin: ['#c08ae8', '<path d="M20.5 3.5C12.5 4 6.5 9 5 19.5l1.8.8c.8-2.2 1.8-4 3.2-5.4 5.4.3 9.6-4.4 10.5-11.4z"/><path d="M4 21 15 9"/>'],
+  item: ['#6ab8ff', '<path d="M12 3c3.6 0 6 5 6 9.5A6 6 0 0 1 6 12.5C6 8 8.4 3 12 3z"/><path d="M9 13l2 2 4-4"/>'],
+  golden: ['#f4cf6a', '<path d="M12 3c3.6 0 6 5 6 9.5A6 6 0 0 1 6 12.5C6 8 8.4 3 12 3z"/><path d="M12 8l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.5-2.5 1.5.6-2.8L8 10.9l2.8-.3z"/>'],
+  enemy: ['#e0603a', '<path d="M12 3a7 7 0 0 0-7 7c0 2.6 1.4 4.3 3 5.2V19h8v-3.8c1.6-.9 3-2.6 3-5.2a7 7 0 0 0-7-7z"/><circle cx="9.3" cy="10.5" r="1.3"/><circle cx="14.7" cy="10.5" r="1.3"/><path d="M10.5 19v2M13.5 19v2"/>'],
+  spell: ['#7fd6c0', '<path d="M5 19 15 9"/><path d="M15 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M19 13l.6 1.4L21 15l-1.4.6L19 17l-.6-1.4L17 15l1.4-.6z"/>'],
+  rift: ['#b06ae8', '<path d="M12 12m-2 0a2 2 0 1 0 4 0a4 4 0 1 0-8 0a6 6 0 1 0 12 0a8 8 0 1 0-16 0"/>'],
+  info: ['#9fb08a', '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'],
+};
+function toastSmall(text, head = '', kind = 'info') { if (api.sim) return; achQueue.push([head, text, kind]); pumpAch(); }
 function pumpAch() {
   if (achBusy || !achQueue.length) return;
   achBusy = true;
-  const [h, t] = achQueue.shift(), a = $('ach');
-  a.textContent = ''; if (h) a.append(el('b', '', h)); a.append(t);
+  const [h, t, kind] = achQueue.shift(), a = $('ach'), k = ACH_KINDS[kind] || ACH_KINDS.info;
+  a.textContent = ''; a.style.setProperty('--kc', k[0]);
+  const ic = el('span', 'ai'); ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + k[1] + '</svg>';
+  a.append(ic); if (h) a.append(el('b', '', h)); a.append(el('span', 'at', t)); a.classList.toggle('nohead', !h);
   a.classList.add('show');
   setTimeout(() => { a.classList.remove('show'); setTimeout(() => { achBusy = false; pumpAch(); }, 300); }, 2600);
 }
@@ -4425,7 +4441,7 @@ function grant(id) {
   save.ach[id] = Date.now();
   save.coins += a.coins; save.earnedTotal += a.coins;
   if (run) run.unlocks.push(T('unl_ach', a.name, a.coins));
-  toastSmall(T('toast_ach_line', a.name, a.coins), T('toast_ach'));
+  toastSmall(T('toast_ach_line', a.name, a.coins), T('toast_ach'), 'ach');
   sfx.ach();
   checkSkins();
   persist();
@@ -4435,7 +4451,7 @@ function checkSkins() {
   for (const s of SKINS) if (s.has(save) && !save.skinsSeen.includes(s.id)) {
     save.skinsSeen.push(s.id);
     if (run) run.unlocks.push(T('unl_skin', s.name));
-    toastSmall(s.name, T('toast_skin'));
+    toastSmall(s.name, T('toast_skin'), 'skin');
   }
   if (save.skinsSeen.length >= 5) grant('collector');
   if (save.earnedTotal >= 1000) grant('tycoon');
@@ -4500,7 +4516,7 @@ function checkItemGoals() {
     save.itemsOpen = [...(save.itemsOpen || []), id]; any = true;
     const it = ITEMS.find(x => x.id === id); if (!it) continue;
     if (run && run.unlocks) run.unlocks.push(T('unl_item', it.name));
-    if (!api.sim) toastSmall(it.name, T('item_unlocked'));
+    if (!api.sim) toastSmall(it.name, T('item_unlocked'), 'item');
   }
   if (any) persist();
 }
@@ -4808,7 +4824,7 @@ function goldenPop() {
   save.itemStats = save.itemStats || {}; save.itemStats[it.id] = (save.itemStats[it.id] || 0) + 1; persist();
   run.items[it.id] = itemCount(it.id) + 1; run.bought++; it.apply();
   if (api.sim) return;
-  run.goldPause = true; paused = true; toastSmall(T('golden_drop'), T('golden_t'));
+  run.goldPause = true; paused = true; toastSmall(T('golden_drop'), T('golden_t'), 'golden');
   setTimeout(() => { sfx.spell(); playEggStage({ ...it, golden: true, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }); }, 350);
 }
 function crackGolden() {
@@ -4869,7 +4885,7 @@ function openGift() {
 function takeGift(i) {
   const it = offers[i]; if (!it || !run.gift) return;
   run.gift = false; run.items[it.id] = itemCount(it.id) + 1; it.apply(); save.itemStats = save.itemStats || {}; save.itemStats[it.id] = (save.itemStats[it.id] || 0) + 1; persist();
-  if (!api.sim) { sfx.buy(); toastSmall(it.name, T('gift_got')); }
+  if (!api.sim) { sfx.buy(); toastSmall(it.name, T('gift_got'), 'item'); }
   offers = []; $('shop').hidden = true; $('hud').hidden = false; startWave();
 }
 const RES_ICON = {
@@ -5186,7 +5202,7 @@ function showWelcome() {
   for (const [code, name] of LANGS) {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(code === lang));
     b.append(document.createTextNode(name), el('small', '', sub[code]));
-    b.onclick = () => { setLang(code); $('welStep1').hidden = true; $('welStep2').hidden = false; drawWelcomeArt(); $('welName').value = save.player || ''; $('welName').focus({ preventScroll: true }); };
+    b.onclick = () => { setLang(code); $('welStep1').hidden = true; $('welStep2').hidden = false; drawWelcomeArt(); $('welName').value = save.player || ''; if (!matchMedia('(pointer: coarse)').matches) $('welName').focus({ preventScroll: true }); };
     box.append(b);
   }
   $('welStep1').hidden = false; $('welStep2').hidden = true; $('welcome').hidden = false;
@@ -5359,7 +5375,7 @@ function renderFly() {
       else if (next) {
         card.append(el('span', 'pr coinc', afford ? T('chaos_buy', cost) : T('chaos_need', cost)));
         card.disabled = !afford;
-        card.onclick = () => { if (save.coins < cost || (save.chaosMax || 0) !== L - 1) return; save.coins -= cost; save.chaosMax = L; save.chaos = L; persist(); sfx.buy(); toastSmall(T('chaos_n', L), T('toast_chaos')); renderFly(); $('mCoins').textContent = save.coins; };
+        card.onclick = () => { if (save.coins < cost || (save.chaosMax || 0) !== L - 1) return; save.coins -= cost; save.chaosMax = L; save.chaos = L; persist(); sfx.buy(); toastSmall(T('chaos_n', L), T('toast_chaos'), 'rift'); renderFly(); $('mCoins').textContent = save.coins; };
       } else card.disabled = true;
       g.append(card);
     }
@@ -6025,7 +6041,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Test hook for automated balance runs. Not used by the game itself.
-Object.assign(api, { bossCard, showEnding, playEggStage, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
+Object.assign(api, { bossCard, showEnding, playEggStage, toastSmall, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
   get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
   audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS, ITEMS });
