@@ -21,7 +21,7 @@ A roguelike nest defence game by crowdude. You are a crow, and everything in the
 - 13 biomes, from Whispering Wood to The Void, plus a secret DLC office. Each has its own monsters, weather and a boss on wave 10, with 3 challenge runs per biome.
 - The **Chaos Rift**: an endless mode with monsters and bosses from every biome, and 10 chaos levels you buy with coins.
 - Pick up to 5 spells to take into each run. Every crow skin has its own passive, projectile, nest and caw.
-- Spend coins in the Roost on permanent upgrades. Fill the monster and upgrade index, and unlock skins and achievements.
+- Spend coins on permanent upgrades in the Upgrades tab. Fill the monster and item index, and unlock skins and achievements.
 - Plays in English, French, Spanish and German.
 
 ## Screenshots

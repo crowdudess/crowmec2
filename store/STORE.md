@@ -24,7 +24,7 @@ Beetles, snakes, raccoons, frogs, spiders, bats and much worse come from every s
 
 **13 biomes.** From Whispering Wood to The Void, each with its own monsters, weather and music, played live by the game.
 
-**Grow between runs.** Spend your coins in the Roost, unlock 26 spells, 29 crow skins with their own passives, and challenges that unlock Legendary and Mythic items.
+**Grow between runs.** Spend your coins on permanent upgrades, unlock 26 spells, 29 crow skins with their own passives, and challenges that unlock Legendary and Mythic items.
 
 **The Chaos Rift.** An endless mode that mixes two biomes every round, with mini bosses and 10 chaos levels. How far can you go?
 
