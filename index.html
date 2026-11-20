@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.4</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.77.5</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4742,13 +4742,20 @@ function introNote(ac, out, t, f0, f1, dur, type, v, att = .02) {
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
   o.connect(g).connect(out); o.start(t); o.stop(t + dur + .05);
 }
+function storyKO(ac, out) {
+  const t = ac.currentTime + .01;
+  introNote(ac, out, t, 180, 36, .8, 'sawtooth', .2, .004); introNote(ac, out, t, 95, 28, 1, 'sine', .4, .004); introNote(ac, out, t, 1400, 300, .12, 'square', .06, .002);
+  for (let i = 0; i < 3; i++) { introNote(ac, out, t + .35 + i * .18, 2093, 2093, .9 - i * .2, 'sine', .035, .01); introNote(ac, out, t + .44 + i * .18, 2637, 2637, .7 - i * .15, 'sine', .025, .01); }
+  introNote(ac, out, t + .3, 900, 400, 1.6, 'triangle', .03, .05);
+}
+function storySlash(ac, out) { const t = ac.currentTime + .01; introNote(ac, out, t, 2400, 500, .14, 'sawtooth', .05, .003); }
 function storyCue(ac, out, cue) {
   const t = ac.currentTime + .03;
   if (cue === 'chime') [880, 1109, 1319, 1760, 2217].forEach((f, i) => introNote(ac, out, t + i * .22, f, f, 1.4, 'triangle', .035));
   else if (cue === 'chime2') [1319, 1760, 2637].forEach((f, i) => introNote(ac, out, t + i * .2, f, f, 1.2, 'sine', .03));
   else if (cue === 'heart') { for (let i = 0, g = .85, x = t; i < 6; i++, x += g, g *= .88) { introNote(ac, out, x, 70, 40, .22, 'sine', .22, .005); introNote(ac, out, x + .2, 62, 38, .2, 'sine', .14, .005); } }
   else if (cue === 'attack') { introNote(ac, out, t, 140, 45, 1.4, 'sawtooth', .12, .01); introNote(ac, out, t, 70, 30, 1.8, 'square', .06, .01); for (let i = 0; i < 4; i++) introNote(ac, out, t + .3 + i * .45, 90 + (i % 3) * 20, 50, .3, 'square', .025, .01); }
-  else if (cue === 'caws') { for (const x of [0, 1.1]) { introNote(ac, out, t + x, 900, 520, .16, 'square', .06, .005); introNote(ac, out, t + x + .12, 760, 420, .14, 'square', .04, .005); } for (const x of [.4, 1.0]) introNote(ac, out, t + x, 700, 260, .35, 'triangle', .07, .01); introNote(ac, out, t + 1.8, 160, 38, .7, 'sawtooth', .16, .005); introNote(ac, out, t + 1.8, 90, 30, .9, 'sine', .3, .005); introNote(ac, out, t + 1.95, 620, 180, .5, 'square', .035, .01); }
+  else if (cue === 'caws') { for (const x of [0, 1.1]) { introNote(ac, out, t + x, 900, 520, .16, 'square', .06, .005); introNote(ac, out, t + x + .12, 760, 420, .14, 'square', .04, .005); } for (const x of [.4, 1.0]) introNote(ac, out, t + x, 700, 260, .35, 'triangle', .07, .01); }
   else if (cue === 'dark') { introNote(ac, out, t + .2, 49, 41, 2.5, 'sine', .12, .4); }
   else if (cue === 'sad') [[0, 440], [1.2, 392], [2.4, 349]].forEach(([x, f]) => { introNote(ac, out, t + x, f, f * .98, 1.5, 'sine', .05, .15); introNote(ac, out, t + x, f / 2, f / 2, 1.5, 'triangle', .02, .2); });
   else if (cue === 'sad2') [[0, 330], [1.3, 294]].forEach(([x, f]) => { introNote(ac, out, t + x, f, f * .98, 1.6, 'sine', .05, .15); introNote(ac, out, t + x, f / 2, f / 2, 1.6, 'triangle', .02, .2); });
@@ -4774,7 +4781,7 @@ function playIntro(opts = {}) {
   let ac = null, out = null, drone = null;
   try { initAudio(); ac = actx; if (ac && !muted) { out = ac.createGain(); out.gain.value = Math.max(.3, vol.sfx); out.connect(master); musicBus.gain.setTargetAtTime(0, ac.currentTime, .3);
     drone = [[55, 'sine', .06], [82.4, 'triangle', .025]].map(([f, type, v]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(.0001, ac.currentTime); g.gain.exponentialRampToValueAtTime(v, ac.currentTime + 3); o.connect(g).connect(out); o.start(); return { o, g, v }; }); } } catch (e) {}
-  let pi = -1, pStart = 0, typed = 0, full = '', done = false, lastBlip = 0;
+  let pi = -1, pStart = 0, typed = 0, full = '', done = false, lastBlip = 0, lastT = -1;
   const go = i => {
     if (i >= STORY.length) { finish(); return; }
     pi = i; pStart = performance.now(); typed = 0; full = T(STORY[i].key); textEl.textContent = ''; nextEl.classList.remove('on');
@@ -4814,7 +4821,9 @@ function playIntro(opts = {}) {
     if (pi < 0) go(0);
     const P0 = STORY[pi], el_ = (now - pStart) / 1000, t = Math.min(P0.to, P0.from + el_);
     // typewriter, with a soft blip every few letters
-    if (typed < full.length) { const want = Math.min(full.length, Math.floor(el_ * 38)); if (want > typed) { typed = want; textEl.textContent = full.slice(0, typed); if (ac && out && now - lastBlip > 55 && /\S/.test(full[typed - 1])) { lastBlip = now; introNote(ac, out, ac.currentTime, 520 + Math.random() * 60, 500, .045, 'square', .025, .003); } } if (typed >= full.length) nextEl.classList.add('on'); }
+    if (typed < full.length) { const want = Math.min(full.length, Math.floor(el_ * 38)); if (want > typed) { typed = want; textEl.textContent = full.slice(0, typed); if (ac && out && now - lastBlip > 55 && /\S/.test(full[typed - 1])) { lastBlip = now; introNote(ac, out, ac.currentTime, 330 + Math.random() * 40, 320, .05, 'square', .07, .002); } } if (typed >= full.length) nextEl.classList.add('on'); }
+    if (ac && out) { for (const ts of [16.05, 16.85, 17.65]) if (lastT < ts && t >= ts) storySlash(ac, out); if (lastT < 18.3 && t >= 18.3) storyKO(ac, out); }
+    lastT = t;
     const r = frameEl.getBoundingClientRect(), W = Math.max(10, r.width), H = Math.max(10, r.height), pr = Math.min(devicePixelRatio || 1, 2);
     if (cvs.width !== Math.round(W * pr) || cvs.height !== Math.round(H * pr)) { cvs.width = Math.round(W * pr); cvs.height = Math.round(H * pr); }
     const base = (H <= 500 && W > H ? Math.min(W, H * 1.25) : Math.min(W, H)) / 740;
@@ -4837,9 +4846,16 @@ function playIntro(opts = {}) {
         const p = a.role === 'thief' ? thiefPos(a, t) : lurkPos(a, t), dx = p.x - a.x, dy = p.y - a.y;
         a.x = p.x; a.y = p.y; if (Math.hypot(dx, dy) > .3) a.dir = [dx, dy];
         if (Math.hypot(a.x, a.y) > 1250) continue;
-        drawEnemy(a, now);
+        { const n = Math.hypot(...a.dir) || 1, ux = a.dir[0] / n, uy = a.dir[1] / n, rr = a.r * 1.05, ang = Math.atan2(uy, ux), bob = Math.sin(now / 160 + a.seed) * 1.5;
+          ictx.save(); ictx.translate(a.x, a.y + bob); ictx.rotate(ang); ictx.shadowColor = 'rgba(0,0,0,.9)'; ictx.shadowBlur = 14;
+          ictx.fillStyle = 'rgba(5,6,12,.93)'; ictx.beginPath(); ictx.ellipse(0, 0, rr * 1.25, rr * .85, 0, 0, TAU); ictx.fill(); ictx.beginPath(); ictx.ellipse(rr * .9, 0, rr * .6, rr * .55, 0, 0, TAU); ictx.fill();
+          ictx.shadowBlur = 0; const ec = a.role === 'boss' ? '255,90,60' : '255,214,90', blink = ((now / 1000 + a.seed) % 3.1) > 2.95;
+          ictx.fillStyle = `rgba(${ec},.95)`; ictx.shadowColor = `rgba(${ec},.9)`; ictx.shadowBlur = 8;
+          for (const sd of [-1, 1]) { ictx.beginPath(); ictx.ellipse(rr * 1.1, sd * rr * .26, rr * .13, blink ? rr * .03 : rr * .16, 0, 0, TAU); ictx.fill(); }
+          ictx.restore(); }
         if (p.carry) { const n = Math.hypot(...a.dir) || 1; drawEgg(a.x + a.dir[0] / n * a.r * .9, a.y + a.dir[1] / n * a.r * .9, 1.1, .9, now); }
       }
+      for (const [ts, sa] of [[16.05, -.6], [16.85, 2.2], [17.65, .9]]) { const k = (t - ts) / .35; if (k > 0 && k < 1) { ictx.save(); ictx.translate(Math.cos(sa) * 30, -NEST_R + Math.sin(sa) * 30); ictx.rotate(sa + .8); ictx.strokeStyle = `rgba(255,255,255,${.9 * (1 - k)})`; ictx.lineWidth = 3; ictx.lineCap = 'round'; for (let j = -1; j <= 1; j++) { ictx.beginPath(); ictx.moveTo(-24 * Math.min(1, k * 3), j * 8); ictx.lineTo(24 * Math.min(1, k * 3), j * 8 - 10); ictx.stroke(); } ictx.restore(); } }
       for (const tc of [16.2, 17.4, 18.6]) { const k = (t - tc) / .5; if (k > 0 && k < 1) { ictx.strokeStyle = `rgba(236,230,214,${.7 * (1 - k)})`; ictx.lineWidth = 5; ictx.beginPath(); ictx.arc(0, 0, 40 + k * 150, 0, TAU); ictx.stroke(); } }
       let target = null, best = 1e9; for (const a of actors) { const d = Math.hypot(a.x, a.y); if (d < best) { best = d; target = a; } }
       const crowA = t > 14.5 && t < 21 && target && best < 900 ? Math.atan2(target.y + NEST_R, target.x) : t >= 27.5 ? -Math.PI / 2 : -Math.PI / 2 + Math.sin(now / 1400) * .25;
@@ -4855,7 +4871,7 @@ function playIntro(opts = {}) {
       ictx.globalAlpha = 1;
       ictx.setTransform(pr, 0, 0, pr, 0, 0);
       // the night closes in around a small circle of light on the nest
-      const lightW = t < 10 ? 190 : t < 14.2 ? lerp(190, 125, smooth(10, 12, t)) : t < 21 ? lerp(125, 300, smooth(14.2, 15, t)) : t < 27.4 ? lerp(300, 170, smooth(21, 23, t)) : lerp(170, 260, smooth(27.4, 29, t));
+      const lightW = t < 10 ? 190 : t < 14.2 ? lerp(190, 125, smooth(10, 12, t)) : t < 21 ? lerp(125, 215, smooth(14.2, 15, t)) : t < 27.4 ? lerp(300, 170, smooth(21, 23, t)) : lerp(170, 260, smooth(27.4, 29, t));
       const lx = W / 2 + sx, ly = cy + sy, lr = Math.min(lightW * sc, Math.min(W, H) * (t > 27.4 ? .5 : .36));
       const dk = ictx.createRadialGradient(lx, ly, lr * .55, lx, ly, lr * 1.9); dk.addColorStop(0, 'rgba(3,4,12,.12)'); dk.addColorStop(.55, 'rgba(3,4,12,.72)'); dk.addColorStop(1, 'rgba(2,3,8,.95)'); ictx.fillStyle = dk; ictx.fillRect(0, 0, W, H);
       // glowing eyes in the dark, each pair blinking on its own
