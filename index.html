@@ -177,7 +177,7 @@ canvas.manualaim { cursor: crosshair; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
 .card { text-align: left; font: inherit; color: var(--bone); background: var(--moss-2); border: 2px solid transparent; border-radius: 12px; padding: 14px; display: grid; align-content: start; gap: 6px; cursor: pointer; min-width: 0; transition: transform .12s, border-color .12s; }
-.card:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--bone-dim); }
+@media (hover: hover) { .card:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--bone-dim); } }
 .card:disabled { opacity: .45; cursor: not-allowed; }
 .card.sold { opacity: .3; }
 .card.sel { border-color: var(--shine); }
@@ -805,6 +805,13 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   .st-box { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: min(680px, calc(100% - 28px)); min-height: 0; border-width: 3px; padding: 8px 14px 14px; font-size: 20px; }
   .intro .in-title { font-size: 46px; top: 7%; } .intro .in-skip { font-size: 17px; padding: 4px 10px; }
 }
+/* no blue tap boxes on phones: hide the tap highlight and mouse/touch focus rings (keyboard focus still shows) */
+* { -webkit-tap-highlight-color: transparent; }
+button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:focus:not(:focus-visible), .nestegg:focus, .cawkey:focus:not(:focus-visible), .sp:focus:not(:focus-visible) { outline: none; box-shadow: none; }
+@media (pointer: coarse) { button:focus-visible, .card:focus-visible, .sp:focus-visible, .cawkey:focus-visible, .nestegg:focus-visible, .tab:focus-visible { outline: none !important; } }
+/* menu lists scroll with a finger, even when the swipe starts on a card */
+#menu .card, #menu .card *, #skinList, #skinList * { touch-action: pan-y; }
+#menu { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 .bosscard { position: fixed; left: 0; right: 0; top: 30%; z-index: 30; pointer-events: none; display: grid; place-items: center; opacity: 0; }
 .bosscard.show { animation: bcshow 2.4s ease-in-out forwards; }
 .bosscard .bc-bar { position: absolute; left: 0; right: 0; top: 50%; height: 110px; margin-top: -55px; background: linear-gradient(90deg, transparent, rgba(8,6,6,.85) 20%, rgba(8,6,6,.85) 80%, transparent); border-top: 2px solid color-mix(in srgb, var(--bc) 70%, transparent); border-bottom: 2px solid color-mix(in srgb, var(--bc) 70%, transparent); }
@@ -934,7 +941,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.4</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.83.5</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
