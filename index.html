@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.79.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.79.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4739,7 +4739,7 @@ function playBossStory(biome, onDone, mode = 'win') {
   const total = shardBiomes().length, have = shardCount(), next = biome.dlc ? null : BIOMES.slice(BIOMES.indexOf(biome) + 1).find(b => !b.dlc && !b.mode);
   const lastLine = have >= total ? T('bs_all') : next ? T('bs_next', bn(next)) : T('bs_more', total - have);
   const bossName = E[biome.boss] ? E[biome.boss].name : '';
-  const pages = enter ? [{ to: 1, text: T('be_1', bn(biome)) }, { to: 2.6, text: T('be_' + biome.boss) }, { to: 2.8, text: T('be_wave', BOSS_WAVE) }]
+  const pages = enter ? [{ to: 1, text: T('be_1', bn(biome)) }, { to: 2.6, text: T('be_' + biome.boss) }]
     : [{ to: 2.4, text: T('bs_' + biome.boss) }, { to: 4.6, text: T('bs_shard', have, total), cue: 'chime' }, { to: 6.4, text: lastLine, cue: 'calm' }];
   const bossR = (E[biome.boss] ? E[biome.boss].r : 40) * 1.2, bossA = -.35, bossD = 165, slots = Array.from({ length: total }, (_, i) => Math.PI / 2 + i / total * TAU);
   let ac = null, out = null; try { initAudio(); ac = actx; if (ac && !muted) { out = ac.createGain(); out.gain.value = Math.max(.3, vol.sfx); out.connect(master); musicBus.gain.setTargetAtTime(.0001, ac.currentTime, .4); if (enter) { introNote(ac, out, ac.currentTime + .05, 55, 50, 3, 'sine', .14, .6); } else { introNote(ac, out, ac.currentTime + .05, 220, 55, 1.6, 'sawtooth', .07, .01); introNote(ac, out, ac.currentTime + .05, 110, 40, 2, 'sine', .2, .01); } } } catch (e) {}
