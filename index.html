@@ -760,7 +760,7 @@ canvas.manualaim { cursor: crosshair; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.4</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.73.5</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4465,9 +4465,8 @@ function playEggStage(it, others = [], fromShop = false) {
     drawEgg(egg, it, 'open'); st.className = 'eggstage reeling'; shake = Math.max(shake, 4);
     if (actx && !muted) tone(220, 90, .25, 'sawtooth', .05);
     const TW = 104, w = reel.clientWidth, target = WIN * TW + rnd(10, 30) - w / 2;
-    void strip.offsetWidth; strip.style.transition = `transform ${SPIN_FAST}ms cubic-bezier(.1,.62,.3,1)`; strip.style.transform = `translateX(${-(target - TW * 1.7)}px)`;
-    setTimeout(() => { if (!alive()) return; st.classList.add('crawl'); strip.style.transition = `transform ${SPIN_SLOW}ms cubic-bezier(.3,.05,.2,1)`; strip.style.transform = `translateX(${-target}px)`;
-      if (actx && !muted) for (let i = 0; i < 4; i++) setTimeout(() => { if (alive()) tone(70, 50, .22, 'sine', .09); }, i * 480); }, SPIN_FAST);
+    void strip.offsetWidth; strip.style.transition = `transform ${EGG_SPIN}ms cubic-bezier(.04,.78,.08,1)`; strip.style.transform = `translateX(${-target}px)`;
+    setTimeout(() => { if (!alive()) return; st.classList.add('crawl'); if (actx && !muted) for (let i = 0; i < 4; i++) setTimeout(() => { if (alive()) tone(70, 50, .22, 'sine', .09); }, i * 480); }, SPIN_FAST);
     let last = -1; const t0 = performance.now();
     const tick = () => { if (!alive() || performance.now() - t0 > EGG_SPIN + 50) return; const m = new DOMMatrixReadOnly(getComputedStyle(strip).transform), idx = Math.floor((-m.m41 + w / 2) / TW); if (idx !== last) { last = idx; const x = tiles[idx]; if (x) setR(x.rar); if (actx && !muted) tone(700 + (x ? x.rar : 0) * 80, 700 + (x ? x.rar : 0) * 80, .03, 'square', .025); } requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
