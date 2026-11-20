@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.81.3</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.81.4</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2583,6 +2583,22 @@ function update(dt) {
         e.shootT = rnd(3.5, 4.5);
         if (e.healer) healAround(e, .12); else webCrow(e, 3);
       }
+      continue;
+    }
+    // The Fairy Queen circles the nest at a distance while she casts, and only dives in for a bite every few seconds.
+    if (e.k === 'faequeen') {
+      const R = 215, ang = Math.atan2(e.y, e.x);
+      e.fqDir = e.fqDir || (Math.random() < .5 ? -1 : 1); e.fqDive = e.fqDive ?? rnd(6, 8);
+      if (e.fqMode === 'dive') {
+        if (d > NEST_R + e.r - 4) { e.x += ux * spd * 3 * dt; e.y += uy * spd * 3 * dt; e.bite = .35; }
+        else { biteNest(e); e.fqMode = 'back'; e.fqDive = rnd(7, 9); e.x -= ux * 14; e.y -= uy * 14; }
+        continue;
+      }
+      if (e.fqMode === 'back' && d < R - 10) { e.x -= ux * spd * 2.4 * dt; e.y -= uy * spd * 2.4 * dt; continue; }
+      e.fqMode = 'orbit';
+      const na = ang + e.fqDir * .32 * dt, tx = Math.cos(na) * R, ty = Math.sin(na) * R, dx = tx - e.x, dy = ty - e.y, dl = Math.hypot(dx, dy) || 1, mv = Math.min(dl, Math.max(spd * 1.6, 42) * dt);
+      e.x += dx / dl * mv; e.y += dy / dl * mv;
+      if (d < R + 40) { e.fqDive -= dt; if (e.fqDive <= 0) e.fqMode = 'dive'; }
       continue;
     }
     if (e.backT > 0) { e.backT -= dt; e.x -= ux * spd * 1.3 * dt; e.y -= uy * spd * 1.3 * dt; e.bite = Math.max(e.bite, .35); continue; }
