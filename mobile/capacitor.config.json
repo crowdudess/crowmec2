@@ -1,0 +1,10 @@
+{
+  "appId": "com.crowdude.nestguard",
+  "appName": "Nestguard",
+  "webDir": "www",
+  "backgroundColor": "#0b0a08",
+  "android": { "allowMixedContent": false, "captureInput": true },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#0b0a08" }
+  }
+}

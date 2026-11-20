@@ -1,0 +1,20 @@
+{
+  "name": "nestguard-mobile",
+  "version": "2.75.1",
+  "private": true,
+  "description": "Android app for Nestguard, a game by crowdude.",
+  "scripts": {
+    "prepare-game": "node wrap.js",
+    "android": "npm run prepare-game && npx cap add android && npx capacitor-assets generate --android && node android-setup.js && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.3",
+    "@capacitor/app": "6.0.3",
+    "@capacitor/core": "6.2.3",
+    "@capacitor/status-bar": "6.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "6.2.3"
+  }
+}
