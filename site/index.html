@@ -106,7 +106,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
       <div class="dl">
         <a class="big" id="bigBtn" href="https://github.com/crowdudess/crowmec2/releases/latest">
           <svg id="bigIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
-          <span><span id="bigLabel">Download Nestguard</span><small id="bigSub">Free · Windows, Linux &amp; Android</small></span>
+          <span><span id="bigLabel">Download Nestguard</span><small id="bigSub">Free · Windows, Mac, Linux &amp; Android</small></span>
         </a>
         <div class="alts">
           <a class="alt" id="altPlay" href="play/"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>Play in your browser</a>
@@ -139,6 +139,13 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
         <a class="get" id="getLinux" href="https://github.com/crowdudess/crowmec2/releases/latest">Download .AppImage</a>
         <div class="file" id="fileLinux"></div>
         <ol><li>Make it runnable: <code>chmod +x Nestguard-*.AppImage</code></li><li>Double-click it, or run it from a terminal.</li></ol>
+      </div>
+      <div class="pc" id="pcMac">
+        <div class="top"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.6zM14.2 5.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1.1.1 2.1-.5 2.7-1.3z"/></svg><h3>Mac</h3><span class="tag" hidden>For you</span></div>
+        <p>App for macOS, on both Intel and Apple chips.</p>
+        <a class="get" id="getMac" href="https://github.com/crowdudess/crowmec2/releases/latest">Download .dmg</a>
+        <div class="file" id="fileMac"></div>
+        <ol><li>Open the <code>.dmg</code> and drag Nestguard to Applications.</li><li>The first time, macOS blocks it because it isn't signed: go to <b>System Settings → Privacy &amp; Security</b> and click <b>Open Anyway</b>.</li></ol>
       </div>
       <div class="pc" id="pcAndroid">
         <div class="top"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.6 9.48 19.44 6.3a.38.38 0 0 0-.66-.38l-1.86 3.22A11.5 11.5 0 0 0 12 8.1c-1.77 0-3.43.37-4.92 1.04L5.22 5.92a.38.38 0 1 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg><h3>Android</h3><span class="tag" hidden>For you</span></div>
@@ -215,21 +222,23 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
   const REPO = 'crowdudess/crowmec2';
   const ua = navigator.userAgent, plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
   const mobile = /Android|iPhone|iPad|iPod/i.test(ua);
-  const os = /Android/i.test(ua) ? 'android' : mobile ? 'web' : /Win/i.test(plat + ua) ? 'win' : /Linux|X11/i.test(plat + ua) ? 'linux' : 'web';
+  const os = /Android/i.test(ua) ? 'android' : mobile ? 'web' : /Mac/i.test(plat + ua) ? 'mac' : /Win/i.test(plat + ua) ? 'win' : /Linux|X11/i.test(plat + ua) ? 'linux' : 'web';
   const ICON_PLAY = '<path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>';
-  const card = { win: 'pcWin', linux: 'pcLinux', android: 'pcAndroid', web: 'pcWeb' }[os];
+  const card = { win: 'pcWin', linux: 'pcLinux', mac: 'pcMac', android: 'pcAndroid', web: 'pcWeb' }[os];
   const c = document.getElementById(card); c.classList.add('rec'); c.querySelector('.tag').hidden = false;
   const big = document.getElementById('bigBtn'), lab = document.getElementById('bigLabel'), sub = document.getElementById('bigSub');
   if (os === 'win') { lab.textContent = 'Download for Windows'; sub.textContent = 'Free · .exe installer'; }
   else if (os === 'linux') { lab.textContent = 'Download for Linux'; sub.textContent = 'Free · .AppImage'; }
+  else if (os === 'mac') { lab.textContent = 'Download for Mac'; sub.textContent = 'Free · .dmg'; }
   else if (os === 'android') { lab.textContent = 'Download for Android'; sub.textContent = 'Free · .apk, plays offline'; }
   else { lab.textContent = 'Play in your browser'; sub.textContent = mobile ? 'Free · works on phones and tablets' : 'Free · no install needed'; big.href = 'play/'; document.getElementById('bigIcon').innerHTML = ICON_PLAY; document.getElementById('altPlay').hidden = true; }
   const mb = n => (n / 1048576).toFixed(0) + ' MB';
   fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then(r => r.ok ? r.json() : Promise.reject()).then(rel => {
-    const win = rel.assets.find(a => /\.exe$/i.test(a.name)), lin = rel.assets.find(a => /\.AppImage$/i.test(a.name)), apk = rel.assets.find(a => /\.apk$/i.test(a.name));
+    const win = rel.assets.find(a => /\.exe$/i.test(a.name)), lin = rel.assets.find(a => /\.AppImage$/i.test(a.name)), apk = rel.assets.find(a => /\.apk$/i.test(a.name)), dmg = rel.assets.find(a => /\.dmg$/i.test(a.name));
     document.getElementById('verLine').textContent = `Version ${rel.tag_name.replace(/^v/, '')} · released ${new Date(rel.published_at).toLocaleDateString()}`;
     if (win) { document.getElementById('getWin').href = win.browser_download_url; document.getElementById('fileWin').textContent = `${win.name} · ${mb(win.size)}`; if (os === 'win') big.href = win.browser_download_url; }
     if (lin) { document.getElementById('getLinux').href = lin.browser_download_url; document.getElementById('fileLinux').textContent = `${lin.name} · ${mb(lin.size)}`; if (os === 'linux') big.href = lin.browser_download_url; }
+    if (dmg) { document.getElementById('getMac').href = dmg.browser_download_url; document.getElementById('fileMac').textContent = `${dmg.name} · ${mb(dmg.size)}`; if (os === 'mac') big.href = dmg.browser_download_url; }
     if (apk) { document.getElementById('getAndroid').href = apk.browser_download_url; document.getElementById('fileAndroid').textContent = `${apk.name} · ${mb(apk.size)}`; if (os === 'android') big.href = apk.browser_download_url; }
   }).catch(() => {});
 })();
