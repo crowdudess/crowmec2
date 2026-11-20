@@ -934,7 +934,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.78.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.78.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4719,8 +4719,8 @@ function showEnding() {
   if (actx && !muted) [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => tone(f, f, .5, 'triangle', .05), i * 220));
 }
 // ---------- boss story: after beating a level's boss for the first time ----------
-// Each boss was holding a shard of the stolen eggs. Plays only on a level's first clear (not sandbox, Chaos Rift or endless bosses).
-const shardBiomes = () => BIOMES.filter(b => b.boss && !b.mode);
+// Each boss was holding a shard of the stolen eggs. Plays only on a level's first clear (not sandbox, Chaos Rift, the Office, or endless bosses).
+const shardBiomes = () => BIOMES.filter(b => b.boss && !b.mode && !b.dlc);
 const shardCount = () => shardBiomes().filter(b => biomeState(b.id).cleared).length;
 function playBossStory(biome, onDone, mode = 'win') {
   const enter = mode === 'enter';
@@ -5069,7 +5069,7 @@ function bossBeaten() {
   run.unlocks = run.unlocks || [];
   grant(B.boss);
   if (!B.mode) { const was = diffWon(bs), now = Math.max(was, (run.diff || 0) + 1); bs.dw = now; if (now > was && now < DIFFS.length) { bs.dwNew = now; run.unlocks.push(T('unl_diff', T('diff_' + DIFFS[now].id), bn(B))); } }
-  const firstClear = !bs.cleared && !run.sandbox && !B.mode && !api.sim;
+  const firstClear = !bs.cleared && !run.sandbox && !B.mode && !B.dlc && !api.sim;
   if (!bs.cleared) {
     bs.cleared = true;
     const bonus = Math.round(40 * B.coin); addCoins(bonus);
@@ -5238,7 +5238,7 @@ $('stayBtn').onclick = () => { run.endless = true; openShop(); };
 function begin() {
   if (introOn) return;
   const lvl = BIOMES[save.biome]; save.entered = save.entered || {};
-  if (lvl && lvl.boss && !lvl.mode && !save.entered[lvl.id] && !biomeState(lvl.id).cleared) { save.entered[lvl.id] = Date.now(); persist(); playBossStory(lvl, () => setTimeout(begin, 80), 'enter'); return; }
+  if (lvl && lvl.boss && !lvl.mode && !lvl.dlc && !save.entered[lvl.id] && !biomeState(lvl.id).cleared) { save.entered[lvl.id] = Date.now(); persist(); playBossStory(lvl, () => setTimeout(begin, 80), 'enter'); return; }
   newRun(save.biome);
   makeDeco();
   ['menu', 'over', 'shop', 'pause', 'choice'].forEach(id => $(id).hidden = true);
