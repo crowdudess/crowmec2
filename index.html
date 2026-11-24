@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -6857,9 +6857,9 @@ function applyContent() {
 let monPopRaf = 0, monPopKey = null;
 function openMonster(k) {
   save.seen = save.seen || {};
-  const d = E[k], known = !!save.seen[k], home = BIOMES.find(b => b.enemies.includes(k) || b.boss === k || b.enemies.some(x => E[x].split === k));
+  const d = E[k], known = !!save.seen[k], home = BIOMES.find(b => b.enemies.includes(k) || b.boss === k || CHAMP_FIRST[b.id] === k || b.enemies.some(x => E[x].split === k));
   monPopKey = k;
-  $('monPopBiome').textContent = (d.boss ? T('boss_tag') + ' · ' : '') + (home ? bn(home) : '');
+  $('monPopBiome').textContent = d.champ ? T('bc_mini', home ? bn(home) : '') : (d.boss ? T('boss_tag') + ' · ' : '') + (home ? bn(home) : '');
   $('monPopName').textContent = known ? d.name : '???';
   $('monPopStats').textContent = known ? T('mon_stats', save.seen[k], d.hp, d.spd, d.dmg) + (d.armor ? T('armour_s', d.armor) : '') : T('not_defeated');
   const tg = $('monPopTags'); tg.innerHTML = '';
@@ -6888,6 +6888,7 @@ function monsterList(includeBosses = true) {
   for (const b of BIOMES) {
     for (const k of b.enemies) { if (!out.includes(k)) out.push(k); const sp = E[k].split; if (sp && !out.includes(sp)) out.push(sp); }
     if (b.boss && E[b.boss].layEggs && !out.includes('spideregg')) out.push('spideregg');
+    if (includeBosses && CHAMP_FIRST[b.id] && !out.includes(CHAMP_FIRST[b.id])) out.push(CHAMP_FIRST[b.id]);
     if (includeBosses && b.boss && !out.includes(b.boss)) out.push(b.boss);
   }
   for (const b of BIOMES) if (b.dlc) for (const k of [...b.enemies, b.boss]) E[k].dlcOnly = true;
@@ -6983,11 +6984,11 @@ function renderMonsters() {
     const g = el('div', 'grid'); for (const k of show) g.append(card(k)); grp.append(g);
     box.append(grp);
   }
-  const bosses = BIOMES.map(b => b.boss).filter(k => visible.includes(k));
+  const bosses = BIOMES.flatMap(b => [CHAMP_FIRST[b.id], b.boss]).filter(k => k && visible.includes(k));
   const bg = el('div', 'mongroup bosses');
   bg.append(el('h3', '', T('bosses')), el('p', 'muted', T('bosses_sub')));
   const g = el('div', 'grid');
-  for (const k of bosses) { const c = card(k); const home = BIOMES.find(b => b.boss === k); c.querySelector('.nm').after(el('span', 'rar', bn(home))); g.append(c); }
+  for (const k of bosses) { const c = card(k); const home = BIOMES.find(b => b.boss === k || CHAMP_FIRST[b.id] === k); c.querySelector('.nm').after(el('span', 'rar', E[k].champ ? T('bc_mini', bn(home)) : bn(home))); g.append(c); }
   bg.append(g); box.append(bg);
 }
 const UP_ICON = { sharp: ['feather', '#f4ecdc'], wings: ['feather', '#a3a3e0'], thorn: ['leaf', '#9eda62'], mud: ['cap', '#b5b534'], eye: ['gem', '#dada62'], caps: ['cobweb', '#e8e0c8'], lungs: ['orb', '#f4ecdc'], iron: ['shard', '#8a92a0'], twin: ['feather', '#6262da'], needle: ['ice', '#f4ecdc'], magpie: ['plane', '#3434b5'], scare: ['leaf', '#34b5b5'], ember: ['flame', '#62da62'], moss: ['leaf', '#3434b5'], golden: ['goldegg', '#f2c84a'], ink: ['orb', '#e0c1a3'], rune: ['gem', '#34b5b5'], murder: ['star', '#62dada'], storm: ['ice', '#75b534'], echo: ['orb', '#da62da'], wind: ['petal', '#34b534'], slay: ['shuriken', '#b57534'], eagle: ['feather', '#da9e62'], blood: ['petal', '#b53434'], shell: ['shard', '#f4ecdc'], mana: ['orb', '#9eda62'], pecker: ['star', '#34b575'], judge: ['shuriken', '#9e62da'], feast: ['cap', '#8a92a0'], quiver: ['feather', '#b53434'], lucky: ['card', '#34b575'], swift: ['feather', '#9eda62'], scav: ['coin', '#dada62'], frostbite: ['snowflake', '#f4ecdc'], barbs: ['shard', '#6262da'], doublecaw: ['orb', '#34b534'], overcharge: ['ice', '#d8b070'], guardian: ['gem', '#da6262'], shrine: ['gem', '#6262da'], pebble: ['orb', '#8a92a0'], whistle: ['star', '#dada62'], twigs: ['leaf', '#b57534'], glint: ['gem', '#e0a3e0'], acorn: ['coin', '#b57534'], shout: ['star', '#f4ecdc'], bark: ['shard', '#b57534'], dew: ['petal', '#a3a3e0'], flint: ['shard', '#d8b070'], hex: ['star', '#a3a3e0'], vamp: ['shard', '#b53475'], coldsnap: ['snowflake', '#a3a3e0'], phoenixf: ['flame', '#b534b5'], tempest: ['petal', '#62da9e'], crownthorn: ['gem', '#8a92a0'], m_parl: ['plane', '#da62da'], m_glass: ['ice', '#da62da'], b_cat: ['star', '#75b534'], b_gator: ['shard', '#34b534'], b_bear: ['snowflake', '#34b5b5'], b_ratking: ['plane', '#f4ecdc'], b_emperor: ['shard', '#62da9e'], b_kong: ['banana', '#dada62'], b_queen: ['web', '#da62da'], b_wyrm: ['flame', '#3475b5'], b_faequeen: ['star', '#7534b5'], b_oni: ['shuriken', '#dada62'], b_maw: ['shuriken', '#62dada'], m_sun: ['flame', '#b53434'], m_storm: ['ice', '#b53434'], m_nova: ['flame', '#e0e0a3'], m_warp: ['card', '#8a92a0'], m_midas: ['coin', '#b534b5'], m_flock: ['feather', '#34b534'], m_doom: ['flame', '#62dada'], u_talon: ['shard', '#9eda62'], u_pine: ['cap', '#34b575'], u_shiny: ['gem', '#a3e0c1'], u_owl: ['feather', '#da629e'], u_throat: ['orb', '#da9e62'], u_sap: ['leaf', '#f4ecdc'], u_hazel: ['petal', '#e0e0a3'], u_perch: ['plane', '#8a92a0'], u_bone: ['shuriken', '#f4ecdc'], u_scraps: ['plane', '#da9e62'], l_hydra: ['feather', '#3434b5'], l_bastion: ['cap', '#b534b5'], l_reaper: ['shuriken', '#34b575'], l_drum: ['star', '#e0a3a3'], l_tome: ['gem', '#75b534'], l_winter: ['snowflake', '#dada62'], l_gilded: ['coin', '#62dada'], l_eagleking: ['star', '#da62da'], m_twin: ['feather', '#c1e0a3'], m_phoenix: ['flame', '#c1a3e0'], m_void: ['shard', '#a3c1e0'], m_bloodmoon: ['orb', '#7534b5'], m_chaos: ['card', '#da62da'], l_storm: ['ice', '#629eda'], l_forge: ['flame', '#8a92a0'], l_aegis: ['cap', '#e0a3e0'], l_quiver: ['plane', '#62da62'], l_moon: ['petal', '#3475b5'], l_rook: ['plane', '#62dada'], l_vampire: ['orb', '#b53475'], l_spellblade: ['gem', '#b534b5'], l_titan: ['cap', '#3434b5'], u_spark: ['star', '#da6262'], u_ember: ['flame', '#da9e62'], u_bramble: ['leaf', '#da629e'], u_plume: ['feather', '#62da9e'], u_echo: ['orb', '#62dada'], u_moth: ['petal', '#b89060'], u_marrow: ['shard', '#c1e0a3'], u_twine: ['leaf', '#a3a3e0'], u_gale: ['petal', '#b534b5'], u_cinder: ['shard', '#e0a3c1'] };
