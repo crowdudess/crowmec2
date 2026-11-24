@@ -114,7 +114,9 @@ jobs:
   release:
     name: Publish release
     needs: [build, android]
-    if: github.event_name == 'push'
+    # Publish whatever was built, even if one desktop build (usually macOS, which can wait a long
+    # time for a runner and then get cancelled) did not finish, so Windows, Linux and Android still ship.
+    if: always() && github.event_name == 'push' && needs.android.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
