@@ -985,7 +985,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.89.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.89.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1890,7 +1890,7 @@ function diffOf(b) { const bs = biomeState(b.id); const L = (save.diffSel && sav
 function newRun(biomeIdx) {
   const u = id => save.up[id] || 0;
   B = BIOMES[biomeIdx];
-  P = { dmg: 10 * roostMul.beak(u('beak')), rate: 2.2 * roostMul.wings(u('wings')), baseDmg: 10, baseRate: 2.2, speed: 560, multi: 1, pierce: 0, crit: .05 + .03 * u('eye'), critMult: 2,
+  P = { dmg: 10 * roostMul.beak(u('beak')), rate: 2.2 * roostMul.wings(u('wings')), baseDmg: 10, baseRate: 2.2, speed: 560, multi: 1, pierce: 0, crit: .03 * u('eye'), critMult: 2,
     range: 470, thorns: 0, goldMult: 1 + .08 * u('luck'), cawR: 170, cawDmg: 20 + 12 * u('voice'), cawCd: 9 * (1 - .07 * u('voice')), stun: .7,
     magpies: 0, slow: 0, burn: 0, regen: 0, interest: false, chain: 0, homing: false, armorPen: 0,
     spellCd: 1 - .06 * Math.min(8, u('focus')), spellPow: 1.25 + .1 * u('focus'), spellR: 1,
@@ -2521,6 +2521,8 @@ function update(dt) {
     if (e.burn > 0) {
       e.burn -= dt; e.hp -= e.burnD * dt; if (e.iceHp > 0) { e.iceHp -= e.burnD * dt * 3; if (e.iceHp <= 0) shatterIce(e); }
       if (!api.sim && Math.random() < dt * 8) parts.push({ x: e.x + rnd(-e.r, e.r), y: e.y, vx: 0, vy: -40, t: .4, c: '#f08a3a', r: 2 });
+      // fire damage shows as small orange numbers, added up every half second
+      if (!api.sim) { e.burnAcc = (e.burnAcc || 0) + e.burnD * dt; e.burnTk = (e.burnTk ?? .5) - dt; if (e.burnTk <= 0) { e.burnTk = .5; if (e.burnAcc >= 1 && texts.length < 90) { texts.push({ x: e.x + rnd(-8, 8), y: e.y - e.r - 2, v: Math.round(e.burnAcc), t: .6, fire: true }); e.burnAcc = 0; } } }
       if (e.hp <= 0) { kill(e); continue; }
     }
     e.x += e.kx * dt; e.y += e.ky * dt; const damp = Math.pow(.02, dt); e.kx *= damp; e.ky *= damp;
@@ -3479,9 +3481,11 @@ function draw(time) {
   ctx.textAlign = 'center';
   for (const t of texts) {
     ctx.globalAlpha = Math.min(1, t.t * 2);
-    ctx.fillStyle = t.bad ? C.blood : t.crit ? C.shine : C.bone;
-    ctx.font = t.crit ? '800 20px Chivo, sans-serif' : '700 14px Chivo, sans-serif';
+    ctx.fillStyle = t.bad ? C.blood : t.fire ? '#ff9a40' : t.crit ? C.shine : C.bone;
+    ctx.font = t.crit ? '800 20px Chivo, sans-serif' : t.fire ? '800 16px Chivo, sans-serif' : '700 14px Chivo, sans-serif';
+    if (t.fire) { ctx.strokeStyle = 'rgba(40,10,0,.85)'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeText(t.v, t.x, t.y); }
     ctx.fillText(t.v, t.x, t.y);
+    if (t.fire) { const w = ctx.measureText(String(t.v)).width, fx = t.x - w / 2 - 7, fy = t.y - 6; ctx.fillStyle = '#ff6a20'; ctx.beginPath(); ctx.moveTo(fx, fy - 7); ctx.quadraticCurveTo(fx + 5, fy - 1, fx + 3.5, fy + 3); ctx.quadraticCurveTo(fx, fy + 5.5, fx - 3.5, fy + 3); ctx.quadraticCurveTo(fx - 5, fy - 1, fx, fy - 7); ctx.fill(); ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(fx, fy + 1.5, 1.8, 0, TAU); ctx.fill(); }
   }
   ctx.globalAlpha = 1;
   // spell aim preview
@@ -6375,7 +6379,7 @@ const ROOST_ICON = { rhythm: ['star', '#d2543f'], charm: ['star', '#9ae05a'], be
 const roostFx = (id, l) => { const v = { rhythm: (.4 * l).toFixed(1), egg: 4 + 4 * l, beak: Math.round((roostMul.beak(l) - 1) * 100), wings: Math.round((roostMul.wings(l) - 1) * 100), nest: roostMul.nest(l) - 100, voice: [7 * l, 12 * l], eye: 3 * l, luck: 8 * l, focus: [10 * l, 6 * Math.min(l, 8)], pen: l, slayer: 10 * l, thorns: 9 * l, regen: (.6 * l).toFixed(1), haggle: 10 * l, pierce: l, twin: l, magpie: l, favour: T('rar' + GIFT_MAX[Math.max(0, Math.min(4, l - 1))]), charm: 12 * l }[id]; return Array.isArray(v) ? T('rfx_' + id, ...v) : T('rfx_' + id, v); };
 function roostStats() {
   const u = id => save.up[id] || 0;
-  return [['st_dmg', (10 * roostMul.beak(u('beak'))).toFixed(1)], ['st_rate', (2.2 * roostMul.wings(u('wings'))).toFixed(2) + '/s'], ['st_hp', roostMul.nest(u('nest'))], ['st_crit', (5 + 3 * u('eye')) + '%'], ['st_caw', 20 + 12 * u('voice')], ['st_cawcd', (9 * (1 - .07 * u('voice'))).toFixed(1) + 's'], ['st_feathers', 1 + u('twin')], ['st_start', (4 + 4 * u('egg')) + '%']];
+  return [['st_dmg', (10 * roostMul.beak(u('beak'))).toFixed(1)], ['st_rate', (2.2 * roostMul.wings(u('wings'))).toFixed(2) + '/s'], ['st_hp', roostMul.nest(u('nest'))], ['st_crit', (0 + 3 * u('eye')) + '%'], ['st_caw', 20 + 12 * u('voice')], ['st_cawcd', (9 * (1 - .07 * u('voice'))).toFixed(1) + 's'], ['st_feathers', 1 + u('twin')], ['st_start', (4 + 4 * u('egg')) + '%']];
 }
 function paintRoostIcon(cv2, id) {
   const [kind, col] = ROOST_ICON[id] || ['orb', '#ece6d6'], pc = cv2.getContext('2d'), keep = ctx, S = cv2.width;
