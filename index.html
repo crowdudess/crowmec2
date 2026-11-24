@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.95.0</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1427,7 +1427,7 @@ const BIOMES = [
     enemies: ['beetle', 'squirrel', 'snake', 'hawk', 'raccoon'], ground: ['#2b3824', '#1b2318', '#121611'], blade: ['#2c3a26', '#25311f'], stone: '#262c22',
     blurb: 'Beetles, squirrels, snakes, hawks and raccoons. The Alley Cat waits on wave 30.' },
   { id: 'marsh', name: 'Murkwater Marsh', hp: 1.65, dmg: 1.25, coin: 1.6, boss: 'gator', elite: 'turtle',
-    enemies: ['frog', 'mosquito', 'leech', 'turtle', 'heron'], ground: ['#21362f', '#15231e', '#0d1613'], blade: ['#2a4038', '#1f3029'], stone: '#1c2b26',
+    enemies: ['frog', 'mosquito', 'leech', 'turtle', 'heron'], ground: ['#2a3a26', '#1b2819', '#0f170e'], blade: ['#3a4a2a', '#2a3a22'], stone: '#1c2b26',
     blurb: 'Hopping frogs, mosquito swarms, leeches that heal when they bite, armoured turtles and herons. Old Gator rules the water.' },
   { id: 'snow', name: 'Frostfang Pass', hp: 2.5, dmg: 1.5, coin: 2.3, boss: 'bear', elite: 'elk',
     enemies: ['hare', 'fox', 'wolf', 'owl', 'elk'], ground: ['#3c4a5e', '#283244', '#141a26'], blade: ['#4a5664', '#3a4450'], stone: '#2e3640',
@@ -3117,7 +3117,7 @@ function ambBack(id, t) {
       for (let i = 0; i < 7; i++) { const r0 = 120 + i * 95, a0 = t / (2200 + i * 300) * (i % 2 ? -1 : 1); ctx.strokeStyle = `rgba(${cols[i]},.14)`; ctx.lineWidth = 14; ctx.beginPath(); ctx.arc(0, 0, r0, a0, a0 + 2.4); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, r0, a0 + Math.PI, a0 + Math.PI + 1.2); ctx.stroke(); }
       glow(0, 0, 420, '184,138,224', .1 + .05 * Math.sin(t / 700)); break; }
     case 'marsh':
-      for (let i = 0; i < 10; i++) { const st = deco.stones[i]; if (!st) break; const ph = ((t / 1000 + AMB[i].p) % 3) / 3; ctx.strokeStyle = `rgba(180,230,220,${.35 * (1 - ph)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(st.x, st.y, 6 + ph * 40, (6 + ph * 40) * .6, 0, 0, TAU); ctx.stroke(); }
+      for (let i = 0; i < (deco.bogs || []).length; i++) { const pl = deco.bogs[i], ph = ((t / 1400 + AMB[i].p) % 3) / 3; ctx.strokeStyle = `rgba(180,230,210,${.3 * (1 - ph)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(pl.x + pl.lobes[0][0] * .5, pl.y + pl.lobes[0][1] * .5, 6 + ph * 45, (6 + ph * 45) * .6, 0, 0, TAU); ctx.stroke(); }
       break;
     case 'city':
       for (let i = 0; i < 6; i++) { const a = AMB[60 + i], x = a.x * .7, y = a.y * .7, fl = i === 2 ? (Math.sin(t / 60) > .2 ? 1 : .2) : 1; glow(x, y, 170, '255,190,110', .16 * fl); ctx.fillStyle = `rgba(255,220,160,${.8 * fl})`; ctx.beginPath(); ctx.arc(x, y, 4, 0, TAU); ctx.fill(); }
@@ -3161,7 +3161,14 @@ function ambFront(id, t) {
       for (let i = 0; i < 12; i++) { const a = AMB[30 + i], y = wrap(a.y + t / 30 * (.4 + a.s), -900, 900), x = a.x + Math.sin(t / 700 + a.p) * 30;
         ctx.save(); ctx.translate(x, y); ctx.rotate(t / 600 + a.p); ctx.fillStyle = i % 3 ? 'rgba(180,120,50,.7)' : 'rgba(200,170,60,.7)'; ctx.beginPath(); ctx.ellipse(0, 0, 6, 3, 0, 0, TAU); ctx.fill(); ctx.restore(); }
       break; }
-    case 'marsh': fog(t, '170,210,200', .07); fireflies(t, 18, '150,240,120'); break;
+    case 'marsh': {
+      if (deco.swampTrees) drawMarshCanopy(t);
+      fog(t, '170,200,170', .07); fog(t, '150,180,150', .04, 5); fireflies(t, 24, '170,250,120');
+      // a dragonfly darting across now and then
+      const cyc = (t / 11000) % 1; if (cyc < .45) { const u = cyc / .45, k = Math.floor(t / 11000), x = (k % 2 ? 1 : -1) * (-1000 + u * 2000), y = -250 + (k % 3) * 220 + Math.sin(u * 14) * 40 + (Math.sin(u * 37) > .9 ? 25 : 0), fl = Math.sin(t / 25);
+        ctx.save(); ctx.translate(x, y); ctx.rotate(k % 2 ? Math.PI : 0); ctx.fillStyle = 'rgba(200,240,255,.35)'; for (const [ox, sd] of [[2, -1], [2, 1], [-3, -1], [-3, 1]]) { ctx.beginPath(); ctx.ellipse(ox, sd * (6 + fl), 3, 8, sd * .25, 0, TAU); ctx.fill(); }
+        ctx.fillStyle = '#2ab0c8'; ctx.fillRect(-14, -1.2, 18, 2.4); ctx.beginPath(); ctx.arc(6, 0, 3, 0, TAU); ctx.fill(); ctx.restore(); }
+      break; }
     case 'snow': {
       if (deco.pines) drawSnowPines(t);
       for (let k = 0; k < 3; k++) { ctx.strokeStyle = k === 1 ? 'rgba(170,110,230,.13)' : 'rgba(110,240,170,.14)'; ctx.lineWidth = 40 - k * 10; ctx.beginPath();
@@ -3242,6 +3249,10 @@ function makeDeco() {
   deco.toro = ring(5, 250, 420, () => ({ rot: rnd(-.3, .3), ph: rnd(0, 7) }));
   deco.bamboo = ring(6, 300, 520, () => ({ n: 4 + Math.floor(rnd(0, 4)), seed: rnd(0, 99) }));
   deco.petals = Array.from({ length: 140 }, () => { const a = rnd(0, 7), d = rnd(60, 860); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, a: rnd(0, 7), s: rnd(2.5, 4.5), c: Math.random() < .7 }; });
+  deco.bogs = ring(7, 300, 640, () => ({ lobes: Array.from({ length: 5 }, () => [rnd(-70, 70), rnd(-40, 40), rnd(55, 95), rnd(35, 60)]), pads: Array.from({ length: 5 }, () => [rnd(-70, 70), rnd(-35, 35), rnd(7, 12), rnd(0, 7), Math.random() < .35]), ph: rnd(0, 7) }));
+  deco.reeds = ring(16, 230, 680, () => ({ n: 7 + Math.floor(rnd(0, 6)), seed: rnd(0, 99) }));
+  deco.knees = ring(9, 260, 620, () => ({ n: 2 + Math.floor(rnd(0, 3)), seed: rnd(0, 99) }));
+  deco.swampTrees = ring(18, 450, 660, () => ({ r: rnd(80, 125), lobes: Array.from({ length: 7 }, (_, j) => ({ a: j / 7 * TAU + rnd(-.3, .3), d: rnd(.35, .6), r: rnd(.42, .62) })), sh: rnd(0, 7), tone: Math.floor(rnd(0, 3)), moss: Array.from({ length: 7 }, () => [rnd(0, 7), rnd(.4, .95), rnd(14, 30)]) }));
   deco.palms = ring(20, 440, 650, () => ({ r: rnd(95, 140), n: 8 + Math.floor(rnd(0, 3)), rot: rnd(0, 7), sh: rnd(0, 7), tone: Math.floor(rnd(0, 3)), banana: Math.random() < .45 }));
   { const ph = rnd(0, 7), a0 = rnd(2.2, 2.9); deco.jriver = Array.from({ length: 26 }, (_, i) => { const u = i / 25, a = a0 + u * 2.4, d = (u < .12 ? 900 - u / .12 * 520 : u > .88 ? 380 + (u - .88) / .12 * 520 : 380) + Math.sin(u * 9 + ph) * 22; return { x: Math.cos(a) * d * 1.35, y: Math.sin(a) * d }; }); }
   deco.bananas = ring(9, 190, 560, () => ({ a: rnd(0, 7), peel: Math.random() < .5 }));
@@ -3273,6 +3284,47 @@ makeDeco();
 const twigs = Array.from({ length: 34 }, (_, i) => ({ a: i / 34 * TAU + rnd(-.1, .1), l: rnd(18, 30), o: rnd(-.6, .6) }));
 const snowflakes = Array.from({ length: 70 }, () => ({ x: rnd(-900, 900), y: rnd(-900, 900), s: rnd(20, 50), r: rnd(1, 2.5) }));
 
+// ---------- Murkwater Marsh: murky ponds, reeds, cypress knees, lily pads ----------
+function drawMarshFloor(time) {
+  for (const m of deco.moss) { ctx.fillStyle = 'rgba(70,58,34,.35)'; ctx.beginPath(); ctx.ellipse(m.x, m.y, m.rx * 1.3, m.ry * 1.3, m.a, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(90,110,50,.18)'; ctx.beginPath(); ctx.ellipse(m.x + 8, m.y - 5, m.rx * .7, m.ry * .6, m.a, 0, TAU); ctx.fill(); }
+  for (const pl of deco.bogs) { const lobe = (grow, f) => { ctx.beginPath(); for (const [dx, dy, rx, ry] of pl.lobes) { ctx.moveTo(pl.x + dx + rx + grow, pl.y + dy); ctx.ellipse(pl.x + dx, pl.y + dy, rx + grow, ry + grow * .7, 0, 0, TAU); } f(); };
+    lobe(16, () => { ctx.fillStyle = '#2e2616'; ctx.fill(); });
+    lobe(6, () => { ctx.fillStyle = '#25301c'; ctx.fill(); });
+    lobe(0, () => { const g = ctx.createRadialGradient(pl.x - 20, pl.y - 15, 5, pl.x, pl.y, 130); g.addColorStop(0, '#2a4a3a'); g.addColorStop(1, '#152a22'); ctx.fillStyle = g; ctx.fill(); });
+    ctx.save(); lobe(0, () => ctx.clip());
+    ctx.fillStyle = 'rgba(110,140,50,.28)'; for (let i = 0; i < 26; i++) { const k = pl.ph * 50 + i * 17.3, x = pl.x + Math.sin(k) * 95, y = pl.y + Math.cos(k * 1.3) * 50; ctx.beginPath(); ctx.ellipse(x, y, 7 + (i % 4) * 3, 4 + (i % 3) * 2, k, 0, TAU); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(200,230,210,.08)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(pl.x - 70, pl.y - 25); ctx.quadraticCurveTo(pl.x, pl.y - 40, pl.x + 60, pl.y - 20); ctx.stroke();
+    for (let i = 0; i < 4; i++) { const ph = ((time / 1700 + pl.ph + i * .27) % 1), x = pl.x + Math.sin(pl.ph * 9 + i * 2.1) * 60, y = pl.y + Math.cos(pl.ph * 7 + i * 1.7) * 28; if (ph < .75) { ctx.strokeStyle = `rgba(190,230,200,${.45 * (1 - ph)})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, 2 + ph * 4, 0, TAU); ctx.stroke(); } else { ctx.strokeStyle = `rgba(190,230,200,${(1 - ph) * 1.2})`; ctx.beginPath(); ctx.arc(x, y, 6 + (ph - .75) * 40, 0, TAU); ctx.stroke(); } }
+    ctx.restore();
+    for (const [dx, dy, r, a, fl] of pl.pads) { const x = pl.x + dx, y = pl.y + dy + Math.sin(time / 1600 + a) * 1.5; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(x + 2, y + 2, r, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#4a7a34'; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, r, a + .35, a + TAU - .35); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(160,200,110,.45)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a + Math.PI) * r * .9, y + Math.sin(a + Math.PI) * r * .9); ctx.stroke();
+      if (fl) { ctx.fillStyle = '#f0a8c8'; for (let k = 0; k < 6; k++) { const q = k / 6 * TAU; ctx.beginPath(); ctx.ellipse(x + Math.cos(q) * 3.5, y + Math.sin(q) * 3.5, 3.6, 1.8, q, 0, TAU); ctx.fill(); } ctx.fillStyle = '#f8e070'; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, TAU); ctx.fill(); } } }
+  // floating and fallen logs
+  for (const g of deco.logs || []) { ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(g.a); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(5, 7, g.l * .55, g.w * .7, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#3e3220'; ctx.beginPath(); ctx.roundRect(-g.l / 2, -g.w / 2, g.l, g.w, g.w / 2); ctx.fill(); ctx.fillStyle = 'rgba(100,130,60,.6)'; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.ellipse(-g.l * .35 + i * g.l * .13, -g.w * .2 + (i % 2) * g.w * .3, g.w * .28, g.w * .16, 0, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = '#6a5436'; ctx.beginPath(); ctx.ellipse(g.l / 2, 0, g.w * .2, g.w * .48, 0, 0, TAU); ctx.fill(); ctx.restore(); }
+  // cypress knees poking out of the mud
+  for (const k of deco.knees) for (let i = 0; i < k.n; i++) { const a = k.seed + i * 2.3, d = 6 + i * 11, x = k.x + Math.cos(a) * d, y = k.y + Math.sin(a) * d, r = 7 + (i % 3) * 3;
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(x + 3, y + 4, r, 0, TAU); ctx.fill(); ctx.fillStyle = '#4a3a26'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.fillStyle = '#6a5438'; ctx.beginPath(); ctx.arc(x - r * .25, y - r * .25, r * .45, 0, TAU); ctx.fill(); }
+  // reeds and cattails
+  for (const rd of deco.reeds) { if (Math.hypot(rd.x, rd.y) < 230) continue;
+    for (let i = 0; i < rd.n; i++) { const a = rd.seed + i * 2.4, L = 20 + ((i * 7) % 5) * 5, sw = Math.sin(time / 900 + rd.seed + i) * .08, x2 = rd.x + Math.cos(a + sw) * L, y2 = rd.y + Math.sin(a + sw) * L;
+      ctx.strokeStyle = i % 2 ? '#5a7a34' : '#6e8a3a'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(rd.x, rd.y); ctx.lineTo(x2, y2); ctx.stroke();
+      if (i % 3 === 0) { ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.ellipse(x2, y2, 6, 2.8, a + sw, 0, TAU); ctx.fill(); } } }
+  for (const sw of deco.swampTrees) { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(sw.x + 30, sw.y + 34, sw.r * 1.05, sw.r * .9, 0, 0, TAU); ctx.fill(); }
+}
+// the swamp trees: dark olive crowns with grey moss hanging down
+function drawMarshCanopy(t) {
+  const TONES = [['#1a2416', '#26341e', '#36462a'], ['#1c2214', '#2a321c', '#3c4628'], ['#162018', '#222e22', '#32402c']];
+  for (const tr of deco.swampTrees) { const sw = Math.sin(t / 2800 + tr.sh) * .02, [d, m, hi] = TONES[tr.tone];
+    ctx.save(); ctx.translate(tr.x, tr.y); ctx.rotate(sw);
+    ctx.fillStyle = d; ctx.beginPath(); ctx.arc(0, 0, tr.r * .8, 0, TAU); ctx.fill(); for (const l of tr.lobes) { ctx.beginPath(); ctx.arc(Math.cos(l.a) * tr.r * l.d, Math.sin(l.a) * tr.r * l.d, tr.r * l.r, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = m; for (const l of tr.lobes) { ctx.beginPath(); ctx.arc(Math.cos(l.a) * tr.r * l.d * .9 - tr.r * .06, Math.sin(l.a) * tr.r * l.d * .9 - tr.r * .06, tr.r * l.r * .74, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = hi; for (const l of tr.lobes) { ctx.beginPath(); ctx.arc(Math.cos(l.a) * tr.r * l.d * .8 - tr.r * .12, Math.sin(l.a) * tr.r * l.d * .8 - tr.r * .12, tr.r * l.r * .36, 0, TAU); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(160,170,140,.55)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    for (const [a, d0, len] of tr.moss) { const x = Math.cos(a) * tr.r * d0, y = Math.sin(a) * tr.r * d0, wv = Math.sin(t / 1100 + a * 3) * 3; for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(x + k * 4, y); ctx.quadraticCurveTo(x + k * 4 + wv, y + len * .5, x + k * 5 - wv, y + len * (1 - Math.abs(k) * .3)); ctx.stroke(); } }
+    ctx.restore(); }
+}
 // ---------- Banana Jungle: river, mud trails, fallen leaves, flowers and bananas ----------
 function drawJungleFloor(time) {
   for (const m of deco.moss) { ctx.fillStyle = 'rgba(70,130,50,.2)'; ctx.beginPath(); ctx.ellipse(m.x, m.y, m.rx * 1.2, m.ry * 1.2, m.a, 0, TAU); ctx.fill(); }
@@ -3484,7 +3536,7 @@ function drawGround(biome, time) {
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1200, 0, TAU); ctx.fill();
   if (biome.id === 'forest' && deco.trees) drawForestFloor(time);
   if (biome.id === 'jungle' && deco.palms) drawJungleFloor(time);
-  if (biome.id === 'marsh') { ctx.fillStyle = 'rgba(40,80,90,.25)'; for (const s of deco.stones) { ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r * 4, s.r * 2.4, 0, 0, TAU); ctx.fill(); } }
+  if (biome.id === 'marsh' && deco.bogs) drawMarshFloor(time);
   if (biome.id === 'dunes') { ctx.strokeStyle = 'rgba(255,230,170,.08)'; ctx.lineWidth = 3; for (let i = -900; i < 900; i += 46) { ctx.beginPath(); for (let x = -900; x <= 900; x += 30) { const y = i + Math.sin(x / 90 + i) * 14; x === -900 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); } }
   if (biome.id === 'volcano' && deco.rivers) drawVolcanoFloor(time);
   if (biome.id === 'snow' && deco.pines) drawSnowFloor(time);
