@@ -1,0 +1,45 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@800&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:transparent}
+#c{position:relative;width:1024px;height:1024px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#c.bg{background:radial-gradient(circle at 50% 42%,#33492b 0%,#22311d 45%,#141d12 100%)}
+#c.round{border-radius:180px}
+#c.bg::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 10px rgba(232,184,74,.18),inset 0 0 120px rgba(0,0,0,.45);pointer-events:none}
+.t{font-family:"Grenze Gotisch";font-weight:800;line-height:.9;letter-spacing:-.01em;
+ background:linear-gradient(180deg,#ffe7a0 0%,#f4cc5a 40%,#e0a832 70%,#b8801e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 6px 0 #4a3410) drop-shadow(0 14px 18px rgba(0,0,0,.55));position:relative;z-index:1}
+svg{display:block;position:relative;z-index:1;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
+#c.nob::after{display:none}</style></head><body>
+<div id="c"><div class="t" id="t">Nestguard</div>
+<svg id="f" viewBox="0 0 600 150">
+ <defs>
+  <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".45" stop-color="#f2c650"/><stop offset="1" stop-color="#b47a1c"/></linearGradient>
+  <linearGradient id="q" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a5a14"/><stop offset="1" stop-color="#fff2c4"/></linearGradient>
+ </defs>
+ <g transform="rotate(-6 300 75)">
+  <!-- vane -->
+  <path d="M70 78 C150 20, 330 8, 560 60 C470 70, 520 78, 560 80 C420 140, 200 132, 70 84 Z" fill="url(#g)" stroke="#7a5010" stroke-width="4" stroke-linejoin="round"/>
+  <!-- notches -->
+  <path d="M250 34 L232 52 M370 34 L352 52 M300 124 L285 104 M430 116 L414 98" stroke="#7a5010" stroke-width="5" stroke-linecap="round"/>
+  <!-- barbs -->
+  <g stroke="#a06a18" stroke-width="2.5" opacity=".75" fill="none">
+   <path d="M120 74 L150 46"/><path d="M160 72 L195 36"/><path d="M200 71 L240 30"/><path d="M290 70 L330 26"/><path d="M330 70 L372 28"/><path d="M410 70 L452 36"/><path d="M450 70 L492 44"/><path d="M490 71 L525 54"/>
+   <path d="M120 86 L152 106"/><path d="M160 88 L196 114"/><path d="M200 89 L242 120"/><path d="M240 90 L280 122"/><path d="M330 90 L372 122"/><path d="M370 89 L410 116"/><path d="M450 86 L488 104"/><path d="M490 84 L522 94"/>
+  </g>
+  <!-- quill -->
+  <path d="M20 84 C140 78, 380 74, 552 72" stroke="url(#q)" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M20 84 L70 82" stroke="#6a4410" stroke-width="9" stroke-linecap="round"/>
+  <!-- sparkles -->
+  <g fill="#fff6d0"><path d="M520 30 l6 14 l14 6 l-14 6 l-6 14 l-6 -14 l-14 -6 l14 -6z"/><path d="M110 40 l4 9 l9 4 l-9 4 l-4 9 l-4 -9 l-9 -4 l9 -4z" opacity=".8"/></g>
+ </g>
+</svg></div>
+<script>
+const P = new URLSearchParams(location.search), mode = P.get('m') || 'icon', c = document.getElementById('c'), t = document.getElementById('t'), f = document.getElementById('f');
+const S = { icon: [210, 640, true, true, 1024], round: [210, 640, true, true, 1024], fg: [150, 450, false, false, 1024], bgonly: [0, 0, true, false, 1024], splash: [300, 900, true, false, 2732] }[mode];
+if (mode === 'round') c.classList.add('round');
+c.style.width = c.style.height = S[4] + 'px'; if (S[2]) c.classList.add('bg');
+t.style.fontSize = S[0] + 'px'; f.style.width = S[1] + 'px'; f.style.marginTop = (S[0] * .02) + 'px';
+if (mode === 'bgonly') { t.remove(); f.remove(); }
+if (mode === 'splash') c.classList.add('nob'); if (mode === 'splash') c.style.background = 'radial-gradient(circle at 50% 45%,#2a3c24 0%,#1d261b 40%,#0b0a08 100%)';
+</script></body></html>
