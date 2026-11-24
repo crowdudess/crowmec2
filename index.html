@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -5543,7 +5543,7 @@ function runReel(win, lab, it, left) {
 }
 function playEggStage(it, others = [], fromShop = false) {
   let st = $('eggStage');
-  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-desc"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (st.classList.contains('open') && !st.dataset.next) closeEggStage(); }; st.querySelector('.es-next').onclick = () => stageNext(); }
+  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-desc"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (performance.now() - (st._revealedAt || 0) < 600) return; if (st.classList.contains('open') && !st.dataset.next) closeEggStage(); }; st.querySelector('.es-next').onclick = () => stageNext(); }
   if (!st._skipHook) { st._skipHook = true; st.addEventListener('pointerdown', ev => { if (ev.target.closest('.es-next')) return; if (!st._revealed && st._skip && performance.now() - (st._shownAt || 0) > 250) { ev.preventDefault(); st._skip(); } }); }
   st._shownAt = performance.now();
   const egg = st.querySelector('.es-egg'), aura = st.querySelector('.es-aura'), glow = st.querySelector('.es-glow'), item = st.querySelector('.es-item'), reel = st.querySelector('.es-reel'), strip = st.querySelector('.es-strip');
@@ -5575,7 +5575,7 @@ function playEggStage(it, others = [], fromShop = false) {
     setTimeout(() => { if (!alive()) return; setR(it.rar); strip.children[WIN].classList.add('win'); if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); } }, EGG_SPIN);
   }, EGG_SHAKE);
   const reveal = () => {
-    if (!aliveR() || st._revealed) return; st._revealed = true;
+    if (!aliveR() || st._revealed) return; st._revealed = true; st._revealedAt = performance.now();   // the tap that skipped the roll must not also close the reveal
     setR(it.rar); st.className = 'eggstage open' + (fromShop ? ' full' : '');
     item.innerHTML = ''; item.append(upIcon(it.id, 160));
     st.querySelector('.es-rar').textContent = T('rar' + it.rar); st.querySelector('.es-rar').style.color = `rgb(${RAR_RGB[it.rar]})`;
@@ -5587,7 +5587,7 @@ function playEggStage(it, others = [], fromShop = false) {
       const nb = st.querySelector('.es-next'); nb.hidden = false; const end = performance.now() + 8000 + (others.length ? 900 : 0);
       const upd = () => { if (!aliveR()) { clearInterval(st._cd); return; } const left = Math.max(0, Math.ceil((end - performance.now()) / 1000)); nb.innerHTML = ''; nb.append(el('span', '', T('next_in', left)), el('span', 'kbd', T('space'))); if (performance.now() >= end) { clearInterval(st._cd); stageNext(); } };
       upd(); st._cd = setInterval(upd, 200);
-    } else setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, STAGE_HOLD + (others.length ? 900 : 0));
+    } else setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, (st._skipped ? 2600 : STAGE_HOLD) + (others.length ? 900 : 0));   // after a skip, leave time to read what you got
   };
   setTimeout(reveal, CRACK_MS);
   // skip the roll: tap, click or Space jumps straight to the item you got
