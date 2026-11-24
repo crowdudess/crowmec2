@@ -18,7 +18,7 @@ A roguelike nest defence game by crowdude. You are a crow, and everything in the
 
 - Hold the nest against waves of monsters. Your crow shoots by itself; press **Space** (or tap the field) to caw.
 - Shop between waves for random upgrades: common, rare, epic and wild **mythic** ones like the Thunder Crown and Raven Legion.
-- 13 biomes, from Whispering Wood to The Void, plus a secret DLC office. Each has its own monsters, weather and a boss on wave 10, with 3 challenge runs per biome.
+- 13 worlds, from Whispering Wood to The Void, plus a secret DLC office. Each has its own monsters, scenery, weather and a boss on wave 30, with mini bosses on waves 10 and 20 and 3 challenge runs per world.
 - The **Chaos Rift**: an endless mode with monsters and bosses from every biome, and 10 chaos levels you buy with coins.
 - Pick up to 5 spells to take into each run. Every crow skin has its own passive, projectile, nest and caw.
 - Spend coins on permanent upgrades in the Upgrades tab. Fill the monster and item index, and unlock skins and achievements.
@@ -28,10 +28,11 @@ A roguelike nest defence game by crowdude. You are a crow, and everything in the
 
 | | |
 |---|---|
-| ![The Frost Bear freezing the crow](media/screenshots/03-boss-bear.png) | ![The Maw splitting in two](media/screenshots/03-boss-maw.png) |
-| ![The Oni's shockwave](media/screenshots/03-boss-oni.png) | ![The Emperor Scorpion's sandstorm](media/screenshots/03-boss-emperor.png) |
-| ![The shop with locked items in chains](media/screenshots/04-shop.png) | ![A mythic build](media/screenshots/05-mythic-build.png) |
-| ![Three bosses in the Chaos Rift](media/screenshots/06-chaos-rift.png) | ![Choosing a biome](media/screenshots/01-menu.png) |
+| ![Silkshade Hollow](media/screenshots/world-spider.jpg) | ![Glimmer Glade](media/screenshots/world-fairy.jpg) |
+| ![Sunscorch Dunes](media/screenshots/world-dunes.jpg) | ![The Void](media/screenshots/world-void.jpg) |
+| ![Banana Jungle](media/screenshots/world-jungle.jpg) | ![Murkwater Marsh](media/screenshots/world-marsh.jpg) |
+| ![The Frost Bear](media/screenshots/boss-snow.jpg) | ![The Magma Dragon](media/screenshots/boss-volcano.jpg) |
+| ![The Chaos Rift](media/screenshots/chaos-rift.jpg) | ![Choosing a biome](media/screenshots/01-menu.png) |
 
 ## Play
 
