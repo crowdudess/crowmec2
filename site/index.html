@@ -1,11 +1,11 @@
 <title>Nestguard</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Nestguard: a roguelike nest defence game by crowdude. Free on Windows and Linux, or play in your browser.">
+<meta name="description" content="Nestguard: a roguelike nest defence game by crowdude. Free on Windows, Linux and Android, or play in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@600;800&family=Chivo:wght@400;600;800&family=Chivo+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: one dark forest page. Hero with trailer, a download panel, then features, bosses and screenshots. */
+/* Layout: one dark forest page. Hero with trailer, a download panel, then features, worlds, bosses and screenshots. */
 :root {
   --night: #0d110c;   /* page ground */
   --moss: #172015;    /* panels */
@@ -102,7 +102,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
       <div class="eyebrow">A roguelike nest defence</div>
       <h1>Nestguard</h1>
       <div class="by">A game by crowdude</div>
-      <p class="pitch">You are a crow, and everything in the forest wants your eggs. Hold the nest for 30 waves, crack the magpie's eggs for wild items, and take on 12 bosses with their own tricks.</p>
+      <p class="pitch">You are a crow, and everything wants your eggs. Hold the nest for 30 waves across 11 hand-drawn worlds, crack the magpie's eggs for wild items, and take on 12 bosses and 13 mini bosses, each with their own tricks.</p>
       <div class="dl">
         <a class="big" id="bigBtn" href="https://github.com/crowdudess/crowmec2/releases/latest">
           <svg id="bigIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/></svg>
@@ -169,12 +169,33 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
     <h2>What's inside</h2>
     <p class="lead">Every run is different: random waves, a gamble on every egg, and bosses that fight back. Plays in English, French, Spanish and German, with keyboard, mouse, touch or a controller.</p>
     <div class="feat">
-      <div class="ft"><b>13</b><span>Biomes</span><p>From Whispering Wood to The Void, each with its own monsters, weather and music.</p></div>
+      <div class="ft"><b>13</b><span>Worlds</span><p>From Whispering Wood to The Void, plus the Chaos Rift and a secret office. Each has its own monsters, scenery, weather and music.</p></div>
       <div class="ft"><b>12</b><span>Bosses</span><p>A freezing Frost Bear, a splitting Maw, an Oni that smashes the ground, and more.</p></div>
+      <div class="ft"><b>13</b><span>Mini bosses</span><p>On waves 10 and 20, from the Raccoon Warlord to the Mudcrab of Murkwater Marsh. Some drop a Golden Egg.</p></div>
       <div class="ft"><b>116</b><span>Items</span><p>Common to Mythic, hatched from the magpie's eggs. Legendary and Mythic ones are earned with challenges.</p></div>
       <div class="ft"><b>30</b><span>Crow skins</span><p>Each with its own passive, projectile, nest and caw.</p></div>
       <div class="ft"><b>∞</b><span>Chaos Rift</span><p>Endless waves with mini bosses and 10 chaos levels. How far can you go?</p></div>
-      <div class="ft"><b>26</b><span>Spells</span><p>Meteors, chain lightning, a crow flock and more. Pick five, and unlock new slots as the run goes on.</p></div>
+      <div class="ft"><b>27</b><span>Spells</span><p>Meteors, chain lightning, a crow flock and more. Pick five, and unlock new slots as the run goes on.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Explore the worlds</h2>
+    <p class="lead">Eleven worlds to defend the nest in, each with its own monsters, scenery and weather.</p>
+    <div class="bosses">
+      <div class="boss"><img src="media/screenshots/world-forest.jpg" alt="Whispering Wood" loading="lazy"><div><h3>Whispering Wood</h3><p>Beetles, squirrels, snakes and hawks under a sunlit forest canopy.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-marsh.jpg" alt="Murkwater Marsh" loading="lazy"><div><h3>Murkwater Marsh</h3><p>Frogs, leeches and snapping turtles among murky ponds and swamp trees.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-snow.jpg" alt="Frostfang Pass" loading="lazy"><div><h3>Frostfang Pass</h3><p>Wolf packs and armoured elk in a snowy pine pass under the northern lights.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-city.jpg" alt="Ashen Alleys" loading="lazy"><div><h3>Ashen Alleys</h3><p>Rat swarms and bin raccoons in a rainy back alley full of neon and steam.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-dunes.jpg" alt="Sunscorch Dunes" loading="lazy"><div><h3>Sunscorch Dunes</h3><p>Scorpions and sandworms among dunes, sandstone ruins and a lonely oasis.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-jungle.jpg" alt="Banana Jungle" loading="lazy"><div><h3>Banana Jungle</h3><p>Monkey gangs and silverback gorillas by a jungle river full of bananas.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-spider.jpg" alt="Silkshade Hollow" loading="lazy"><div><h3>Silkshade Hollow</h3><p>Spiders, webs and cocoons in a cave where red eyes watch from the burrows.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-volcano.jpg" alt="Cinder Peak" loading="lazy"><div><h3>Cinder Peak</h3><p>Fire beetles, lava slimes and obsidian golems on rivers of lava.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-fairy.jpg" alt="Glimmer Glade" loading="lazy"><div><h3>Glimmer Glade</h3><p>Pixies and unicorns in a moonlit glade of crystals, toadstools and rune stones.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-sakura.jpg" alt="Blossom Ridge" loading="lazy"><div><h3>Blossom Ridge</h3><p>Kitsune and tanuki under cherry trees, lanterns and falling petals.</p></div></div>
+      <div class="boss"><img src="media/screenshots/world-void.jpg" alt="The Void" loading="lazy"><div><h3>The Void</h3><p>Shades and gazers among floating islands, rifts and a black hole.</p></div></div>
     </div>
   </div>
 </section>
@@ -182,14 +203,20 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
 <section>
   <div class="wrap">
     <h2>Meet the bosses</h2>
-    <p class="lead">Every boss has its own trick. Learn it, or lose your eggs.</p>
+    <p class="lead">Every world ends with a boss on wave 30, with mini bosses on waves 10 and 20. Every boss has its own trick. Learn it, or lose your eggs.</p>
     <div class="bosses">
-      <div class="boss"><img src="media/screenshots/03-boss-bear.png" alt="The Frost Bear freezing the crow in a block of ice" loading="lazy"><div><h3>Frost Bear</h3><p>Caw to stop his roar, or mash to break out of the ice. At low HP he curls up and rolls away to heal.</p></div></div>
-      <div class="boss"><img src="media/screenshots/03-boss-maw.png" alt="The Maw splitting into two Lesser Maws" loading="lazy"><div><h3>The Maw</h3><p>Its eye slows your feathers to a crawl, and when it's hurt it splits into two.</p></div></div>
-      <div class="boss"><img src="media/screenshots/03-boss-oni.png" alt="The Oni's shockwave spreading across the field" loading="lazy"><div><h3>Oni</h3><p>His kanabo slam sends a shockwave that breaks your spells. At half HP he flies into a rage.</p></div></div>
-      <div class="boss"><img src="media/screenshots/03-boss-emperor.png" alt="A sandstorm covering the desert" loading="lazy"><div><h3>Emperor Scorpion</h3><p>Spits poison and vanishes into a sandstorm, circling the nest.</p></div></div>
-      <div class="boss"><img src="media/screenshots/03-boss-kong.png" alt="The Monkey King with spinning bananas" loading="lazy"><div><h3>The Monkey King</h3><p>Spinning bananas block your feathers. Break them to get through.</p></div></div>
-      <div class="boss"><img src="media/screenshots/03-boss-ratking.png" alt="The Rat King throwing a block of cheese" loading="lazy"><div><h3>Rat King</h3><p>Throws cheese at your nest, and rats pour out of it.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-forest.jpg" alt="Alley Cat in battle" loading="lazy"><div><h3>Alley Cat</h3><p>When it meows, every critter nearby runs twice as fast.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-marsh.jpg" alt="Old Gator in battle" loading="lazy"><div><h3>Old Gator</h3><p>Dives under the water, then lunges for the nest and calls the frogs.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-snow.jpg" alt="Frost Bear in battle" loading="lazy"><div><h3>Frost Bear</h3><p>Caw to stop his roar, or mash to break out of the ice. At low HP he curls up and rolls away to heal.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-city.jpg" alt="Rat King in battle" loading="lazy"><div><h3>Rat King</h3><p>Throws cheese at your nest, and rats pour out of it.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-dunes.jpg" alt="Emperor Scorpion in battle" loading="lazy"><div><h3>Emperor Scorpion</h3><p>Spits poison and vanishes into a sandstorm, circling the nest.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-jungle.jpg" alt="The Monkey King in battle" loading="lazy"><div><h3>The Monkey King</h3><p>Spinning bananas block your feathers. Break them to get through.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-spider.jpg" alt="Spider Queen in battle" loading="lazy"><div><h3>Spider Queen</h3><p>Climbs out of reach to lay egg sacs. Pop them before they hatch.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-volcano.jpg" alt="Magma Dragon in battle" loading="lazy"><div><h3>Magma Dragon</h3><p>Spits fireballs at the nest, then rises into the sky and calls down meteors.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-fairy.jpg" alt="Fairy Queen in battle" loading="lazy"><div><h3>Fairy Queen</h3><p>Turns your crow into a frog, and calls her pixies to the fight.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-sakura.jpg" alt="Oni in battle" loading="lazy"><div><h3>Oni</h3><p>His kanabo slam sends a shockwave that breaks your spells. At half HP he flies into a rage.</p></div></div>
+      <div class="boss"><img src="media/screenshots/boss-void.jpg" alt="The Maw in battle" loading="lazy"><div><h3>The Maw</h3><p>Its eye slows your feathers to a crawl, and when it's hurt it splits into two.</p></div></div>
+      <div class="boss"><img src="media/screenshots/mini-mudcrab.jpg" alt="The Mudcrab mini boss" loading="lazy"><div><h3>Mudcrab <small style="font:700 13px var(--body);color:var(--shine);letter-spacing:.08em">MINI BOSS</small></h3><p>Armoured, scuttles sideways, snaps its claws and stirs leeches out of the mud.</p></div></div>
     </div>
   </div>
 </section>
@@ -199,13 +226,11 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
     <h2>Screenshots</h2>
     <div class="gal">
       <img src="media/screenshots/01-menu.png" alt="Choosing a biome in the menu" loading="lazy">
-      <img src="media/screenshots/02-forest.png" alt="Defending the nest in Whispering Wood" loading="lazy">
-      <img src="media/screenshots/04-eggs.png" alt="Picking one of three eggs in the magpie's nest" loading="lazy">
+            <img src="media/screenshots/04-eggs.png" alt="Picking one of three eggs in the magpie's nest" loading="lazy">
       <img src="media/screenshots/07-egg-reveal.png" alt="A Mythic item hatching, with the missed items beside it" loading="lazy">
       <img src="media/screenshots/08-boss-intro.png" alt="The Alley Cat boss arriving" loading="lazy">
       <img src="media/screenshots/05-mythic-build.png" alt="A mythic build firing feathers everywhere" loading="lazy">
-      <img src="media/screenshots/06-chaos-rift.png" alt="Three bosses at once in the Chaos Rift" loading="lazy">
-      <img src="media/screenshots/03-boss-queen.png" alt="The Spider Queen laying egg sacs" loading="lazy">
+      <img src="media/screenshots/chaos-rift.jpg" alt="Monsters and bosses swarming the nest in the Chaos Rift" loading="lazy">
     </div>
   </div>
 </section>
@@ -238,6 +263,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
     document.getElementById('verLine').textContent = `Version ${rel.tag_name.replace(/^v/, '')} · released ${new Date(rel.published_at).toLocaleDateString()}`;
     if (win) { document.getElementById('getWin').href = win.browser_download_url; document.getElementById('fileWin').textContent = `${win.name} · ${mb(win.size)}`; if (os === 'win') big.href = win.browser_download_url; }
     if (lin) { document.getElementById('getLinux').href = lin.browser_download_url; document.getElementById('fileLinux').textContent = `${lin.name} · ${mb(lin.size)}`; if (os === 'linux') big.href = lin.browser_download_url; }
+    if (!dmg) { const g = document.getElementById('getMac'); g.textContent = 'Play in your browser'; g.href = 'play/'; document.getElementById('fileMac').textContent = 'No Mac app in this version yet. The browser version is the same game.'; if (os === 'mac') { big.href = 'play/'; lab.textContent = 'Play in your browser'; sub.textContent = 'Free · no install needed'; } }
     if (dmg) { document.getElementById('getMac').href = dmg.browser_download_url; document.getElementById('fileMac').textContent = `${dmg.name} · ${mb(dmg.size)}`; if (os === 'mac') big.href = dmg.browser_download_url; }
     if (apk) { document.getElementById('getAndroid').href = apk.browser_download_url; document.getElementById('fileAndroid').textContent = `${apk.name} · ${mb(apk.size)}`; if (os === 'android') big.href = apk.browser_download_url; }
   }).catch(() => {});
