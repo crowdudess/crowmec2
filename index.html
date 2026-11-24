@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3529,7 +3529,6 @@ function draw(time) {
     ctx.font = t.crit ? '800 20px Chivo, sans-serif' : t.fire ? '800 16px Chivo, sans-serif' : '700 14px Chivo, sans-serif';
     if (t.fire) { ctx.strokeStyle = 'rgba(40,10,0,.85)'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeText(t.v, t.x, t.y); }
     ctx.fillText(t.v, t.x, t.y);
-    if (t.fire) { const w = ctx.measureText(String(t.v)).width, fx = t.x - w / 2 - 7, fy = t.y - 6; ctx.fillStyle = '#ff6a20'; ctx.beginPath(); ctx.moveTo(fx, fy - 7); ctx.quadraticCurveTo(fx + 5, fy - 1, fx + 3.5, fy + 3); ctx.quadraticCurveTo(fx, fy + 5.5, fx - 3.5, fy + 3); ctx.quadraticCurveTo(fx - 5, fy - 1, fx, fy - 7); ctx.fill(); ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(fx, fy + 1.5, 1.8, 0, TAU); ctx.fill(); }
   }
   ctx.globalAlpha = 1;
   // spell aim preview
