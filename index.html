@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.96.0</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.96.1</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3250,15 +3250,15 @@ function makeDeco() {
   deco.bamboo = ring(6, 300, 520, () => ({ n: 4 + Math.floor(rnd(0, 4)), seed: rnd(0, 99) }));
   deco.petals = Array.from({ length: 140 }, () => { const a = rnd(0, 7), d = rnd(60, 860); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, a: rnd(0, 7), s: rnd(2.5, 4.5), c: Math.random() < .7 }; });
   // New York alley: buildings on both sides, props along the walls
-  { const W = 360; deco.cityW = W; deco.cityB = [];
+  { const W = 640; deco.cityW = W; deco.cityB = [];
     for (const sd of [-1, 1]) { let y = -1300; while (y < 1300) { const h = rnd(380, 600); deco.cityB.push({ sd, y0: y, y1: y + h - 16, tone: Math.floor(rnd(0, 4)), ac: Array.from({ length: 2 + Math.floor(rnd(0, 3)) }, () => [rnd(.2, .85), rnd(.1, .9)]), tower: Math.random() < .5, tw: [rnd(.35, .7), rnd(.25, .75)], hut: Math.random() < .5, hw: [rnd(.3, .8), rnd(.2, .8)], fe: [rnd(.15, .4), rnd(.6, .85)], neon: Math.random() < .5 ? ['255,80,180', '80,200,255', '255,140,60'][Math.floor(rnd(0, 3))] : null, ny: rnd(.2, .8) }); y += h; } }
     const prop = (sd, y) => ({ sd, y, x: sd * (W - 34) });
     deco.cityProps = [];
-    for (const sd of [-1, 1]) for (const y of [-420, -150, 160, 430]) { const k = Math.floor(rnd(0, 5)); deco.cityProps.push({ ...prop(sd, y + rnd(-60, 60)), k, rot: rnd(-.15, .15), seed: rnd(0, 99) }); }
+    for (const sd of [-1, 1]) for (const y of [-520, -260, 0, 260, 520]) { const k = Math.floor(rnd(0, 5)); deco.cityProps.push({ ...prop(sd, y + rnd(-60, 60)), k, rot: rnd(-.15, .15), seed: rnd(0, 99) }); }
     deco.manholes = [{ x: rnd(-120, 120), y: rnd(-330, -230) }, { x: rnd(-140, 140), y: rnd(230, 330) }];
-    deco.puddles = Array.from({ length: 9 }, () => ({ x: rnd(-300, 300), y: rnd(-800, 800), rx: rnd(30, 70), ry: rnd(14, 28), a: rnd(-.3, .3) })).filter(q => Math.hypot(q.x, q.y) > 120);
-    deco.trash = Array.from({ length: 34 }, () => ({ x: rnd(-320, 320), y: rnd(-900, 900), a: rnd(0, 7), k: Math.floor(rnd(0, 4)) })).filter(q => Math.hypot(q.x, q.y) > 90);
-    deco.cityCracks = Array.from({ length: 14 }, () => { let x = rnd(-300, 300), y = rnd(-850, 850); const pts = [[x, y]]; for (let k = 0; k < 5; k++) { x += rnd(-30, 30); y += rnd(-40, 40); pts.push([x, y]); } return pts; }); }
+    deco.puddles = Array.from({ length: 12 }, () => ({ x: rnd(-W + 80, W - 80), y: rnd(-800, 800), rx: rnd(30, 70), ry: rnd(14, 28), a: rnd(-.3, .3) })).filter(q => Math.hypot(q.x, q.y) > 120);
+    deco.trash = Array.from({ length: 46 }, () => ({ x: rnd(-W + 60, W - 60), y: rnd(-900, 900), a: rnd(0, 7), k: Math.floor(rnd(0, 4)) })).filter(q => Math.hypot(q.x, q.y) > 90);
+    deco.cityCracks = Array.from({ length: 20 }, () => { let x = rnd(-W + 40, W - 40), y = rnd(-850, 850); const pts = [[x, y]]; for (let k = 0; k < 5; k++) { x += rnd(-30, 30); y += rnd(-40, 40); pts.push([x, y]); } return pts; }); }
   deco.bogs = ring(7, 300, 640, () => ({ lobes: Array.from({ length: 5 }, () => [rnd(-70, 70), rnd(-40, 40), rnd(55, 95), rnd(35, 60)]), pads: Array.from({ length: 5 }, () => [rnd(-70, 70), rnd(-35, 35), rnd(7, 12), rnd(0, 7), Math.random() < .35]), ph: rnd(0, 7) }));
   deco.reeds = ring(16, 230, 680, () => ({ n: 7 + Math.floor(rnd(0, 6)), seed: rnd(0, 99) }));
   deco.knees = ring(9, 260, 620, () => ({ n: 2 + Math.floor(rnd(0, 3)), seed: rnd(0, 99) }));
