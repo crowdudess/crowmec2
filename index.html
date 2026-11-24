@@ -954,7 +954,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.85.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.85.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4827,10 +4827,10 @@ function showEnding() {
 // Each boss was holding a shard of the stolen eggs. Plays only on a level's first clear (not sandbox, Chaos Rift, the Office, or endless bosses).
 const shardBiomes = () => BIOMES.filter(b => b.boss && !b.mode && !b.dlc);
 const shardCount = () => shardBiomes().filter(b => biomeState(b.id).cleared).length;
-function replayStory(id, mode) {
+function replayStory(id, mode, opts = {}, after) {
   const lvl = BIOMES.find(b => b.id === id); if (!lvl || introOn) return;
   const prevB = B; B = lvl; makeDeco();
-  playBossStory(lvl, () => { if (state === 'menu') { B = prevB; makeDeco(); } }, mode);
+  playBossStory(lvl, blinded => { if (state === 'menu') { B = prevB; makeDeco(); } if (after) after(blinded); }, mode, opts);
 }
 // Phone vibration when the nest takes damage (Android app uses the Haptics plugin; browsers use navigator.vibrate).
 let lastBuzz = 0;
@@ -4851,7 +4851,7 @@ function playBossStory(biome, onDone, mode = 'win', opts = {}) {
   const cvs = box.querySelector('canvas'), bctx = cvs.getContext('2d'), textEl = box.querySelector('.st-text'), nextEl = box.querySelector('.st-next'), skip = box.querySelector('.in-skip');
   try { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); } catch (e) {}
   introOn = true; skip.textContent = T('in_skip'); box.hidden = false; box.classList.remove('out');
-  const total = shardBiomes().length, have = shardCount(), next = biome.dlc ? null : BIOMES.slice(BIOMES.indexOf(biome) + 1).find(b => !b.dlc && !b.mode);
+  const total = shardBiomes().length, have = opts.all ? total : shardCount(), next = biome.dlc ? null : BIOMES.slice(BIOMES.indexOf(biome) + 1).find(b => !b.dlc && !b.mode);
   const lastLine = have >= total ? T('bs_all') : next ? T('bs_next', bn(next)) : T('bs_more', total - have);
   const bossName = E[biome.boss] ? E[biome.boss].name : '';
   const pages = enter ? [{ to: 1, text: T('be_1', bn(biome)) }, { to: 1.6, text: T('bl_' + biome.boss) }, { to: 2.6, text: T('be_' + biome.boss) }]
@@ -4958,7 +4958,7 @@ function playBossStory(biome, onDone, mode = 'win', opts = {}) {
       const lr = Math.min(W, H) * (pi === 2 ? .5 : .4), dk = bctx.createRadialGradient(W / 2, cy, lr * .5, W / 2, cy, lr * 1.9); dk.addColorStop(0, 'rgba(3,4,12,.08)'); dk.addColorStop(.6, 'rgba(3,4,12,.6)'); dk.addColorStop(1, 'rgba(2,3,8,.9)'); bctx.fillStyle = dk; bctx.fillRect(0, 0, W, H);
       bctx.setTransform(pr * sc, 0, 0, pr * sc, W / 2 * pr, cy * pr);
       const gather = rebuild ? smooth(6.5, 8.6, t) : 0;
-      if (gather <= 0) slots.forEach((a, i) => { const got = lvls[i] && biomeState(lvls[i].id).cleared && !(i === justGot && fly < 1); drawShard(Math.cos(a) * (NEST_R + 28), Math.sin(a) * (NEST_R + 28), i, 1, got, now); });
+      if (gather <= 0) slots.forEach((a, i) => { const got = lvls[i] && (opts.all || biomeState(lvls[i].id).cleared) && !(i === justGot && fly < 1); drawShard(Math.cos(a) * (NEST_R + 28), Math.sin(a) * (NEST_R + 28), i, 1, got, now); });
       else if (t < 8.6) slots.forEach((a, i) => { const sp = a + gather * 2.4, r = (NEST_R + 28) * (1 - gather), lift = Math.sin(gather * Math.PI) * 26; drawShard(Math.cos(sp) * r, Math.sin(sp) * r - lift, i, 1 - gather * .45, true, now); });
       if (rebuild && t >= 8.2) { const k = smooth(8.4, 9.1, t), fl = t < 9.3 ? 1 - smooth(8.6, 9.3, t) : 0;
         if (fl > 0) { bctx.fillStyle = `rgba(255,244,210,${.9 * fl})`; bctx.beginPath(); bctx.arc(0, 4, 18 + (1 - fl) * 90, 0, TAU); bctx.fill(); }
@@ -5753,7 +5753,7 @@ function buildSettings(box, pre) {
   check('lowfx', T('set_lowfx'), () => lowFx(), on => { save.lowFx = on; resize(); });
   g.append(el('p', 'muted sethint', T('set_lowfx_hint')));
   if (pre === 'm') { const ir = el('div', 'setrow'), ib = el('button', 'ghost', T('in_watch')); ib.type = 'button'; ib.onclick = () => playIntro(); ir.append(el('label', '', T('in_label')), ib, el('span')); g.append(ir);
-    if (save.sawEnding || biomeState('void').cleared) { const er = el('div', 'setrow'), eb = el('button', 'ghost', T('in_watch')); eb.type = 'button'; eb.onclick = () => showEnding(); er.append(el('label', '', T('end_label')), eb, el('span')); g.append(er); }
+    if (save.sawEnding || biomeState('void').cleared) { const er = el('div', 'setrow'), eb = el('button', 'ghost', T('in_watch')); eb.type = 'button'; eb.onclick = () => replayStory('void', 'win', { all: true, blind: true }, blinded => { if (blinded) showEnding(); else setTimeout(showEnding, 600); }); er.append(el('label', '', T('end_label')), eb, el('span')); g.append(er); }
     // replay a level's stories once you have seen them
     const seenLv = shardBiomes().filter(b => (save.entered || {})[b.id] || biomeState(b.id).cleared);
     if (seenLv.length) {
