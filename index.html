@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.94.2</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3875,8 +3875,10 @@ const NO_BLINK = new Set(['paper', 'chair', 'coffee', 'printer', 'vending', 'egg
 let blinkCtx = null;
 function blinkStart(e, time, r, c2) {
   if (NO_BLINK.has(e.shape) || e.frozen > 0 || e.dead) return false;
-  const per = 2.6 + (e.seed * 1.7) % 2.2, ph = (time / 1000 + e.seed * 3.1) % per, dur = .16;
-  if (ph > dur) return false;
+  // Previews (monster index, boss cards, menus) build enemies without a seed: fall back to ph so they still blink now and then, never stuck shut.
+  const sd = Number.isFinite(e.seed) ? e.seed : Number.isFinite(e.ph) ? e.ph : 1;
+  const per = 2.6 + (sd * 1.7) % 2.2, ph = (time / 1000 + sd * 3.1) % per, dur = .16;
+  if (!Number.isFinite(ph) || ph > dur) return false;
   const k = Math.sin(ph / dur * Math.PI), sq = Math.max(.12, 1 - k);
   const c = ctx, arc = c.arc, ell = c.ellipse;
   c.fillStyle = c2; const eyeCols = new Set([c.fillStyle, '#111111', '#000000', '#1a1c20']);
