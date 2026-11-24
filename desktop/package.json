@@ -1,7 +1,7 @@
 {
   "name": "nestguard",
   "productName": "Nestguard",
-  "version": "2.91.5",
+  "version": "2.92.0",
   "description": "A roguelike where a crow defends its nest. A game by crowdude.",
   "author": "crowdude",
   "repository": "github:crowdudess/crowmec2",
