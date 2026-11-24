@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.95.3</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.96.0</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3139,10 +3139,6 @@ function ambBack(id, t) {
     case 'dunes':
       glow(-650, -650, 1100, '255,220,150', .22);
       break;
-    case 'spider':
-      for (let i = 0; i < 9; i++) { const a = AMB[50 + i], ang = a.p, d = 420 + a.s * 380, x = Math.cos(ang) * d, y = Math.sin(ang) * d; if (((t / 1000 + a.p * 3) % 4) < .18) continue;
-        glow(x, y, 18, '255,40,40', .25); ctx.fillStyle = '#ff3a3a'; ctx.beginPath(); ctx.arc(x - 5, y, 2.4, 0, TAU); ctx.arc(x + 5, y, 2.4, 0, TAU); ctx.arc(x - 9, y - 4, 1.4, 0, TAU); ctx.arc(x + 9, y - 4, 1.4, 0, TAU); ctx.fill(); }
-      break;
     case 'volcano':
       glow(0, -700, 900, '255,90,30', .12 + .03 * Math.sin(t / 900));
       break;
@@ -3197,8 +3193,11 @@ function ambFront(id, t) {
         ctx.fillStyle = cols[i % cols.length]; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(x + sd * 4 * fl, y, 5 * fl + 1, 6, sd * .4, 0, TAU); ctx.fill(); } ctx.fillStyle = '#222'; ctx.fillRect(x - .8, y - 4, 1.6, 8); }
       break; }
     case 'spider': {
+      fog(t, '120,80,160', .05, 5);
+      { const a = .05 + .015 * Math.sin(t / 2300); ctx.fillStyle = `rgba(190,170,240,${a})`; ctx.beginPath(); ctx.moveTo(-420, -950); ctx.lineTo(-250, -950); ctx.lineTo(120, 420); ctx.lineTo(-260, 420); ctx.closePath(); ctx.fill(); ctx.fillStyle = `rgba(210,195,250,${a * .8})`; ctx.beginPath(); ctx.moveTo(-370, -950); ctx.lineTo(-300, -950); ctx.lineTo(-20, 420); ctx.lineTo(-150, 420); ctx.closePath(); ctx.fill(); }
       motes(t, '220,210,235', 25);
-      for (let i = 0; i < 3; i++) { const a = AMB[80 + i], x = a.x * .45, base = -480 - i * 60, y = base + 260 + Math.sin(t / 1100 + i * 2) * 60;
+      if (deco.roots) drawSpiderCanopy(t);
+      for (let i = 0; i < 5; i++) { const a = AMB[80 + i], x = a.x * .6, base = -480 - (i % 3) * 60, y = base + 260 + Math.sin(t / 1100 + i * 2) * 60;
         ctx.strokeStyle = 'rgba(230,225,240,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, base - 600); ctx.lineTo(x, y); ctx.stroke();
         ctx.fillStyle = '#1a1220'; ctx.beginPath(); ctx.arc(x, y + 7, 7, 0, TAU); ctx.arc(x, y, 4.5, 0, TAU); ctx.fill();
         ctx.strokeStyle = '#1a1220'; ctx.lineWidth = 1.5; for (let l = 0; l < 4; l++) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x, y + 3 + l * 2); ctx.lineTo(x + sd * 11, y - 2 + l * 4 + Math.sin(t / 200 + l) * 1.5); ctx.stroke(); } }
@@ -3247,6 +3246,17 @@ function makeDeco() {
   deco.toro = ring(5, 250, 420, () => ({ rot: rnd(-.3, .3), ph: rnd(0, 7) }));
   deco.bamboo = ring(6, 300, 520, () => ({ n: 4 + Math.floor(rnd(0, 4)), seed: rnd(0, 99) }));
   deco.petals = Array.from({ length: 140 }, () => { const a = rnd(0, 7), d = rnd(60, 860); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, a: rnd(0, 7), s: rnd(2.5, 4.5), c: Math.random() < .7 }; });
+  // Silkshade Hollow: boulders strung together with silk, big orb webs, cocoons, egg sacs, burrows, glowing cave mushrooms and bones.
+  deco.sRocks = ring(15, 250, 470, () => ({ r: rnd(26, 50), pts: Array.from({ length: 8 }, () => rnd(.78, 1.12)), rot: rnd(0, 7), tone: Math.floor(rnd(0, 3)) }));
+  deco.sStrands = []; deco.sRocks.forEach((a, i) => deco.sRocks.forEach((b, j) => { const d = Math.hypot(a.x - b.x, a.y - b.y); if (j > i && d < 300) deco.sStrands.push({ a, b, sag: rnd(.12, .25), d }); }));
+  deco.sWebs = ring(5, 330, 420, () => ({ r: rnd(105, 150), n: 11 + Math.floor(rnd(0, 4)), rot: rnd(0, 7), tw: rnd(0, 7), torn: Math.floor(rnd(0, 11)) }));
+  deco.cocoons = ring(10, 170, 430, () => ({ a: rnd(0, 7), l: rnd(13, 21), ph: rnd(0, 7) }));
+  deco.eggSacs = ring(5, 200, 420, () => ({ n: 3 + Math.floor(rnd(0, 3)), a: rnd(0, 7) }));
+  deco.burrows = ring(6, 190, 420, () => ({ r: rnd(17, 26), a: rnd(-.5, .5), ph: rnd(0, 7) }));
+  deco.glowcaps = ring(11, 150, 440, () => ({ n: 3 + Math.floor(rnd(0, 3)), teal: Math.random() < .45, ph: rnd(0, 7) }));
+  deco.bones = Array.from({ length: 16 }, () => { const a = rnd(0, 7), d = rnd(140, 460); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, a: rnd(0, 7), skull: Math.random() < .3 }; });
+  deco.sCracks = Array.from({ length: 10 }, () => { const a = rnd(0, 7), d = rnd(130, 460); let x = Math.cos(a) * d * 1.3, y = Math.sin(a) * d, h = rnd(0, 7); const pts = [[x, y]]; for (let k = 0; k < 6; k++) { h += rnd(-.7, .7); x += Math.cos(h) * rnd(16, 34); y += Math.sin(h) * rnd(16, 34); pts.push([x, y]); } return pts; });
+  deco.roots = ring(20, 445, 480, () => ({ w: rnd(45, 95), l: rnd(45, 105), rot: rnd(-.4, .4), drip: Math.random() < .6, ph: rnd(0, 7) }));
   deco.pines = ring(18, 340, 540, () => ({ r: rnd(60, 95), arms: 7 + Math.floor(rnd(0, 3)), rot: rnd(0, 7), tone: Math.floor(rnd(0, 3)) }));
   deco.ponds = ring(3, 230, 360, () => ({ rx: rnd(50, 75), ry: rnd(28, 42), a: rnd(0, 3), cr: Array.from({ length: 5 }, () => [rnd(-1, 1), rnd(-1, 1), rnd(0, 7), rnd(.3, .7)]) }));
   deco.drifts = Array.from({ length: 22 }, () => { const a = rnd(0, 7), d = rnd(120, 820); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, rx: rnd(40, 110), ry: rnd(16, 34), a: rnd(-.4, .4) }; });
@@ -3423,6 +3433,147 @@ function drawForestCanopy(t) {
     ctx.restore();
   }
 }
+// Silkshade Hollow's floor. Everything that never moves is drawn once into a cached image (per zoom level);
+// only the dew, the eyes, the twitching cocoons and the glowing mushrooms are drawn every frame.
+const spiderCache = new Map();
+function drawSpiderStatic() {
+  // pale rock showing through the dust, and a pool of dim light where the gap in the ceiling lets it in
+  for (const m of deco.moss) { ctx.fillStyle = 'rgba(120,100,150,.09)'; ctx.beginPath(); ctx.ellipse(m.x * .6, m.y * .6, m.rx * 1.6, m.ry * 1.6, m.a, 0, TAU); ctx.fill(); }
+  glow(-120, -60, 520, '150,120,200', .16);
+  // the old nest web the hollow is built around: faint, so it never hides the fight
+  ctx.strokeStyle = 'rgba(220,210,235,.07)'; ctx.lineWidth = 1.5;
+  for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 70, Math.sin(a) * 70); ctx.lineTo(Math.cos(a) * 1100, Math.sin(a) * 1100); ctx.stroke(); }
+  for (let r = 120; r < 1100; r += 70) { ctx.beginPath(); for (let i = 0; i <= 16; i++) { const a = i / 16 * TAU, rr = r * (i % 2 ? .96 : 1); i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.stroke(); }
+  // damp patches and cracks in the cave floor
+  for (const s of deco.stones) { ctx.fillStyle = 'rgba(70,50,90,.16)'; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r * 5, s.r * 3, s.r, 0, TAU); ctx.fill(); }
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const c of deco.sCracks) { for (const [w, col, dy] of [[4, 'rgba(6,4,10,.55)', 0], [1.5, 'rgba(140,120,170,.12)', 2]]) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); c.forEach(([x, y], i) => i ? ctx.lineTo(x, y + dy) : ctx.moveTo(x, y + dy)); ctx.stroke(); } }
+  // bones of whatever wandered in before the crow
+  for (const b of deco.bones) {
+    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a); ctx.fillStyle = 'rgba(200,190,175,.55)';
+    if (b.skull) { ctx.beginPath(); ctx.ellipse(0, 0, 7, 5.5, 0, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.moveTo(5, -2); ctx.lineTo(13, 0); ctx.lineTo(5, 2); ctx.fill(); ctx.fillStyle = 'rgba(10,6,14,.8)'; ctx.beginPath(); ctx.arc(1, -2, 1.6, 0, TAU); ctx.arc(1, 2, 1.6, 0, TAU); ctx.fill(); }
+    else { ctx.fillRect(-7, -1.2, 14, 2.4); for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(sd * 7, -1.4, 1.8, 0, TAU); ctx.arc(sd * 7, 1.4, 1.8, 0, TAU); ctx.fill(); } }
+    ctx.restore();
+  }
+  // burrows: dark holes with silk round the rim, and red eyes that peer out and blink
+  for (const b of deco.burrows) {
+    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a);
+    ctx.fillStyle = 'rgba(60,46,72,.9)'; ctx.beginPath(); ctx.ellipse(0, 2, b.r * 1.35, b.r * .95, 0, 0, TAU); ctx.fill();
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, b.r); g.addColorStop(0, '#000'); g.addColorStop(.7, '#07040a'); g.addColorStop(1, '#1a1222');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, b.r, b.r * .7, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(225,220,240,.35)'; ctx.lineWidth = 1; for (let i = 0; i < 9; i++) { const a = i / 9 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * b.r * .8, Math.sin(a) * b.r * .56); ctx.lineTo(Math.cos(a + .2) * b.r * 1.45, Math.sin(a + .2) * b.r * 1.05); ctx.stroke(); }
+    ctx.restore();
+  }
+  // boulders, each with a shadow, a lit top edge and a cap of old silk
+  const RT = [['#2a2232', '#3a3046', '#524462'], ['#262030', '#342c40', '#4a3e58'], ['#2e2636', '#40344a', '#5a4a68']];
+  for (const r of deco.sRocks) {
+    const shape = (k, dx, dy) => { ctx.beginPath(); r.pts.forEach((p, i) => { const a = r.rot + i / r.pts.length * TAU, x = r.x + dx + Math.cos(a) * r.r * p * k, y = r.y + dy + Math.sin(a) * r.r * p * k * .8; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); };
+    const [d, m, hi] = RT[r.tone];
+    ctx.fillStyle = 'rgba(0,0,0,.4)'; shape(1.05, 12, 14); ctx.fill();
+    ctx.fillStyle = d; shape(1, 0, 0); ctx.fill();
+    ctx.fillStyle = m; shape(.82, -r.r * .08, -r.r * .1); ctx.fill();
+    ctx.fillStyle = hi; shape(.42, -r.r * .26, -r.r * .28); ctx.fill();
+    ctx.fillStyle = 'rgba(230,225,245,.13)'; ctx.beginPath(); ctx.ellipse(r.x + r.r * .1, r.y - r.r * .05, r.r * .55, r.r * .3, r.rot, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(190,170,230,.22)'; ctx.lineWidth = 2; ctx.beginPath(); r.pts.slice(4, 8).forEach((p, i) => { const a = r.rot + (i + 4) / r.pts.length * TAU, x = r.x + Math.cos(a) * r.r * p * .96, y = r.y + Math.sin(a) * r.r * p * .77; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+  }
+  // silk threads slung from boulder to boulder, sagging, with the odd dewdrop catching the light
+  for (const st of deco.sStrands) {
+    const { a, b } = st, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 + st.d * st.sag;
+    ctx.strokeStyle = 'rgba(225,220,240,.22)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(mx, my, b.x, b.y); ctx.stroke();
+  }
+  // big orb webs, a little torn, with dew that glints in turn
+  for (const w of deco.sWebs) {
+    ctx.save(); ctx.translate(w.x, w.y); ctx.rotate(w.rot);
+    const spoke = i => i / w.n * TAU, R = i => w.r * (.85 + .15 * Math.sin(i * 2.3 + w.tw));
+    ctx.strokeStyle = 'rgba(228,224,242,.3)'; ctx.lineWidth = 1.1;
+    for (let i = 0; i < w.n; i++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(spoke(i)) * R(i), Math.sin(spoke(i)) * R(i)); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(228,224,242,.24)'; ctx.lineWidth = 1;
+    for (let ring = 1; ring <= 7; ring++) { ctx.beginPath(); let first = true; for (let i = 0; i <= w.n; i++) { if (i % w.n === w.torn && ring > 4) { first = true; continue; }
+      const f = ring / 8, a0 = spoke(i % w.n), x = Math.cos(a0) * R(i % w.n) * f, y = Math.sin(a0) * R(i % w.n) * f;
+      if (first) { ctx.moveTo(x, y); first = false; } else { const ap = spoke(i - .5), sg = R(i % w.n) * f * .9; ctx.quadraticCurveTo(Math.cos(ap) * sg, Math.sin(ap) * sg, x, y); } } ctx.stroke(); }
+    // the torn bit hangs loose
+    const ta = spoke(w.torn); ctx.beginPath(); ctx.moveTo(Math.cos(ta) * w.r * .6, Math.sin(ta) * w.r * .6); ctx.quadraticCurveTo(Math.cos(ta + .3) * w.r * .9, Math.sin(ta + .3) * w.r * .9 + 20, Math.cos(ta + .15) * w.r * .85, Math.sin(ta + .15) * w.r * .85 + 34); ctx.stroke();
+    ctx.fillStyle = 'rgba(230,226,245,.35)'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  // egg sacs, tucked against the rock in clutches
+  for (const e of deco.eggSacs) for (let i = 0; i < e.n; i++) { const a = e.a + i * 2.1, x = e.x + Math.cos(a) * 11 * (i ? 1 : 0), y = e.y + Math.sin(a) * 8 * (i ? 1 : 0), r = 9 - i * .8;
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(x + 3, y + 4, r, r * .8, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#ddd6e6'; ctx.beginPath(); ctx.ellipse(x, y, r, r * .85, a, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(150,135,170,.6)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x - r * .8, y - r * .2); ctx.quadraticCurveTo(x, y + r * .4, x + r * .8, y - r * .1); ctx.moveTo(x - r * .5, y - r * .6); ctx.quadraticCurveTo(x, y - r * .1, x + r * .6, y - r * .5); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .35, r * .22, 0, TAU); ctx.fill(); }
+}
+function drawSpiderFloor(time) {
+  const lo = lowFx(), W = 860, H = 640, k = Math.max(.5, Math.min(1.5, Math.round(ctx.getTransform().a * 4) / 4)), key = k;
+  let c = spiderCache.get(key);
+  if (!c || c.deco !== deco.sRocks) {
+    if (spiderCache.size > 1) spiderCache.clear();
+    const cv2 = document.createElement('canvas'); cv2.width = Math.ceil(W * 2 * k); cv2.height = Math.ceil(H * 2 * k);
+    const keep = ctx; ctx = cv2.getContext('2d'); ctx.setTransform(k, 0, 0, k, W * k, H * k);
+    try { drawSpiderStatic(); } finally { ctx = keep; }
+    c = { cv: cv2, deco: deco.sRocks }; spiderCache.set(key, c);
+  }
+  ctx.drawImage(c.cv, -W, -H, W * 2, H * 2);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  // red eyes peer out of the burrows and blink
+  for (const b of deco.burrows) {
+    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a);
+    const cyc = (time / 1000 + b.ph * 3) % 7, open = cyc < 4.5 && !(cyc % 2.2 < .14);
+    if (open) { const k = Math.min(1, cyc / .5, (4.5 - cyc) / .5), sx = Math.sin(time / 900 + b.ph) * b.r * .15;
+      if (!lo) glow(sx, 0, b.r * .9, '255,30,40', .22 * k);
+      ctx.fillStyle = `rgba(255,${50 + 30 * k},50,${k})`; for (const [x, y, rr] of [[-4, 0, 2.2], [4, 0, 2.2], [-8, -3, 1.3], [8, -3, 1.3], [-2, -4, 1], [2, -4, 1]]) { ctx.beginPath(); ctx.arc(sx + x, y, rr, 0, TAU); ctx.fill(); } }
+    ctx.restore();
+  }
+  // dewdrops on the threads
+  for (const st of deco.sStrands) {
+    const { a, b } = st, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 + st.d * st.sag;
+    for (let k = 1; k < 4; k++) { const u = k / 4, x = (1 - u) * (1 - u) * a.x + 2 * u * (1 - u) * mx + u * u * b.x, y = (1 - u) * (1 - u) * a.y + 2 * u * (1 - u) * my + u * u * b.y, tw = .35 + .35 * Math.sin(time / 500 + k * 2 + st.d); ctx.fillStyle = `rgba(235,240,255,${tw})`; ctx.beginPath(); ctx.arc(x, y, 1.4, 0, TAU); ctx.fill(); }
+  }
+  // dew on the orb webs, glinting in turn
+  for (const w of deco.sWebs) {
+    ctx.save(); ctx.translate(w.x, w.y); ctx.rotate(w.rot);
+    const spoke = i => i / w.n * TAU, R = i => w.r * (.85 + .15 * Math.sin(i * 2.3 + w.tw));
+    for (let i = 0; i < w.n; i++) for (let ring = 2; ring <= 6; ring += 2) { const f = ring / 8, x = Math.cos(spoke(i)) * R(i) * f, y = Math.sin(spoke(i)) * R(i) * f, tw = Math.max(0, Math.sin(time / 700 - i * .9 - ring + w.tw)) ** 6;
+      ctx.fillStyle = `rgba(240,245,255,${.25 + .65 * tw})`; ctx.beginPath(); ctx.arc(x, y, 1.3 + tw * 1.4, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+  // silk-wrapped cocoons; now and then one of them twitches
+  for (const c of deco.cocoons) {
+    const tw = (time / 1000 + c.ph * 2) % 5 < .5 ? Math.sin(time / 35) * .12 : 0;
+    ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.a + tw);
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(4, 5, c.l, c.l * .42, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(225,220,240,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-c.l, 0); ctx.lineTo(-c.l * 1.9, -c.l * .5); ctx.moveTo(-c.l, 0); ctx.lineTo(-c.l * 1.8, c.l * .6); ctx.stroke();
+    ctx.fillStyle = '#cfc8da'; ctx.beginPath(); ctx.ellipse(0, 0, c.l, c.l * .4, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,105,140,.55)'; ctx.lineWidth = 1; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * c.l * .26 - 3, -c.l * .38); ctx.quadraticCurveTo(i * c.l * .26 + 2, 0, i * c.l * .26 + 4, c.l * .38); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(-c.l * .2, -c.l * .16, c.l * .5, c.l * .1, 0, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  // glowing cave mushrooms, the only warm light down here
+  for (const m of deco.glowcaps) { const col = m.teal ? '90,230,210' : '200,110,255', pul = .55 + .25 * Math.sin(time / 900 + m.ph);
+    if (!lo) glow(m.x, m.y, 70, col, .28 * pul);
+    for (let i = 0; i < m.n; i++) { const x = m.x + (i - m.n / 2) * 10 + (i % 2) * 3, y = m.y + (i % 2) * 7 - (i % 3) * 2, rr = 4.5 + ((i * 7) % 3) * 1.6;
+      ctx.fillStyle = 'rgba(210,200,225,.7)'; ctx.fillRect(x - 1, y, 2, rr * 1.1);
+      ctx.fillStyle = `rgba(${col},${.7 + .3 * pul})`; ctx.beginPath(); ctx.ellipse(x, y, rr, rr * .7, 0, Math.PI, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(x - rr * .35, y - rr * .35, rr * .2, 0, TAU); ctx.fill(); } }
+}
+function drawSpiderCanopy(t) {
+  // roots and rock overhanging the hollow, all round the edge, dripping now and then
+  for (const r of deco.roots) {
+    const a = Math.atan2(r.y, r.x), ux = -Math.cos(a), uy = -Math.sin(a);
+    ctx.save(); ctx.translate(r.x, r.y); ctx.rotate(a + Math.PI / 2 + r.rot * .2);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(10, -r.l * .1 + 16, r.w * .75, r.l * .65, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#120d18'; ctx.beginPath(); ctx.moveTo(-r.w, r.l * .4); ctx.quadraticCurveTo(-r.w * .5, -r.l * .5, 0, -r.l); ctx.quadraticCurveTo(r.w * .5, -r.l * .5, r.w, r.l * .4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#1e1628'; ctx.beginPath(); ctx.moveTo(-r.w * .6, r.l * .4); ctx.quadraticCurveTo(-r.w * .3, -r.l * .3, -r.w * .05, -r.l * .75); ctx.quadraticCurveTo(r.w * .1, -r.l * .2, r.w * .2, r.l * .4); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#2a1e32'; ctx.lineCap = 'round'; for (let i = 0; i < 3; i++) { const x0 = (i - 1) * r.w * .35; ctx.lineWidth = 5 - i; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.quadraticCurveTo(x0 + 10 * Math.sin(i + r.ph), -r.l * .6, x0 + 18 * Math.sin(i * 2 + r.ph), -r.l * (.8 + i * .2)); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(225,220,240,.28)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-r.w * .4, -r.l * .1); ctx.quadraticCurveTo(0, -r.l * .55, r.w * .5, -r.l * .05); ctx.stroke();
+    if (r.drip) { const k = ((t / 1000 + r.ph) % 2.6) / 2.6, y = -r.l * .9 - k * k * 90; ctx.fillStyle = `rgba(170,200,230,${.6 * (1 - k)})`; ctx.beginPath(); ctx.ellipse(0, y, 2, 3, 0, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+  // gossamer: loose strands of silk drifting on the air
+  for (let i = 0; i < 7; i++) { const a = AMB[60 + i], x = wrap(a.x + t / 60 * (.5 + a.s), -1000, 1000), y = a.y * .85 + Math.sin(t / 1300 + a.p) * 40, len = 50 + a.s * 70;
+    ctx.strokeStyle = `rgba(235,230,250,${.18 + .12 * Math.sin(t / 700 + a.p)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x + len * .3, y - 14 * Math.sin(t / 500 + a.p), x + len * .6, y + 14 * Math.cos(t / 600 + a.p), x + len, y + 4 * Math.sin(t / 400 + a.p)); ctx.stroke(); }
+}
 function drawGround(biome, time) {
   const g = ctx.createRadialGradient(0, 0, 40, 0, 0, 520);
   g.addColorStop(0, biome.ground[0]); g.addColorStop(.6, biome.ground[1]); g.addColorStop(1, biome.ground[2]);
@@ -3455,15 +3606,11 @@ function drawGround(biome, time) {
     for (const b of deco.blades) { ctx.fillStyle = b.c ? 'rgba(184,138,224,.5)' : 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(b.x, b.y, b.h / 8, 0, TAU); ctx.fill(); }
     ctx.strokeStyle = 'rgba(120,60,200,.12)'; ctx.lineWidth = 18; for (let i = 0; i < 4; i++) { const a0 = time / 4000 + i * 1.57; ctx.beginPath(); ctx.arc(0, 0, 200 + i * 130, a0, a0 + 2.2); ctx.stroke(); }
   }
-  if (biome.id === 'spider') {
-    ctx.strokeStyle = 'rgba(220,210,235,.09)'; ctx.lineWidth = 1.5;
-    for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 70, Math.sin(a) * 70); ctx.lineTo(Math.cos(a) * 1100, Math.sin(a) * 1100); ctx.stroke(); }
-    for (let r = 120; r < 1100; r += 70) { ctx.beginPath(); for (let i = 0; i <= 16; i++) { const a = i / 16 * TAU, rr = r * (i % 2 ? .96 : 1); i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.stroke(); }
-  }
+  if (biome.id === 'spider' && deco.sRocks) drawSpiderFloor(time);
   if (biome.id === 'city') { ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 2; for (let i = -900; i < 900; i += 120) { ctx.beginPath(); ctx.moveTo(i, -900); ctx.lineTo(i, 900); ctx.moveTo(-900, i); ctx.lineTo(900, i); ctx.stroke(); } }
-  if (!['office', 'volcano', 'snow', 'sakura'].includes(biome.id)) for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
+  if (!['office', 'volcano', 'snow', 'sakura', 'spider'].includes(biome.id)) for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
   ctx.lineWidth = 2; ctx.lineCap = 'round';
-  if (!['office', 'volcano', 'snow', 'sakura'].includes(biome.id)) for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
+  if (!['office', 'volcano', 'snow', 'sakura', 'spider'].includes(biome.id)) for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
 }
 function drawWeather(biome, time) {
   if (biome.id === 'sakura' || biome.id === 'fairy' || biome.id === 'volcano') {
