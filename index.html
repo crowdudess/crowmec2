@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.98.1</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.0</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1445,7 +1445,7 @@ const BIOMES = [
     enemies: ['rat', 'roach', 'pigeon', 'dog', 'binbandit'], ground: ['#2e2d2c', '#232221', '#181716'], blade: ['#3c3630', '#2e2924'], stone: '#2a2622',
     blurb: 'Rat swarms, roaches that split, pigeons that steal your coins, stray dogs and bin raccoons. The Rat King calls his subjects.' },
   { id: 'dunes', name: 'Sunscorch Dunes', hp: 4.8, dmg: 2.1, coin: 4.2, boss: 'emperor', elite: 'worm',
-    enemies: ['scarab', 'lizard', 'scorpion', 'vulture', 'worm'], ground: ['#6e5c3c', '#4a3d27', '#2a2217'], blade: ['#8a7550', '#5e4f34'], stone: '#5a4a30',
+    enemies: ['scarab', 'lizard', 'scorpion', 'vulture', 'worm'], ground: ['#c49a5e', '#a67c48', '#6e4e2c'], blade: ['#8a7550', '#5e4f34'], stone: '#5a4a30',
     blurb: 'Armoured scarabs, darting lizards, scorpions whose sting poisons the nest, vultures and sandworms that stay underground until they are close. The Emperor Scorpion guards the sand.' },
   { id: 'jungle', name: 'Banana Jungle', hp: 7.6, dmg: 2.2, coin: 4.8, boss: 'kong', elite: 'gorilla',
     enemies: ['baboon', 'chimp', 'gibbon', 'thrower', 'gorilla'], ground: ['#2e4c28', '#1c3218', '#0e1a0e'], blade: ['#2e5a32', '#3a6a3a'], stone: '#1a3020',
@@ -3146,7 +3146,6 @@ function ambBack(id, t) {
         ctx.save(); ctx.translate(x, y); ctx.rotate(sw); ctx.fillStyle = '#d8402a'; ctx.beginPath(); ctx.ellipse(0, 0, 9, 12, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2a1a14'; ctx.fillRect(-6, -14, 12, 3); ctx.fillRect(-6, 11, 12, 3); ctx.restore(); }
       break;
     case 'void':
-      for (let i = 0; i < 6; i++) { const a = AMB[20 + i]; glow(a.x * .7 + Math.sin(t / 7000 + i) * 60, a.y * .7 + Math.cos(t / 8000 + i) * 60, 380, i % 2 ? '120,60,200' : '60,40,160', .16); }
       for (let i = 0; i < 3; i++) { const ph = ((t / 900 + i * .33) % 1); ctx.strokeStyle = `rgba(184,138,224,${.18 * (1 - ph)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 80 + ph * 500, 0, TAU); ctx.stroke(); }
       break;
     case 'office':
@@ -3236,7 +3235,7 @@ function ambFront(id, t) {
       ctx.globalAlpha = 1; break; }
   }
 }
-const VIG = { rift: '24,0,34', forest: '0,0,0', marsh: '0,18,14', snow: '18,28,48', city: '0,0,0', dunes: '50,25,0', jungle: '0,16,0', spider: '12,0,18', volcano: '70,6,0', fairy: '12,0,32', sakura: '34,0,18', void: '0,0,0', office: '0,0,12' };
+const VIG = { rift: '24,0,34', forest: '0,0,0', marsh: '0,18,14', snow: '18,28,48', city: '0,0,0', dunes: '40,20,0', jungle: '0,16,0', spider: '12,0,18', volcano: '70,6,0', fairy: '12,0,32', sakura: '34,0,18', void: '0,0,0', office: '0,0,12' };
 function vignette(id) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const g = ctx.createRadialGradient(vw / 2, vh / 2, Math.min(vw, vh) * .35, vw / 2, vh / 2, Math.hypot(vw, vh) * .62);
@@ -3296,6 +3295,21 @@ function makeDeco() {
   deco.fFlowers = Array.from({ length: 70 }, () => { const a = rnd(0, 7), d = rnd(130, 470); return { x: Math.cos(a) * d * 1.35, y: Math.sin(a) * d, k: Math.floor(rnd(0, 3)), n: 2 + Math.floor(rnd(0, 4)), a: rnd(0, 7) }; }).filter(f => Math.hypot(f.x - deco.fPond.x, f.y - deco.fPond.y) > 160);
   deco.fTufts = Array.from({ length: 220 }, () => { const a = rnd(0, 7), d = rnd(90, 700); return { x: Math.cos(a) * d * 1.35, y: Math.sin(a) * d, h: rnd(6, 13), n: 3 + Math.floor(rnd(0, 3)), c: Math.floor(rnd(0, 3)) }; }).filter(f => Math.hypot(f.x - deco.fPond.x, f.y - deco.fPond.y) > 150);
   deco.fWillows = ring(14, 450, 490, () => ({ r: rnd(90, 130), strands: Array.from({ length: 22 }, () => [rnd(-1, 1), rnd(.5, 1.1), rnd(0, 7)]), tone: Math.floor(rnd(0, 2)) }));
+  // Sunscorch Dunes: crescent dunes, sandstone rocks, ruins, an oasis, bones and tracks.
+  deco.dDunes = ring(7, 270, 470, () => ({ L: rnd(260, 400), wv: rnd(30, 60), ph: rnd(0, 7), a: rnd(-.5, .5), w: rnd(40, 65) }));
+  deco.dRocks = ring(5, 230, 430, () => ({ r: rnd(30, 52), layers: 3 + Math.floor(rnd(0, 3)), pts: Array.from({ length: 9 }, () => rnd(.8, 1.1)), rot: rnd(0, 7) }));
+  { const a = rnd(0, TAU); deco.dOasis = { x: Math.cos(a) * 360 * 1.35, y: Math.sin(a) * 330, palms: Array.from({ length: 3 }, (_, i) => ({ a: i * 2.1 + rnd(-.3, .3), r: rnd(42, 56), rot: rnd(0, 7) })) }; }
+  deco.dRuins = ring(4, 220, 420, () => ({ k: Math.floor(rnd(0, 3)), a: rnd(0, 7), n: 2 + Math.floor(rnd(0, 3)) })).filter(r => Math.hypot(r.x - deco.dOasis.x, r.y - deco.dOasis.y) > 190);
+  deco.dBones = ring(4, 180, 420, () => ({ a: rnd(0, 7), k: Math.random() < .5 ? 'skull' : 'ribs' })).filter(r => Math.hypot(r.x - deco.dOasis.x, r.y - deco.dOasis.y) > 160);
+  deco.dShrubs = Array.from({ length: 22 }, () => { const a = rnd(0, 7), d = rnd(150, 470); return { x: Math.cos(a) * d * 1.35, y: Math.sin(a) * d, s: rnd(7, 12), a: rnd(0, 7) }; }).filter(r => Math.hypot(r.x - deco.dOasis.x, r.y - deco.dOasis.y) > 130);
+  deco.dTracks = Array.from({ length: 3 }, () => { const a = rnd(0, 7), d = rnd(200, 380), h = rnd(0, 7); return { x: Math.cos(a) * d * 1.35, y: Math.sin(a) * d, h }; });
+  // The Void: stars, nebulae, floating islands with crystal veins, broken arches, orbiting debris, rifts and a black hole.
+  deco.vStars = Array.from({ length: 420 }, () => ({ x: rnd(-860, 860), y: rnd(-640, 640), r: Math.random() < .08 ? rnd(1.4, 2.2) : rnd(.4, 1.2), c: Math.floor(rnd(0, 3)), tw: Math.random() < .15 ? rnd(0, 7) : -1 }));
+  deco.vNebula = Array.from({ length: 7 }, () => ({ x: rnd(-760, 760), y: rnd(-560, 560), r: rnd(180, 320), c: Math.floor(rnd(0, 3)) }));
+  deco.vIslands = ring(7, 230, 440, () => ({ r: rnd(30, 52), pts: Array.from({ length: 10 }, () => rnd(.75, 1.12)), rot: rnd(0, 7), veins: Array.from({ length: 3 }, () => [rnd(0, 7), rnd(.3, .9)]), ph: rnd(0, 7), shards: Math.floor(rnd(1, 4)) }));
+  deco.vArches = ring(2, 300, 420, () => ({ a: rnd(0, 7), w: rnd(60, 80) }));
+  deco.vRifts = ring(4, 200, 430, () => ({ a: rnd(-.6, .6), l: rnd(40, 60), ph: rnd(0, 7) }));
+  { const a = rnd(0, TAU); deco.vHole = { x: Math.cos(a) * 440 * 1.35, y: Math.sin(a) * 360 }; deco.vGalaxy = { x: Math.cos(a + Math.PI) * 430 * 1.35, y: Math.sin(a + Math.PI) * 350, a: rnd(0, 7) }; }
   deco.pines = ring(18, 340, 540, () => ({ r: rnd(60, 95), arms: 7 + Math.floor(rnd(0, 3)), rot: rnd(0, 7), tone: Math.floor(rnd(0, 3)) }));
   deco.ponds = ring(3, 230, 360, () => ({ rx: rnd(50, 75), ry: rnd(28, 42), a: rnd(0, 3), cr: Array.from({ length: 5 }, () => [rnd(-1, 1), rnd(-1, 1), rnd(0, 7), rnd(.3, .7)]) }));
   deco.drifts = Array.from({ length: 22 }, () => { const a = rnd(0, 7), d = rnd(120, 820); return { x: Math.cos(a) * d * 1.3, y: Math.sin(a) * d, rx: rnd(40, 110), ry: rnd(16, 34), a: rnd(-.4, .4) }; });
@@ -3787,6 +3801,120 @@ function drawSpiderCanopy(t) {
     ctx.strokeStyle = `rgba(235,230,250,${.18 + .12 * Math.sin(t / 700 + a.p)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y);
     ctx.bezierCurveTo(x + len * .3, y - 14 * Math.sin(t / 500 + a.p), x + len * .6, y + 14 * Math.cos(t / 600 + a.p), x + len, y + 4 * Math.sin(t / 400 + a.p)); ctx.stroke(); }
 }
+// Sunscorch Dunes: wind-rippled sand, crescent dunes with a lit and a shaded face, sandstone, ruins, an oasis, bones, scrub and tracks.
+function drawDunesStatic() {
+  // fine wind ripples across all the sand
+  ctx.lineCap = 'round';
+  for (let i = -680; i < 680; i += 17) { ctx.strokeStyle = i % 34 ? 'rgba(255,225,160,.07)' : 'rgba(90,60,25,.09)'; ctx.lineWidth = 2; ctx.beginPath(); for (let x = -900; x <= 900; x += 24) { const y = i + Math.sin(x / 70 + i * .13) * 6 + Math.sin(x / 210 + i) * 10; x === -900 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); }
+  // a dimmer patch of plain sand around the nest so monsters stand out
+  glow(0, 0, 260, '90,60,30', .18);
+  // long winding dune ridges: the sun is to the top left, so the near slope is lit and the far slope falls into shadow
+  for (const d of deco.dDunes) { ctx.save(); ctx.translate(d.x, d.y); ctx.rotate(d.a);
+    const crest = []; for (let i = 0; i <= 24; i++) { const u = i / 24, x = (u - .5) * d.L, y = Math.sin(u * Math.PI * 1.6 + d.ph) * d.wv * Math.sin(u * Math.PI); crest.push([x, y, Math.sin(u * Math.PI) ** .7]); }
+    const side = (off, col) => { ctx.fillStyle = col; ctx.beginPath(); crest.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); for (let i = crest.length - 1; i >= 0; i--) { const [x, y, k] = crest[i]; ctx.lineTo(x + off * .25 * k * d.w, y + off * k * d.w); } ctx.closePath(); ctx.fill(); };
+    side(1.3, 'rgba(90,55,20,.16)'); side(.8, 'rgba(90,55,20,.2)'); side(.35, 'rgba(80,48,18,.22)');
+    side(-1.1, 'rgba(255,225,160,.12)'); side(-.6, 'rgba(255,228,170,.16)'); side(-.25, 'rgba(255,235,190,.2)');
+    ctx.strokeStyle = 'rgba(255,244,215,.6)'; ctx.lineWidth = 2; ctx.beginPath(); crest.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+    ctx.restore(); }
+  // sidewinder tracks: little slanted dashes winding across the sand
+  for (const t of deco.dTracks) { let x = t.x, y = t.y, h = t.h; ctx.strokeStyle = 'rgba(70,45,20,.35)'; ctx.lineWidth = 2.5; for (let k = 0; k < 16; k++) { h += Math.sin(k * .8) * .15; x += Math.cos(h) * 14; y += Math.sin(h) * 14; const px = -Math.sin(h) * 6, py = Math.cos(h) * 6; ctx.beginPath(); ctx.moveTo(x - px + Math.cos(h) * 4, y - py + Math.sin(h) * 4); ctx.lineTo(x + px - Math.cos(h) * 4, y + py - Math.sin(h) * 4); ctx.stroke(); } }
+  // desert scrub
+  for (const b of deco.dShrubs) { ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(b.x + 4, b.y + 4, b.s, b.s * .7, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#6a5a30'; ctx.lineWidth = 1.4; ctx.beginPath(); for (let i = 0; i < 9; i++) { const a = b.a + i / 9 * TAU; ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + Math.cos(a) * b.s, b.y + Math.sin(a) * b.s * .8); } ctx.stroke(); ctx.fillStyle = '#8a8a46'; for (let i = 0; i < 6; i++) { const a = b.a + i; ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * b.s * .6, b.y + Math.sin(a) * b.s * .5, 2, 0, TAU); ctx.fill(); } }
+  // layered sandstone outcrops, each band a little smaller and lighter
+  const RC = ['#7a3a20', '#9a4a26', '#b8643a', '#c87a48', '#d8946a'];
+  for (const r of deco.dRocks) { const shape = (k, dx, dy) => { ctx.beginPath(); r.pts.forEach((p, i) => { const a = r.rot + i / r.pts.length * TAU, x = r.x + dx + Math.cos(a) * r.r * p * k, y = r.y + dy + Math.sin(a) * r.r * p * k * .78; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); };
+    ctx.fillStyle = 'rgba(60,30,10,.45)'; shape(1.08, 16, 16); ctx.fill();
+    for (let l = 0; l < r.layers; l++) { ctx.fillStyle = RC[Math.min(4, l)]; shape(1 - l * .18, -l * 4, -l * 5); ctx.fill(); ctx.strokeStyle = 'rgba(255,220,180,.18)'; ctx.lineWidth = 1.5; shape(1 - l * .18, -l * 4, -l * 5); ctx.stroke(); } }
+  // half-buried ruins: column stumps, a fallen column, a toppled obelisk with carvings
+  for (const ru of deco.dRuins) { ctx.save(); ctx.translate(ru.x, ru.y); ctx.rotate(ru.a);
+    if (ru.k === 0) for (let i = 0; i < ru.n; i++) { const x = i * 46 - ru.n * 20, y = (i % 2) * 18; ctx.fillStyle = 'rgba(60,35,15,.4)'; ctx.beginPath(); ctx.ellipse(x + 8, y + 9, 17, 13, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#c8a878'; ctx.beginPath(); ctx.arc(x, y, 16, 0, TAU); ctx.fill(); ctx.fillStyle = '#e0c49a'; ctx.beginPath(); ctx.arc(x - 2, y - 2, 12, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(120,90,50,.5)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x - 2, y - 2, 7, 0, TAU); for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; ctx.moveTo(x - 2 + Math.cos(a) * 12, y - 2 + Math.sin(a) * 12); ctx.lineTo(x - 2 + Math.cos(a) * 16, y - 2 + Math.sin(a) * 16); } ctx.stroke(); }
+    else if (ru.k === 1) { ctx.fillStyle = 'rgba(60,35,15,.4)'; ctx.fillRect(-60, 2, 130, 30); for (let i = 0; i < 3; i++) { const x = -60 + i * 42; ctx.fillStyle = i % 2 ? '#c8a878' : '#d4b486'; ctx.fillRect(x, -14, 40, 28); ctx.fillStyle = 'rgba(255,240,210,.3)'; ctx.fillRect(x, -14, 40, 7); ctx.strokeStyle = 'rgba(110,80,45,.45)'; ctx.lineWidth = 1; for (let f = 1; f < 4; f++) { ctx.beginPath(); ctx.moveTo(x + 2, -14 + f * 7); ctx.lineTo(x + 38, -14 + f * 7); ctx.stroke(); } } ctx.fillStyle = 'rgba(200,160,100,.6)'; ctx.beginPath(); ctx.ellipse(-62, 0, 20, 22, 0, 0, TAU); ctx.fill(); }
+    else { ctx.fillStyle = 'rgba(60,35,15,.4)'; ctx.beginPath(); ctx.moveTo(-50, 22); ctx.lineTo(90, 14); ctx.lineTo(-50, 40); ctx.fill(); ctx.fillStyle = '#b89062'; ctx.beginPath(); ctx.moveTo(-60, -16); ctx.lineTo(70, -9); ctx.lineTo(86, 0); ctx.lineTo(70, 9); ctx.lineTo(-60, 16); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#d4ae7a'; ctx.beginPath(); ctx.moveTo(-60, -16); ctx.lineTo(70, -9); ctx.lineTo(86, 0); ctx.lineTo(-60, 0); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(90,60,30,.6)'; ctx.lineWidth = 1.5; for (let i = 0; i < 5; i++) { const x = -44 + i * 22; ctx.beginPath(); if (i % 3 === 0) { ctx.arc(x, -6, 3.5, 0, TAU); ctx.moveTo(x, -2.5); ctx.lineTo(x, 6); } else if (i % 3 === 1) { ctx.moveTo(x - 4, -8); ctx.lineTo(x + 4, -8); ctx.lineTo(x, 0); ctx.closePath(); ctx.moveTo(x, 2); ctx.lineTo(x, 8); } else { ctx.moveTo(x - 4, 6); ctx.quadraticCurveTo(x, -10, x + 4, 6); } ctx.stroke(); }
+      ctx.fillStyle = 'rgba(200,160,100,.7)'; ctx.beginPath(); ctx.ellipse(-64, 0, 18, 24, 0, 0, TAU); ctx.fill(); }
+    ctx.restore(); }
+  // bleached bones: an animal skull with horns, and a ribcage half in the sand
+  for (const b of deco.dBones) { ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a); ctx.fillStyle = 'rgba(60,35,15,.35)'; ctx.beginPath(); ctx.ellipse(5, 6, 22, 14, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#efe6d2'; ctx.strokeStyle = '#efe6d2'; ctx.lineCap = 'round';
+    if (b.k === 'skull') { ctx.beginPath(); ctx.ellipse(0, 0, 11, 9, 0, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.moveTo(6, -5); ctx.lineTo(20, -3); ctx.lineTo(20, 3); ctx.lineTo(6, 5); ctx.fill(); ctx.lineWidth = 3.5; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-3, sd * 7); ctx.quadraticCurveTo(-8, sd * 22, -22, sd * 20); ctx.stroke(); } ctx.fillStyle = '#3a2a18'; ctx.beginPath(); ctx.arc(3, -4, 2.5, 0, TAU); ctx.arc(3, 4, 2.5, 0, TAU); ctx.fill(); }
+    else { ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(24, 0); ctx.stroke(); ctx.lineWidth = 2.4; for (let i = 0; i < 6; i++) { const x = -18 + i * 8; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.quadraticCurveTo(x - 6, sd * 12, x - 2, sd * (16 - i)); ctx.stroke(); } } }
+    ctx.restore(); }
+  // the oasis: green bank, blue water and three palms
+  const O = deco.dOasis;
+  ctx.fillStyle = 'rgba(60,35,15,.35)'; ctx.beginPath(); ctx.ellipse(O.x + 10, O.y + 12, 98, 62, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#6a8a3a'; ctx.beginPath(); ctx.ellipse(O.x, O.y, 95, 60, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#86a24a'; ctx.beginPath(); ctx.ellipse(O.x - 6, O.y - 5, 82, 50, 0, 0, TAU); ctx.fill();
+  const wg = ctx.createRadialGradient(O.x - 15, O.y - 10, 4, O.x, O.y, 60); wg.addColorStop(0, '#7ad0e0'); wg.addColorStop(.6, '#2a8aa8'); wg.addColorStop(1, '#1a5a78');
+  ctx.fillStyle = wg; ctx.beginPath(); ctx.ellipse(O.x, O.y, 62, 36, 0, 0, TAU); ctx.fill();
+  for (const pm of O.palms) { const px = O.x + Math.cos(pm.a) * 78, py = O.y + Math.sin(pm.a) * 48; ctx.save(); ctx.translate(px, py); ctx.rotate(pm.rot);
+    ctx.fillStyle = 'rgba(40,30,10,.35)'; ctx.beginPath(); ctx.arc(14, 16, pm.r * .9, 0, TAU); ctx.fill();
+    for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; ctx.fillStyle = i % 2 ? '#3e7a34' : '#4e9440'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(Math.cos(a - .3) * pm.r * .6, Math.sin(a - .3) * pm.r * .6, Math.cos(a) * pm.r, Math.sin(a) * pm.r); ctx.quadraticCurveTo(Math.cos(a + .3) * pm.r * .6, Math.sin(a + .3) * pm.r * .6, 0, 0); ctx.fill(); ctx.strokeStyle = 'rgba(30,60,20,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * pm.r * .95, Math.sin(a) * pm.r * .95); ctx.stroke(); }
+    ctx.fillStyle = '#6a4a26'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, TAU); ctx.fill(); ctx.fillStyle = '#5a3a1a'; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(Math.cos(i * 2) * 5, Math.sin(i * 2) * 5, 3, 0, TAU); ctx.fill(); }
+    ctx.restore(); }
+}
+function drawDunesFloor(time) {
+  drawCachedFloor('dunes', deco.dDunes, drawDunesStatic);
+  const lo = lowFx(), O = deco.dOasis;
+  // the oasis water glitters
+  for (let i = 0; i < 6; i++) { const k = Math.max(0, Math.sin(time / 300 + i * 1.7)) ** 6; if (k < .05) continue; const x = O.x - 40 + i * 15, y = O.y + Math.sin(i * 2.3) * 16; ctx.fillStyle = `rgba(255,255,240,${k})`; ctx.beginPath(); ctx.arc(x, y, 1.5 + k * 1.5, 0, TAU); ctx.fill(); }
+  // vulture shadows sliding over the sand
+  for (let i = 0; i < 2; i++) { const a = time / (9000 + i * 2500) + i * 3, R = 330 + i * 80, x = Math.cos(a) * R * 1.35, y = Math.sin(a) * R, h = a + Math.PI / 2, f = Math.sin(time / 300 + i) * .15;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(h); ctx.fillStyle = 'rgba(40,25,10,.25)'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-6, -34 - f * 20); ctx.lineTo(-12, -6); ctx.lineTo(-18, 0); ctx.lineTo(-12, 6); ctx.lineTo(-6, 34 + f * 20); ctx.closePath(); ctx.fill(); ctx.restore(); }
+  // heat shimmer: faint bands drifting up
+  if (!lo) for (let i = 0; i < 4; i++) { const y = wrap(400 - time / 30 - i * 220, -500, 500); ctx.fillStyle = 'rgba(255,240,200,.035)'; ctx.fillRect(-1000, y, 2000, 14 + 8 * Math.sin(time / 500 + i)); }
+}
+// The Void: stars and nebulae, a black hole, floating islands with glowing crystal veins and broken arches.
+const VCOL = ['200,160,255', '140,200,255', '255,150,220'];
+function drawVoidStatic() {
+  for (const n of deco.vNebula) { glow(n.x, n.y, n.r, VCOL[n.c], .2); glow(n.x + n.r * .3, n.y - n.r * .2, n.r * .55, VCOL[(n.c + 1) % 3], .14); }
+  // a spiral galaxy, far away
+  { const G = deco.vGalaxy; ctx.save(); ctx.translate(G.x, G.y); ctx.rotate(G.a); ctx.scale(1, .55); glow(0, 0, 120, '255,220,240', .25); glow(0, 0, 40, '255,250,240', .6);
+    for (let arm = 0; arm < 2; arm++) for (let i = 0; i < 90; i++) { const u = i / 90, ang = arm * Math.PI + u * 5.2, rr = 10 + u * 110, j = Math.sin(i * 12.9 + arm) * 8; ctx.fillStyle = `rgba(${u < .5 ? '255,230,250' : '200,180,255'},${.55 * (1 - u * .7)})`; ctx.beginPath(); ctx.arc(Math.cos(ang) * rr + j, Math.sin(ang) * rr + j * .5, 1.2 + (1 - u) * 1.8, 0, TAU); ctx.fill(); }
+    ctx.restore(); }
+  for (const st of deco.vStars) { if (st.tw >= 0) continue; ctx.fillStyle = `rgba(${VCOL[st.c]},${.5 + st.r * .3})`; ctx.beginPath(); ctx.arc(st.x, st.y, st.r * 1.2, 0, TAU); ctx.fill(); }
+  // broken arches of something very old, drifting
+  for (const a of deco.vArches) { ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.a);
+    ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(14, 22, a.w, 18, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#2a2240'; ctx.lineWidth = 16; ctx.lineCap = 'butt'; ctx.beginPath(); ctx.arc(0, 0, a.w * .7, Math.PI * 1.05, Math.PI * 1.7); ctx.stroke();
+    ctx.strokeStyle = '#3e3460'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(-2, -2, a.w * .7, Math.PI * 1.08, Math.PI * 1.65); ctx.stroke();
+    ctx.fillStyle = '#2a2240'; ctx.fillRect(-a.w * .7 - 9, -4, 18, 34); ctx.fillStyle = '#3e3460'; ctx.fillRect(-a.w * .7 - 9, -4, 7, 34);
+    ctx.strokeStyle = 'rgba(200,150,255,.5)'; ctx.lineWidth = 1.5; for (let i = 0; i < 4; i++) { const t = Math.PI * (1.12 + i * .14), x = Math.cos(t) * a.w * .7, y = Math.sin(t) * a.w * .7; ctx.beginPath(); ctx.moveTo(x - 3, y - 3); ctx.lineTo(x + 3, y + 3); ctx.moveTo(x + 3, y - 3); ctx.lineTo(x - 3, y + 3); ctx.stroke(); }
+    ctx.restore(); }
+  // floating islands: dark rock with a lit top, a shadow far below, and crystal shards
+  for (const r of deco.vIslands) { const shape = (k, dx, dy) => { ctx.beginPath(); r.pts.forEach((p, i) => { const a = r.rot + i / r.pts.length * TAU, x = r.x + dx + Math.cos(a) * r.r * p * k, y = r.y + dy + Math.sin(a) * r.r * p * k * .8; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); };
+    ctx.fillStyle = 'rgba(0,0,0,.55)'; shape(.85, 30, 40); ctx.fill();
+    ctx.fillStyle = '#1a1428'; shape(1, 0, 8); ctx.fill();
+    ctx.fillStyle = '#2a2240'; shape(1, 0, 0); ctx.fill();
+    ctx.fillStyle = '#3a3058'; shape(.7, -r.r * .12, -r.r * .12); ctx.fill();
+    ctx.fillStyle = 'rgba(160,140,220,.14)'; shape(.4, -r.r * .25, -r.r * .25); ctx.fill();
+    for (let i = 0; i < r.shards; i++) { const a = r.rot + i * 2.2, x = r.x + Math.cos(a) * r.r * .45, y = r.y + Math.sin(a) * r.r * .35; ctx.fillStyle = '#7a4ac0'; ctx.beginPath(); ctx.moveTo(x - 5, y + 4); ctx.lineTo(x, y - 16); ctx.lineTo(x + 5, y + 4); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#c8a0ff'; ctx.beginPath(); ctx.moveTo(x - 5, y + 4); ctx.lineTo(x, y - 16); ctx.lineTo(x, y + 4); ctx.closePath(); ctx.fill(); }
+  }
+}
+function drawVoidFloor(time) {
+  drawCachedFloor('void', deco.vIslands, drawVoidStatic);
+  const lo = lowFx();
+  // twinkling stars
+  for (const st of deco.vStars) { if (st.tw < 0) continue; const k = .3 + .7 * Math.max(0, Math.sin(time / 600 + st.tw * 5)) ** 3; ctx.fillStyle = `rgba(${VCOL[st.c]},${k})`; ctx.beginPath(); ctx.arc(st.x, st.y, st.r + k, 0, TAU); ctx.fill(); if (k > .8) { ctx.fillRect(st.x - 5 * k, st.y - .4, 10 * k, .8); ctx.fillRect(st.x - .4, st.y - 5 * k, .8, 10 * k); } }
+  // the black hole far off: a bright accretion disk turning round a perfectly black centre, its light bent into a ring
+  { const H = deco.vHole; if (!lo) { glow(H.x, H.y, 230, '230,130,255', .25); glow(H.x, H.y, 110, '255,190,150', .25); }
+    ctx.save(); ctx.translate(H.x, H.y); ctx.scale(1, .38); ctx.rotate(time / 2600);
+    for (let i = 0; i < 8; i++) { ctx.strokeStyle = ['rgba(255,240,220,.85)', 'rgba(255,190,140,.7)', 'rgba(255,140,200,.6)', 'rgba(200,130,255,.5)'][i % 4]; ctx.lineWidth = 9 - i * .8; ctx.beginPath(); ctx.arc(0, 0, 44 + i * 10, i * 1.3, i * 1.3 + 4.6); ctx.stroke(); }
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,220,200,.75)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(H.x, H.y - 6, 40, 30, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(H.x, H.y, 32, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,240,255,.95)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(H.x, H.y, 33, 0, TAU); ctx.stroke(); }
+  // crystal veins on the islands pulse with light
+  for (const r of deco.vIslands) { const k = .5 + .5 * Math.sin(time / 900 + r.ph); ctx.strokeStyle = `rgba(220,160,255,${.55 + .45 * k})`; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+    for (const [a0, l] of r.veins) { ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.x + Math.cos(a0) * r.r * l * .6, r.y + Math.sin(a0) * r.r * l * .5); ctx.lineTo(r.x + Math.cos(a0 + .4) * r.r * l, r.y + Math.sin(a0 + .4) * r.r * l * .8); ctx.stroke(); }
+    if (!lo) glow(r.x, r.y, r.r * 1.1, '170,100,255', .18 * k); }
+  // debris orbiting the nest very slowly
+  for (let i = 0; i < 12; i++) { const a = AMB[i], ang = a.p + time / (20000 + a.s * 20000) * (i % 2 ? 1 : -1), R = 230 + a.s * 220, x = Math.cos(ang) * R * 1.35, y = Math.sin(ang) * R, sz = 3 + a.s * 6;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(time / 2000 + i); ctx.fillStyle = '#2e2646'; ctx.beginPath(); ctx.moveTo(-sz, -sz * .6); ctx.lineTo(sz * .8, -sz); ctx.lineTo(sz, sz * .5); ctx.lineTo(-sz * .5, sz); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(200,170,255,.35)'; ctx.fillRect(-sz * .5, -sz * .7, sz, sz * .3); ctx.restore(); }
+  // rifts: tears in nothing that open, glow, and seal again
+  for (const r of deco.vRifts) { const cyc = (time / 1000 + r.ph * 2) % 6, open = cyc < 2.4 ? Math.sin(cyc / 2.4 * Math.PI) : 0; if (open <= 0) continue;
+    ctx.save(); ctx.translate(r.x, r.y); ctx.rotate(r.a); if (!lo) glow(0, 0, r.l, '200,80,255', .3 * open);
+    ctx.fillStyle = `rgba(255,220,255,${.9 * open})`; ctx.beginPath(); ctx.moveTo(-r.l / 2, 0); ctx.quadraticCurveTo(0, -10 * open, r.l / 2, 0); ctx.quadraticCurveTo(0, 10 * open, -r.l / 2, 0); ctx.fill();
+    ctx.fillStyle = `rgba(20,0,40,${open})`; ctx.beginPath(); ctx.moveTo(-r.l * .35, 0); ctx.quadraticCurveTo(0, -5 * open, r.l * .35, 0); ctx.quadraticCurveTo(0, 5 * open, -r.l * .35, 0); ctx.fill(); ctx.restore(); }
+}
 // Glimmer Glade: moonlit grass, a pond with lilies, giant toadstools, crystals and rune stones.
 function drawFairyStatic() {
   // moonlit moss and soft light where the canopy opens
@@ -3889,7 +4017,7 @@ function drawGround(biome, time) {
   if (biome.id === 'forest' && deco.trees) drawForestFloor(time);
   if (biome.id === 'jungle' && deco.palms) drawJungleFloor(time);
   if (biome.id === 'marsh' && deco.bogs) drawMarshFloor(time);
-  if (biome.id === 'dunes') { ctx.strokeStyle = 'rgba(255,230,170,.08)'; ctx.lineWidth = 3; for (let i = -900; i < 900; i += 46) { ctx.beginPath(); for (let x = -900; x <= 900; x += 30) { const y = i + Math.sin(x / 90 + i) * 14; x === -900 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); } }
+  if (biome.id === 'dunes' && deco.dDunes) drawDunesFloor(time);
   if (biome.id === 'volcano' && deco.rivers) drawVolcanoFloor(time);
   if (biome.id === 'snow' && deco.pines) drawSnowFloor(time);
   if (biome.id === 'sakura' && deco.cherries) drawSakuraFloor(time);
@@ -3911,16 +4039,13 @@ function drawGround(biome, time) {
       ctx.strokeStyle = 'rgba(70,90,40,.7)'; ctx.lineWidth = 4; ctx.beginPath(); pts.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
       pts.forEach(([x, y], k) => { if (k % 2) return; ctx.fillStyle = k % 4 ? '#3e7a34' : '#4e8e3a'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(x + sd * 9, y, 9, 4.5, sd * .5, 0, TAU); ctx.fill(); } }); }
   }
-  if (biome.id === 'void') {
-    for (const b of deco.blades) { ctx.fillStyle = b.c ? 'rgba(184,138,224,.5)' : 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(b.x, b.y, b.h / 8, 0, TAU); ctx.fill(); }
-    ctx.strokeStyle = 'rgba(120,60,200,.12)'; ctx.lineWidth = 18; for (let i = 0; i < 4; i++) { const a0 = time / 4000 + i * 1.57; ctx.beginPath(); ctx.arc(0, 0, 200 + i * 130, a0, a0 + 2.2); ctx.stroke(); }
-  }
+  if (biome.id === 'void' && deco.vIslands) drawVoidFloor(time);
   if (biome.id === 'spider' && deco.sRocks) drawSpiderFloor(time);
   if (biome.id === 'fairy' && deco.fToads) drawFairyFloor(time);
   if (biome.id === 'city' && deco.cityB) { drawCityFloor(time); drawCityBuildings(time); }
-  if (!['office', 'volcano', 'snow', 'sakura', 'jungle', 'city', 'spider', 'fairy'].includes(biome.id)) for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
+  if (!['office', 'volcano', 'snow', 'sakura', 'jungle', 'city', 'spider', 'fairy', 'dunes', 'void'].includes(biome.id)) for (const s of deco.stones) { ctx.fillStyle = biome.stone; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r, s.r * .7, 0, 0, TAU); ctx.fill(); }
   ctx.lineWidth = 2; ctx.lineCap = 'round';
-  if (!['office', 'volcano', 'snow', 'sakura', 'city', 'spider', 'fairy'].includes(biome.id)) for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
+  if (!['office', 'volcano', 'snow', 'sakura', 'city', 'spider', 'fairy', 'dunes', 'void'].includes(biome.id)) for (const b of deco.blades) { ctx.strokeStyle = biome.blade[b.c]; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.t * b.h + Math.sin(time / 900 + b.x) * 1.5, b.y - b.h); ctx.stroke(); }
 }
 function drawWeather(biome, time) {
   if (biome.id === 'sakura' || biome.id === 'fairy' || biome.id === 'volcano') {
