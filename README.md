@@ -62,3 +62,21 @@ Pushing a tag such as `v1.2.0` also builds a release with that name. You can run
 - `site/` is the download website. `.github/workflows/website.yml` publishes it with GitHub Pages, together with a playable copy of the game at `/play/`. Turn it on once in **Settings → Pages → Source: GitHub Actions**.
 - `desktop/` packages the game as a desktop app with Electron (`npm install`, then `npm start` to play or `npm run dist` to build an installer).
 - `.github/workflows/nestguard-installers.yml` builds the installers.
+- `CHANGELOG.md` lists what changed in each update.
+- `tools/balance-sim.js` plays real runs of the game with a bot, headless, and prints win rates. It needs Playwright (`npm i -g playwright && npx playwright install chromium`). Examples:
+  - `node tools/balance-sim.js --world void --up full` (a fully upgraded crow on The Void)
+  - `node tools/balance-sim.js --world spider --compare "--up 0.6;--up 0.5"` (60% vs 50% of every Roost upgrade)
+  - `node tools/balance-sim.js --world void --diff 3 --skin shard --up full,beak=20` (Nightmare, shard skin, Sharp Beak at 20)
+  - `node tools/balance-sim.js --scan items --world volcano --spells razor,meteor,fury,starfall,shadow --up 0.75,egg=0` (every item alone vs. no item)
+  - `node tools/balance-sim.js --scan up --coins 1500 --world volcano --spells razor,meteor,fury,starfall,shadow --up 0.6` (what ~1500 coins in each Roost upgrade is worth)
+  - Run it without options or read the top of the file for every option.
+
+### Balance targets
+
+Each world is tuned so a crow with this share of every Roost upgrade wins it almost every time on Normal, and usually loses with 10% less:
+
+| World | 1 Wood | 2 Marsh | 3 Frostfang | 4 Alleys | 5 Dunes | 6 Jungle | 7 Silkshade | 8 Cinder | 9 Glade | 10 Blossom | 11 Void |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Upgrades needed | 0% | 10% | 20% | 30% | 40% | 50% | 60% | 70% | 80% | 90% | 100% |
+
+The next 10% of upgrades costs about 2-4 wins of the world before. The Void has its own difficulty steps, so Nightmare stays hard even fully upgraded.
