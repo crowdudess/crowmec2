@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.5</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.6</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1417,7 +1417,7 @@ Object.assign(LX.es.LO, { mudcrab: 'El Cangrejo de Lodo lleva cuarenta años cav
 Object.assign(LX.de.LO, { mudcrab: 'Die Schlammkrabbe gräbt seit vierzig Jahren am selben Ufer des Sumpfs. Ihre Scheren knacken Schildkrötenpanzer, und sie mag keinen Besuch, Krähen am wenigsten. Wenn sie wütend ist, scheucht sie die Blutegel aus dem Schlamm.' });
 Object.assign(TX, { say_b_mudcrab: ['A crab. Made of mud. Wonderful.|Mind the pincers, mind the pincers!|Sideways is not a real direction!', 'Un crabe. En boue. Génial.|Attention aux pinces, attention aux pinces !|De côté, ce n’est pas une direction !', 'Un cangrejo. De barro. Genial.|¡Cuidado con las pinzas, cuidado con las pinzas!|¡De lado no es una dirección!', 'Eine Krabbe. Aus Schlamm. Großartig.|Vorsicht, Scheren, Vorsicht, Scheren!|Seitwärts ist keine echte Richtung!'], say_w_mudcrab: ['Back in your shell. Well, you know what I mean.', 'Retourne dans ta carapace. Enfin, tu vois.', 'Vuelve a tu caparazón. Bueno, ya me entiendes.', 'Zurück in deinen Panzer. Na ja, du weißt schon.'] });
 const BNAMES = {"forest": ["Whispering Wood", "Bois Murmurant", "Bosque Susurrante", "Flüsterwald"], "marsh": ["Murkwater Marsh", "Marais Trouble", "Pantano Turbio", "Trübwassersumpf"], "snow": ["Frostfang Pass", "Col Croc-de-Givre", "Paso Colmillo Helado", "Frostzahnpass"], "city": ["Ashen Alleys", "Ruelles Cendrées", "Callejones de Ceniza", "Aschengassen"], "dunes": ["Sunscorch Dunes", "Dunes Brûlantes", "Dunas Abrasadoras", "Sonnenglutdünen"], "jungle": ["Banana Jungle", "Jungle Banane", "Selva Banana", "Bananendschungel"], "spider": ["Silkshade Hollow", "Creux Soieombre", "Hondonada Sedasombra", "Seidenschattenhöhle"], "volcano": ["Cinder Peak", "Pic des Cendres", "Pico Ceniza", "Aschegipfel"], "fairy": ["Glimmer Glade", "Clairière Scintillante", "Claro Resplandeciente", "Glimmerlichtung"], "sakura": ["Blossom Ridge", "Crête des Fleurs", "Cresta Florida", "Blütenkamm"], "void": ["The Void", "Le Néant", "El Vacío", "Die Leere"], "office": ["Corporate Office", "Bureau d’Entreprise", "Oficina Corporativa", "Großraumbüro"], "rift": ["Chaos Rift", "Faille du Chaos", "Grieta del Caos", "Chaosriss"]};
-const CHNAMES = {"glass": [["Glass Nest", "The nest has 40% of its HP and you cannot shield it between waves."], ["Nid de verre", "Le nid n’a que 40 % de ses PV et tu ne peux pas le protéger entre les vagues."], ["Nido de cristal", "El nido tiene el 40 % de sus PS y no puedes protegerlo entre oleadas."], ["Glasnest", "Das Nest hat 40 % seiner LP und du kannst es zwischen den Wellen nicht abschirmen."]], "swarm": [["Swarm", "60% more enemies, and they move 20% faster."], ["Essaim", "60 % d’ennemis en plus, 20 % plus rapides."], ["Enjambre", "60 % más enemigos, y un 20 % más rápidos."], ["Schwarm", "60 % mehr Gegner, und sie sind 20 % schneller."]], "pauper": [["No Spells", "Your spells are locked for the whole run. Only your feathers and your caw."], ["Sans sorts", "Tes sorts sont bloqués pendant toute la partie. Seulement tes plumes et ton croassement."], ["Sin hechizos", "Tus hechizos están bloqueados toda la partida. Solo tus plumas y tu graznido."], ["Keine Zauber", "Deine Zauber sind den ganzen Lauf über gesperrt. Nur deine Federn und dein Krächzen."]]};
+const CHNAMES = {"glass": [["Glass Nest", "The nest has 33% of its HP and you cannot shield it between waves."], ["Nid de verre", "Le nid n’a que 33 % de ses PV et tu ne peux pas le protéger entre les vagues."], ["Nido de cristal", "El nido tiene el 33 % de sus PS y no puedes protegerlo entre oleadas."], ["Glasnest", "Das Nest hat 33 % seiner LP und du kannst es zwischen den Wellen nicht abschirmen."]], "swarm": [["Swarm", "80% more enemies, and they move 25% faster."], ["Essaim", "80 % d’ennemis en plus, 25 % plus rapides."], ["Enjambre", "80 % más enemigos, y un 25 % más rápidos."], ["Schwarm", "80 % mehr Gegner, und sie sind 25 % schneller."]], "pauper": [["No Spells", "Your spells are locked for the whole run. Only your feathers and your caw."], ["Sans sorts", "Tes sorts sont bloqués pendant toute la partie. Seulement tes plumes et ton croassement."], ["Sin hechizos", "Tus hechizos están bloqueados toda la partida. Solo tus plumas y tu graznido."], ["Keine Zauber", "Deine Zauber sind den ganzen Lauf über gesperrt. Nur deine Federn und dein Krächzen."]]};
 let lang = 'en';
 const li = () => Math.max(0, LANGS.findIndex(l => l[0] === lang));
 function T(k, ...a) { const row = TX[k]; let str = row ? (row[li()] || row[0]) : k; a.forEach((v, i) => { str = str.split('{' + i + '}').join(v); }); return str; }
@@ -1758,8 +1758,8 @@ function loadout() {
   return save.loadout.filter(id => save.spells.includes(id)).slice(0, MAX_LOADOUT);
 }
 const CHALLENGES = [
-  { id: 'glass', name: 'Glass Nest', desc: 'The nest has 40% of its HP and you cannot shield it between waves.' },
-  { id: 'swarm', name: 'Swarm', desc: '60% more enemies, and they move 20% faster.' },
+  { id: 'glass', name: 'Glass Nest', desc: 'The nest has 33% of its HP and you cannot shield it between waves.' },
+  { id: 'swarm', name: 'Swarm', desc: '80% more enemies, and they move 25% faster.' },
   { id: 'pauper', name: 'No Spells', desc: 'Your spells are locked for the whole run. Only your feathers and your caw.' },
 ];
 const chDone = (s, bid) => { const b = s.biomes && s.biomes[bid]; return !!(b && b.ch && CHALLENGES.every(c => b.ch[c.id])); };
@@ -1913,8 +1913,8 @@ function newRun(biomeIdx) {
   const chaos = BIOMES[biomeIdx].mode ? Math.min(save.chaos || 0, save.chaosMax || 0) : 0;
   if (chaos >= 8) maxHp = Math.round(maxHp * .7);
   const ch = save.challenge && biomeState(B.id).cleared && !B.mode ? save.challenge : '';
-  if (ch === 'glass') maxHp = Math.round(maxHp * .4);
-  run = { ch, noHeal: ch === 'glass', countMult: ch === 'swarm' ? 1.6 : 1, spdMult: ch === 'swarm' ? 1.2 : 1, chGold: 1, rerollMult: ch === 'pauper' ? 2 : 1, biome: biomeIdx, chaos, diff: diffOf(BIOMES[biomeIdx]), coinX: (1 + .3 * chaos) * DIFFS[diffOf(BIOMES[biomeIdx])].coin, wave: 0, gold: 0, hp: maxHp, maxHp, kills: 0, items: {}, bought: 0, earned: 0, coins: 0, endless: false, bossBeaten: false, waveDmg: 0, unlocks: [], boss: null, poisonT: 0, poisonD: 0, webT: 0 };
+  if (ch === 'glass') maxHp = Math.round(maxHp * .33);
+  run = { ch, noHeal: ch === 'glass', countMult: ch === 'swarm' ? 1.8 : 1, spdMult: ch === 'swarm' ? 1.25 : 1, chGold: 1, rerollMult: ch === 'pauper' ? 2 : 1, biome: biomeIdx, chaos, diff: diffOf(BIOMES[biomeIdx]), coinX: (1 + .3 * chaos) * DIFFS[diffOf(BIOMES[biomeIdx])].coin, wave: 0, gold: 0, hp: maxHp, maxHp, kills: 0, items: {}, bought: 0, earned: 0, coins: 0, endless: false, bossBeaten: false, waveDmg: 0, unlocks: [], boss: null, poisonT: 0, poisonD: 0, webT: 0 };
   enemies = []; shots = []; parts = []; texts = []; rings = []; coinsFx = []; zones = []; spawnQ = []; webLines = []; cheeses = []; meteors = []; quakes = []; pillars = []; iceTrail = [];
   fireT = 0; cawT = 0; armed = null; spellCds = {};
   for (const s of SPELLS) spellCds[s.id] = 0;

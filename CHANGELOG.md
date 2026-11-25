@@ -1,5 +1,12 @@
 # Nestguard changelog
 
+## 2.99.6 — Tougher challenges
+
+- **Glass Nest:** the nest now has 33% of its HP (was 40%).
+- **Swarm:** 80% more enemies (was 60%), and they move 25% faster (was 20%).
+- **No Spells** is unchanged; it was already about right.
+- Each challenge is now roughly a coin flip with the upgrades a world needs, and a sure win with a bit more. The Void's challenges stay beatable for a fully upgraded crow.
+
 ## 2.99.5 — The Big Balance Update
 
 Every world, item, permanent upgrade and spell was tested with thousands of simulated runs and retuned.

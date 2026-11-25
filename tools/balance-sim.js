@@ -14,6 +14,7 @@
 //   --heal 0.4          patch the nest instead of taking an item below this HP fraction
 //   --items sharp,twin  start the run holding these items (repeat an id to stack it)
 //   --noshop 1          take nothing from the shop or golden eggs (to judge items on their own)
+//   --ch glass          play a challenge run: glass, swarm or pauper (No Spells)
 //   --nogift 1          skip the Magpie's Favour starting pick
 //   --scan items        test every item alone against no item (add --rar 5 for one rarity); implies --noshop 1 --nogift 1
 //   --scan spells       test every spell as the only spell against no spell; implies --noshop 1 --nogift 1
@@ -47,7 +48,7 @@ function upgrades(spec) {
 }
 function setup(o, label) {
   return { label, world: o.world, diff: +o.diff, skin: o.skin, up: upgrades(o.up), loadout: o.spells === 'none' ? [] : o.spells.split(','), healAt: +o.heal,
-    hp: o.hp ? +o.hp : 0, dmg: o.dmg ? +o.dmg : 0, runs: +o.runs, seed: +o.seed, items: o.items ? String(o.items).split(',') : [], noshop: !!+o.noshop, nogift: !!+o.nogift };
+    hp: o.hp ? +o.hp : 0, dmg: o.dmg ? +o.dmg : 0, runs: +o.runs, seed: +o.seed, items: o.items ? String(o.items).split(',') : [], noshop: !!+o.noshop, nogift: !!+o.nogift, ch: o.ch || '' };
 }
 
 // Runs inside the page: one full run, returns { win, wave }.
@@ -57,7 +58,7 @@ function playRun(c) {
   const idx = A.BIOMES.findIndex(b => b.id === c.world); if (idx < 0) return { error: 'no world ' + c.world };
   const biomes = {}; for (const b of A.BIOMES) biomes[b.id] = { unlocked: true, cleared: true, best: 0, dw: 3 };
   A.setSave({ coins: 0, up: c.up, spells: A.SPELLS.map(x => x.id), loadout: c.loadout, skin: c.skin, skinsSeen: [c.skin], biomes, itemsOpen: A.ITEMS.map(i => i.id),
-    biome: idx, ach: {}, stats: { kills: 0, casts: 0 }, talk: false, diffSel: { [c.world]: c.diff } });
+    biome: idx, ach: {}, stats: { kills: 0, casts: 0 }, talk: false, diffSel: { [c.world]: c.diff }, challenge: c.ch });
   if (c.hp) A.BIOMES[idx].hp = c.hp; if (c.dmg) A.BIOMES[idx].dmg = c.dmg;
   A.newRun(idx);
   { const run = A.get().run; for (const id of c.items) { const it = A.ITEMS.find(x => x.id === id); if (!it) return { error: 'no item ' + id }; run.items[id] = (run.items[id] || 0) + 1; it.apply(); } }
