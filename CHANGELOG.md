@@ -1,5 +1,10 @@
 # Nestguard changelog
 
+## 2.99.7 — The Old Gator bites and runs
+
+- **Bite and dive:** after every bite (including a death roll, whether it ends or you break it with a caw), the Old Gator sinks underwater, swims away from the nest and **spits frogs out behind him** for a few seconds. Then he swims back, surfaces and comes in again.
+- **Fewer frogs on call:** his frog call now brings **1 frog** instead of 2.
+
 ## 2.99.6 — The Old Gator wakes up, and tougher challenges
 
 ### Old Gator rework
