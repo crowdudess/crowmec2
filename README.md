@@ -66,6 +66,8 @@ Pushing a tag such as `v1.2.0` also builds a release with that name. You can run
   - `node tools/balance-sim.js --world void --up full` (a fully upgraded crow on The Void)
   - `node tools/balance-sim.js --world spider --compare "--up 0.6;--up 0.5"` (60% vs 50% of every Roost upgrade)
   - `node tools/balance-sim.js --world void --diff 3 --skin shard --up full,beak=20` (Nightmare, shard skin, Sharp Beak at 20)
+  - `node tools/balance-sim.js --scan items --world volcano --spells razor,meteor,fury,starfall,shadow --up 0.75,egg=0` (every item alone vs. no item)
+  - `node tools/balance-sim.js --scan up --coins 1500 --world volcano --spells razor,meteor,fury,starfall,shadow --up 0.6` (what ~1500 coins in each Roost upgrade is worth)
   - Run it without options or read the top of the file for every option.
 
 ### Balance targets
