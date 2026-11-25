@@ -62,6 +62,7 @@ Pushing a tag such as `v1.2.0` also builds a release with that name. You can run
 - `site/` is the download website. `.github/workflows/website.yml` publishes it with GitHub Pages, together with a playable copy of the game at `/play/`. Turn it on once in **Settings → Pages → Source: GitHub Actions**.
 - `desktop/` packages the game as a desktop app with Electron (`npm install`, then `npm start` to play or `npm run dist` to build an installer).
 - `.github/workflows/nestguard-installers.yml` builds the installers.
+- `CHANGELOG.md` lists what changed in each update.
 - `tools/balance-sim.js` plays real runs of the game with a bot, headless, and prints win rates. It needs Playwright (`npm i -g playwright && npx playwright install chromium`). Examples:
   - `node tools/balance-sim.js --world void --up full` (a fully upgraded crow on The Void)
   - `node tools/balance-sim.js --world spider --compare "--up 0.6;--up 0.5"` (60% vs 50% of every Roost upgrade)

@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.4</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.5</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1450,13 +1450,13 @@ const BIOMES = [
   { id: 'jungle', name: 'Banana Jungle', hp: 7.6, dmg: 2.2, coin: 4.8, boss: 'kong', elite: 'gorilla',
     enemies: ['baboon', 'chimp', 'gibbon', 'thrower', 'gorilla'], ground: ['#2e4c28', '#1c3218', '#0e1a0e'], blade: ['#2e5a32', '#3a6a3a'], stone: '#1a3020',
     blurb: 'Baboon gangs, hopping chimps, gibbons that swing in from the trees, banana throwers that pelt your crow, and armoured silverback gorillas. The Monkey King rules the canopy.' },
-  { id: 'spider', name: 'Silkshade Hollow', hp: 21, dmg: 3.2, coin: 5.5, boss: 'queen', elite: 'tarantula',
+  { id: 'spider', name: 'Silkshade Hollow', hp: 23.5, dmg: 3.3, coin: 5.5, boss: 'queen', elite: 'tarantula',
     enemies: ['spiderling', 'jumper', 'weaver', 'moth', 'tarantula'], ground: ['#2c2433', '#1b1621', '#0e0b12'], blade: ['#3e3446', '#2e2636'], stone: '#251f2b',
     blurb: 'Spiderling swarms, jumping spiders, weavers that spit webs to slow your crow, moths, and tarantulas that burst into spiderlings. The Spider Queen waits in the dark.' },
   { id: 'volcano', name: 'Cinder Peak', hp: 18.2, dmg: 3.15, coin: 7, boss: 'wyrm', elite: 'golem',
     enemies: ['bat', 'firebeetle', 'magmaworm', 'slime', 'golem'], ground: ['#3a2420', '#241614', '#120a09'], blade: ['#5a2a18', '#3a1a10'], stone: '#2a1814',
     blurb: 'Bat swarms, fire beetles, magma worms that tunnel through the rock, lava slimes that split in two, and obsidian golems. The Magma Dragon rises from the lava.' },
-  { id: 'fairy', name: 'Glimmer Glade', hp: 45, dmg: 4.4, coin: 9, boss: 'faequeen', elite: 'unicorn',
+  { id: 'fairy', name: 'Glimmer Glade', hp: 50, dmg: 4.5, coin: 9, boss: 'faequeen', elite: 'unicorn',
     enemies: ['pixie', 'shroom', 'sprite', 'wisp', 'unicorn'], ground: ['#1e3a3a', '#122626', '#0a1414'], blade: ['#2e5a4a', '#244a3e'], stone: '#1a3030',
     blurb: 'Pixie swarms, armoured mushroom walkers, sprites that heal other enemies, will-o-wisps that fade in and out, and charging unicorns. The Fairy Queen holds court.' },
   { id: 'sakura', name: 'Blossom Ridge', hp: 47, dmg: 4.6, coin: 11.5, boss: 'oni', elite: 'tanuki',
@@ -1716,7 +1716,7 @@ const SPELLS = [
     desc: 'A post that throws feathers at enemies in range for 12 seconds.' },
   { id: 'bolt', name: 'Thunderclap', short: 'Thunder', cd: 15, r: 80, cost: 140, req: 'marsh', col: '#f2e27a',
     desc: 'Lightning strikes the spot after half a second. Heavy damage and a short stun.' },
-  { id: 'frost', name: 'Frost Ring', short: 'Frost', cd: 24, r: 120, cost: 200, req: 'snow', col: '#a8d8f0',
+  { id: 'frost', name: 'Frost Ring', short: 'Frost', cd: 18, r: 120, cost: 200, req: 'snow', col: '#a8d8f0',
     desc: 'Freezes every enemy in the ring for 3 seconds. Frozen enemies take 25% more damage.' },
   { id: 'sand', name: 'Sandstorm', short: 'Sandstorm', cd: 24, r: 110, cost: 260, req: 'dunes', col: '#d8b878',
     desc: 'A whirlwind that scours everything inside and pushes it away from the nest for 5 seconds. Bosses stand their ground.' },
@@ -1724,33 +1724,33 @@ const SPELLS = [
     desc: 'Scatters banana peels for 8 seconds. Every walking enemy that steps in slips and is stunned for 1.5 seconds.' },
   { id: 'web', name: 'Web Snare', short: 'Web', cd: 24, r: 110, cost: 330, req: 'spider', col: '#e8e4f0',
     desc: 'A sticky web that lasts 6 seconds. Each enemy that walks in is stuck for 2.5 seconds and takes 20% more damage.' },
-  { id: 'erupt', name: 'Eruption', short: 'Eruption', cd: 22, r: 100, cost: 420, req: 'volcano', col: '#f0602a',
+  { id: 'erupt', name: 'Eruption', short: 'Eruption', cd: 15, r: 100, cost: 420, req: 'volcano', col: '#f0602a',
     desc: 'A lava pool for 5 seconds. Walking enemies in it burn.' },
   { id: 'pixie', name: 'Pixie Ring', short: 'Pixies', cd: 26, r: 150, cost: 520, req: 'fairy', col: '#a0f0e0',
     desc: 'Pixies mend the nest for 5 seconds and zap enemies in the ring.' },
   { id: 'petal', name: 'Petal Storm', short: 'Petals', cd: 22, r: 120, cost: 640, req: 'sakura', col: '#ffb0d0',
     desc: 'Razor petals spin in a circle for 6 seconds and cut everything, flying enemies too.' },
-  { id: 'hole', name: 'Black Hole', short: 'Black Hole', cd: 28, r: 150, cost: 800, req: 'void', col: '#b88ae0',
+  { id: 'hole', name: 'Black Hole', short: 'Black Hole', cd: 20, r: 150, cost: 800, req: 'void', col: '#b88ae0',
     desc: 'Pulls enemies to one point for 4 seconds, then collapses for huge damage. Bosses resist the pull.' },
-  { id: 'gust', name: 'Gale Burst', short: 'Gale', cd: 14, r: 170, cost: 120, req: null, col: '#cfe8f0',
+  { id: 'gust', name: 'Gale Burst', short: 'Gale', cd: 18, r: 170, cost: 120, req: null, col: '#cfe8f0',
     desc: 'A blast of wind that hurts everything nearby and throws normal enemies away from the nest.' },
-  { id: 'miasma', name: 'Plague Cloud', short: 'Plague', cd: 22, r: 125, cost: 380, req: 'city', col: '#9acb5a',
+  { id: 'miasma', name: 'Plague Cloud', short: 'Plague', cd: 16, r: 125, cost: 380, req: 'city', col: '#9acb5a',
     desc: 'A sickly green cloud for 7 seconds. Everything inside takes damage, flying enemies too.' },
-  { id: 'meteor', name: 'Meteor Shower', short: 'Meteors', cd: 26, r: 150, cost: 650, req: null, col: '#ff8a3a',
+  { id: 'meteor', name: 'Meteor Shower', short: 'Meteors', cd: 19, r: 150, cost: 650, req: null, col: '#ff8a3a',
     desc: 'Eight burning rocks crash down in the circle over 3 seconds. Each one hits hard in a small blast.' },
-  { id: 'flock', name: 'Crow Flock', short: 'Flock', cd: 28, r: 230, cost: 900, req: null, col: '#8a90b0',
+  { id: 'flock', name: 'Crow Flock', short: 'Flock', cd: 20, r: 230, cost: 900, req: null, col: '#8a90b0',
     desc: 'Four crow friends circle the spot for 9 seconds and peck at every enemy in range.' },
   { id: 'vines', name: 'Strangling Vines', short: 'Vines', cd: 18, r: 110, cost: 180, req: null, col: '#5aa83a', desc: 'Vines burst from the ground and root every walking enemy in the circle for 3 seconds.' },
-  { id: 'hexmark', name: 'Hex Mark', short: 'Hex', cd: 20, r: 130, cost: 240, req: null, col: '#c05ad8', desc: 'Curses the ground for 6 seconds. Enemies inside take 50% more damage from everything.' },
-  { id: 'whirl', name: 'Whirlpool', short: 'Whirl', cd: 22, r: 140, cost: 320, req: null, col: '#4aa8e0', desc: 'A swirling pool for 4 seconds that drags enemies to its centre and hurts them.' },
-  { id: 'thornwall', name: 'Thorn Wall', short: 'Thorns', cd: 26, r: 150, cost: 420, req: null, col: '#8a6a3a', desc: 'A ring of thorns grows around the nest for 8 seconds. Anything crossing it is cut and slowed.' },
+  { id: 'hexmark', name: 'Hex Mark', short: 'Hex', cd: 15, r: 130, cost: 240, req: null, col: '#c05ad8', desc: 'Curses the ground for 6 seconds. Enemies inside take 50% more damage from everything.' },
+  { id: 'whirl', name: 'Whirlpool', short: 'Whirl', cd: 17, r: 140, cost: 320, req: null, col: '#4aa8e0', desc: 'A swirling pool for 4 seconds that drags enemies to its centre and hurts them.' },
+  { id: 'thornwall', name: 'Thorn Wall', short: 'Thorns', cd: 32, r: 150, cost: 420, req: null, col: '#8a6a3a', desc: 'A ring of thorns grows around the nest for 8 seconds. Anything crossing it is cut and slowed.' },
   { id: 'chain', name: 'Chain Lightning', short: 'Chain', cd: 16, r: 120, cost: 520, req: null, col: '#9ad8ff', desc: 'Lightning hits the enemy closest to the spot, then jumps to up to 6 more nearby enemies.' },
   { id: 'quake', name: 'Earthquake', short: 'Quake', cd: 24, r: 170, cost: 600, req: null, col: '#b08a5a', desc: 'Three shockwaves that hurt and stun every walking enemy in a wide circle.' },
-  { id: 'starfall', name: 'Starfall', short: 'Stars', cd: 28, r: 60, cost: 750, req: null, col: '#ffe27a', desc: 'For 3 seconds, stars rain down on random enemies anywhere on the field.' },
+  { id: 'starfall', name: 'Starfall', short: 'Stars', cd: 20, r: 60, cost: 750, req: null, col: '#ffe27a', desc: 'For 3 seconds, stars rain down on random enemies anywhere on the field.' },
   { id: 'fury', name: 'Crow Fury', short: 'Fury', cd: 24, r: 0, cost: 350, req: null, col: '#ff7a4a', self: true, desc: 'Cast on your crow: +60% attack speed for 6 seconds.' },
   { id: 'razor', name: 'Razor Feathers', short: 'Razor', cd: 24, r: 0, cost: 450, req: null, col: '#d8e4f0', self: true, desc: 'Cast on your crow: +70% damage and feathers pierce 1 more enemy for 6 seconds.' },
   { id: 'eagle', name: 'Eagle Eye', short: 'Eagle', cd: 26, r: 0, cost: 550, req: null, col: '#ffd84a', self: true, desc: 'Cast on your crow: every hit is a critical hit for 5 seconds.' },
-  { id: 'shadow', name: 'Shadow Crow', short: 'Shadow', cd: 30, r: 320, cost: 1000, req: null, col: '#6a5a9a', desc: 'A shadow copy of your crow appears for 8 seconds and shoots with your full damage.' },
+  { id: 'shadow', name: 'Shadow Crow', short: 'Shadow', cd: 22, r: 320, cost: 1000, req: null, col: '#6a5a9a', desc: 'A shadow copy of your crow appears for 8 seconds and shoots with your full damage.' },
 ];
 const MAX_LOADOUT = 5;
 function loadout() {
@@ -2353,7 +2353,7 @@ function updateZones(dt) {
       for (const e of enemies) { if (e.dead || e.under) continue; const dx = z.x - e.x, dy = z.y - e.y, dd = Math.hypot(dx, dy); if (dd < z.r + e.r && dd > 6) { const k = (e.boss ? 12 : 70) * dt, tx = -dy / dd, ty = dx / dd; e.x += (dx / dd * k + tx * k * .6); e.y += (dy / dd * k + ty * k * .6); } }
       z.tick -= dt; if (z.tick <= 0) { z.tick = .3; for (const e of enemies) if (!e.dead && !e.under && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) hurt(e, P.dmg * P.spellPow * .25, { crit: false, text: false }); }
     } else if (z.id === 'thornwall') {
-      z.tick -= dt; if (z.tick <= 0) { z.tick = .3; for (const e of enemies) if (!e.dead && !e.under && Math.abs(Math.hypot(e.x, e.y) - z.r) < 22 + e.r) hurt(e, P.dmg * P.spellPow * .45, { crit: false, text: false }); }
+      z.tick -= dt; if (z.tick <= 0) { z.tick = .3; for (const e of enemies) if (!e.dead && !e.under && Math.abs(Math.hypot(e.x, e.y) - z.r) < 22 + e.r) hurt(e, P.dmg * P.spellPow * .35, { crit: false, text: false }); }
     } else if (z.id === 'quake') {
       z.pulse -= dt; if (z.pulse <= 0 && z.n < 3) { z.n++; z.pulse = .55; shake = Math.max(shake, 7); for (const e of enemies) if (!e.dead && !e.fly && !e.under && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) { hurt(e, P.dmg * P.spellPow * 1.8, { crit: true }); e.stun = Math.max(e.stun, e.boss ? .15 : .7); } if (!api.sim) rings.push({ x: z.x, y: z.y, r: 20, max: z.r, t: 0, c: '200,160,110' }); }
     } else if (z.id === 'starfall') {
@@ -2367,7 +2367,7 @@ function updateZones(dt) {
     } else if (z.id === 'meteor') {
       z.tick -= dt; for (const f of z.fx) f.a += dt; z.fx = z.fx.filter(f => f.a < .6);
       if (z.tick <= 0 && z.n > 0) { z.tick = .36; z.n--; const a = rnd(0, TAU), d = Math.sqrt(Math.random()) * z.r * .85, mx = z.x + Math.cos(a) * d, my = z.y + Math.sin(a) * d;
-        for (const e of enemies) if (!e.dead && !e.under && Math.hypot(e.x - mx, e.y - my) < 52 + e.r) hurt(e, 3.2 * P.dmg * P.spellPow, { crit: true });
+        for (const e of enemies) if (!e.dead && !e.under && Math.hypot(e.x - mx, e.y - my) < 52 + e.r) hurt(e, 4.5 * P.dmg * P.spellPow, { crit: true });
         z.fx.push({ x: mx, y: my, a: 0 }); shake = Math.max(shake, 4);
         if (!api.sim) for (let i = 0; i < 12; i++) parts.push({ x: mx, y: my, vx: rnd(-200, 200), vy: rnd(-200, 200), t: rnd(.2, .5), c: i % 2 ? '#ff8a3a' : '#ffd070', r: 2.5 }); }
       if (z.n <= 0 && !z.fx.length) z.t = Math.min(z.t, .01);
@@ -2379,7 +2379,7 @@ function updateZones(dt) {
       if (z.tick <= 0) { z.tick = .25; for (const e of enemies) if (!e.dead && Math.hypot(e.x - z.x, e.y - z.y) < z.r + e.r) hurt(e, P.dmg * P.spellPow * .35, { crit: true, text: false }); }
     } else if (z.id === 'hole') {
       for (const e of enemies) { if (e.dead || e.under) continue; const dx = z.x - e.x, dy = z.y - e.y, dd = Math.hypot(dx, dy); if (dd < z.r * 1.5 && dd > 4) { const k = (e.boss ? 20 : 150) * dt; e.x += dx / dd * Math.min(k, dd); e.y += dy / dd * Math.min(k, dd); } }
-      if (z.t <= .12 && !z.done) { z.done = true; for (const e of enemies) if (!e.dead && Math.hypot(e.x - z.x, e.y - z.y) < z.r * .7 + e.r) hurt(e, 8 * P.dmg * P.spellPow, { crit: true }); shake = Math.max(shake, 7); sfx.bolt(); if (!api.sim) rings.push({ x: z.x, y: z.y, r: 10, max: z.r, t: 0, c: '184,138,224' }); }
+      if (z.t <= .12 && !z.done) { z.done = true; for (const e of enemies) if (!e.dead && Math.hypot(e.x - z.x, e.y - z.y) < z.r * .7 + e.r) hurt(e, 11 * P.dmg * P.spellPow, { crit: true }); shake = Math.max(shake, 7); sfx.bolt(); if (!api.sim) rings.push({ x: z.x, y: z.y, r: 10, max: z.r, t: 0, c: '184,138,224' }); }
     } else if (z.id === 'sand') {
       z.tick -= dt;
       if (z.tick <= 0) { z.tick = .25; for (const e of enemies) { if (e.dead || e.under) continue; const dx = e.x - z.x, dy = e.y - z.y, dd = Math.hypot(dx, dy); if (dd < z.r + e.r) { const d0 = Math.hypot(e.x, e.y) || 1, k = e.boss ? 0 : e.elite ? 6 : 16; e.x += e.x / d0 * k; e.y += e.y / d0 * k; hurt(e, P.dmg * P.spellPow * .3, { crit: false, text: false }); } } }
@@ -2398,7 +2398,7 @@ function zoneSlow(e, dt) {
   let f = 1; e.webbed = false;
   if (e.webFree > 0) e.webFree -= dt;
   for (const z of zones) {
-    if (z.id === 'thornwall') { if (Math.abs(Math.hypot(e.x, e.y) - z.r) < 22 + e.r) f = Math.min(f, e.boss ? .8 : .45); continue; }
+    if (z.id === 'thornwall') { if (Math.abs(Math.hypot(e.x, e.y) - z.r) < 22 + e.r) f = Math.min(f, e.boss ? .85 : .6); continue; }
     if (z.id !== 'scare' && z.id !== 'web') continue;
     if (Math.hypot(e.x - z.x, e.y - z.y) >= z.r + e.r) continue;
     if (z.id === 'scare') f = Math.min(f, .5);
@@ -7122,7 +7122,13 @@ function renderDiff(b, bs, unlocked) {
   box.append(row);
 }
 let resetArmed = 0;
-function roostRefund() { let n = 0; for (const u of ROOST) for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(u, l); return n; }
+// A reset gives back what was actually paid. Levels bought before prices were tracked count at the price they had then.
+const ROOST_OLD_BASE = { twin: 90, voice: 10 };
+function roostSpent(u) {
+  const rec = save.upSpent && save.upSpent[u.id]; if (rec != null) return rec;
+  const old = ROOST_OLD_BASE[u.id] ? { ...u, base: ROOST_OLD_BASE[u.id] } : u; let n = 0; for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(old, l); return n;
+}
+function roostRefund() { let n = 0; for (const u of ROOST) n += roostSpent(u); return n; }
 const ROOST_GROUPS = [['attack', ['beak', 'wings', 'eye', 'slayer', 'pen', 'pierce', 'twin', 'magpie', 'rhythm']], ['defence', ['nest', 'thorns', 'regen']], ['cawspell', ['voice', 'focus']], ['economy', ['egg', 'luck', 'haggle', 'favour', 'charm']]];
 const ROOST_ICON = { rhythm: ['star', '#d2543f'], charm: ['star', '#9ae05a'], beak: ['shard', '#e6e1d2'], wings: ['feather', '#9ad0f0'], nest: ['leaf', '#c8a070'], egg: ['coin', '#f0c030'], voice: ['star', '#ece6d6'], eye: ['gem', '#e8c860'], luck: ['coin', '#c8a060'], focus: ['orb', '#7fb2c9'], pen: ['shard', '#9aa4b0'], slayer: ['shard', '#d2543f'], thorns: ['leaf', '#6a8a3a'], regen: ['leaf', '#6aa040'], haggle: ['coin', '#9fd0a8'], pierce: ['ice', '#ffffff'], twin: ['feather', '#cfd6e6'], magpie: ['feather', '#6a8ab0'], favour: ['star', '#e8b84a'], reroll: ['orb', '#b88ae0'] };
 const roostFx = (id, l) => { const v = { rhythm: (.4 * l).toFixed(1), egg: 4 + 4 * l, beak: Math.round((roostMul.beak(l) - 1) * 100), wings: Math.round((roostMul.wings(l) - 1) * 100), nest: roostMul.nest(l) - 100, voice: [7 * l, 12 * l], eye: 3 * l, luck: 8 * l, focus: [15 * l, 6 * Math.min(l, 8)], pen: l, slayer: 15 * l, thorns: 15 * l, regen: (1 * l).toFixed(1), haggle: 10 * l, pierce: l, twin: l, magpie: l, favour: T('rar' + GIFT_MAX[Math.max(0, Math.min(4, l - 1))]), charm: 12 * l }[id]; return Array.isArray(v) ? T('rfx_' + id, ...v) : T('rfx_' + id, v); };
@@ -7156,9 +7162,10 @@ function roostBuyFx(id) {
   }
 }
 function roostBuy(u, many) {
-  let lvl = save.up[u.id] || 0, n = 0;
-  while (lvl < u.max && save.coins >= roostCost(u, lvl) && (many || n === 0)) { save.coins -= roostCost(u, lvl); lvl++; n++; }
+  let lvl = save.up[u.id] || 0, n = 0, paid = 0; const spent0 = roostSpent(u);
+  while (lvl < u.max && save.coins >= roostCost(u, lvl) && (many || n === 0)) { const c = roostCost(u, lvl); save.coins -= c; paid += c; lvl++; n++; }
   if (!n) return;
+  save.upSpent = save.upSpent || {}; save.upSpent[u.id] = spent0 + paid;
   save.up[u.id] = lvl; if (lvl >= u.max) grant('fledged');
   persist(); roostChime(n); renderMenu(); roostBuyFx(u.id);
 }
@@ -7209,7 +7216,7 @@ function renderRoost() {
   rb.id = 'resetRoostBtn'; rb.disabled = !refund;
   if (resetArmed > Date.now()) rb.style.borderColor = 'var(--blood)';
   rb.onclick = () => {
-    if (resetArmed > Date.now()) { save.coins += refund; save.up = {}; resetArmed = 0; sfx.buy(); persist(); toastSmall(T('got_back', refund), T('roost_reset_t')); renderMenu(); return; }
+    if (resetArmed > Date.now()) { save.coins += refund; save.up = {}; save.upSpent = {}; resetArmed = 0; sfx.buy(); persist(); toastSmall(T('got_back', refund), T('roost_reset_t')); renderMenu(); return; }
     resetArmed = Date.now() + 4000; renderRoost(); setTimeout(() => { if (resetArmed && resetArmed <= Date.now() && curTab === 'roost') renderRoost(); }, 4100);
   };
   bottom.append(rb); box.append(bottom);

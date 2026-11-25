@@ -16,6 +16,7 @@
 //   --noshop 1          take nothing from the shop or golden eggs (to judge items on their own)
 //   --nogift 1          skip the Magpie's Favour starting pick
 //   --scan items        test every item alone against no item (add --rar 5 for one rarity); implies --noshop 1 --nogift 1
+//   --scan spells       test every spell as the only spell against no spell; implies --noshop 1 --nogift 1
 //   --scan up           test what ~coins (default 1000) spent on each Roost upgrade, on top of --up, is worth
 //   --compare "a;b;c"   run several setups side by side, each written as options, e.g.
 //                       --compare "--up full;--up 0.9;--up full --diff 3 --skin shard"
@@ -45,7 +46,7 @@ function upgrades(spec) {
   return up;
 }
 function setup(o, label) {
-  return { label, world: o.world, diff: +o.diff, skin: o.skin, up: upgrades(o.up), loadout: o.spells.split(','), healAt: +o.heal,
+  return { label, world: o.world, diff: +o.diff, skin: o.skin, up: upgrades(o.up), loadout: o.spells === 'none' ? [] : o.spells.split(','), healAt: +o.heal,
     hp: o.hp ? +o.hp : 0, dmg: o.dmg ? +o.dmg : 0, runs: +o.runs, seed: +o.seed, items: o.items ? String(o.items).split(',') : [], noshop: !!+o.noshop, nogift: !!+o.nogift };
 }
 
@@ -100,6 +101,10 @@ function playRun(c) {
   }
 }
 
+async function spellList() {
+  const b = await chromium.launch(); const p = await b.newPage(); await p.route(/^https?:/, r => r.abort()); await p.goto('file://' + GAME);
+  await p.waitForFunction(() => window.__nestguard); const l = await p.evaluate(() => window.__nestguard.SPELLS.map(s => [s.id, s.cost])); await b.close(); return l;
+}
 async function itemList(rar) {
   const b = await chromium.launch(); const p = await b.newPage(); await p.route(/^https?:/, r => r.abort()); await p.goto('file://' + GAME);
   await p.waitForFunction(() => window.__nestguard); const l = await p.evaluate(() => window.__nestguard.ITEMS.map(i => [i.id, i.rar])); await b.close();
@@ -111,6 +116,9 @@ async function itemList(rar) {
   if (o.scan === 'items') {
     const ids = await itemList(o.rar); const base = { ...o, noshop: 1, nogift: 1 };
     setups = [setup(base, 'no item'), ...ids.map(([id, rar]) => setup({ ...base, items: id }, `${id} (r${rar})`))];
+  } else if (o.scan === 'spells') {
+    const ids = await spellList(); const base = { ...o, noshop: 1, nogift: 1 };
+    setups = [setup({ ...base, spells: 'none' }, 'no spell'), ...ids.map(([id, cost]) => setup({ ...base, spells: id }, `${id} (${cost} coins)`))];
   } else if (o.scan === 'up') {
     const up = upgrades(o.up), coins = +(o.coins || 1000);
     setups = [setup(o, 'base')];
