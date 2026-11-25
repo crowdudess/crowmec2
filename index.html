@@ -984,7 +984,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.2</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.3</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1438,28 +1438,28 @@ const BIOMES = [
   { id: 'marsh', name: 'Murkwater Marsh', hp: 1.65, dmg: 1.25, coin: 1.6, boss: 'gator', elite: 'turtle',
     enemies: ['frog', 'mosquito', 'leech', 'turtle', 'heron'], ground: ['#2a3a26', '#1b2819', '#0f170e'], blade: ['#3a4a2a', '#2a3a22'], stone: '#1c2b26',
     blurb: 'Hopping frogs, mosquito swarms, leeches that heal when they bite, armoured turtles and herons. Old Gator rules the water.' },
-  { id: 'snow', name: 'Frostfang Pass', hp: 2.5, dmg: 1.5, coin: 2.3, boss: 'bear', elite: 'elk',
+  { id: 'snow', name: 'Frostfang Pass', hp: 1.25, dmg: 1.15, coin: 2.3, boss: 'bear', elite: 'elk',
     enemies: ['hare', 'fox', 'wolf', 'owl', 'elk'], ground: ['#3c4a5e', '#283244', '#141a26'], blade: ['#4a5664', '#3a4450'], stone: '#2e3640',
     blurb: 'Hares, foxes, wolf packs, owls and armoured elk. The Frost Bear shrugs off weak hits.' },
-  { id: 'city', name: 'Ashen Alleys', hp: 3.6, dmg: 1.8, coin: 3.2, boss: 'ratking', elite: 'binbandit',
+  { id: 'city', name: 'Ashen Alleys', hp: 1.9, dmg: 1.3, coin: 3.2, boss: 'ratking', elite: 'binbandit',
     enemies: ['rat', 'roach', 'pigeon', 'dog', 'binbandit'], ground: ['#2e2d2c', '#232221', '#181716'], blade: ['#3c3630', '#2e2924'], stone: '#2a2622',
     blurb: 'Rat swarms, roaches that split, pigeons that steal your coins, stray dogs and bin raccoons. The Rat King calls his subjects.' },
-  { id: 'dunes', name: 'Sunscorch Dunes', hp: 4.8, dmg: 2.1, coin: 4.2, boss: 'emperor', elite: 'worm',
+  { id: 'dunes', name: 'Sunscorch Dunes', hp: 3.4, dmg: 1.85, coin: 4.2, boss: 'emperor', elite: 'worm',
     enemies: ['scarab', 'lizard', 'scorpion', 'vulture', 'worm'], ground: ['#c49a5e', '#a67c48', '#6e4e2c'], blade: ['#8a7550', '#5e4f34'], stone: '#5a4a30',
     blurb: 'Armoured scarabs, darting lizards, scorpions whose sting poisons the nest, vultures and sandworms that stay underground until they are close. The Emperor Scorpion guards the sand.' },
   { id: 'jungle', name: 'Banana Jungle', hp: 7.6, dmg: 2.2, coin: 4.8, boss: 'kong', elite: 'gorilla',
     enemies: ['baboon', 'chimp', 'gibbon', 'thrower', 'gorilla'], ground: ['#2e4c28', '#1c3218', '#0e1a0e'], blade: ['#2e5a32', '#3a6a3a'], stone: '#1a3020',
     blurb: 'Baboon gangs, hopping chimps, gibbons that swing in from the trees, banana throwers that pelt your crow, and armoured silverback gorillas. The Monkey King rules the canopy.' },
-  { id: 'spider', name: 'Silkshade Hollow', hp: 8.2, dmg: 2.4, coin: 5.5, boss: 'queen', elite: 'tarantula',
+  { id: 'spider', name: 'Silkshade Hollow', hp: 14.5, dmg: 2.9, coin: 5.5, boss: 'queen', elite: 'tarantula',
     enemies: ['spiderling', 'jumper', 'weaver', 'moth', 'tarantula'], ground: ['#2c2433', '#1b1621', '#0e0b12'], blade: ['#3e3446', '#2e2636'], stone: '#251f2b',
     blurb: 'Spiderling swarms, jumping spiders, weavers that spit webs to slow your crow, moths, and tarantulas that burst into spiderlings. The Spider Queen waits in the dark.' },
-  { id: 'volcano', name: 'Cinder Peak', hp: 12.5, dmg: 2.8, coin: 7, boss: 'wyrm', elite: 'golem',
+  { id: 'volcano', name: 'Cinder Peak', hp: 15, dmg: 3, coin: 7, boss: 'wyrm', elite: 'golem',
     enemies: ['bat', 'firebeetle', 'magmaworm', 'slime', 'golem'], ground: ['#3a2420', '#241614', '#120a09'], blade: ['#5a2a18', '#3a1a10'], stone: '#2a1814',
     blurb: 'Bat swarms, fire beetles, magma worms that tunnel through the rock, lava slimes that split in two, and obsidian golems. The Magma Dragon rises from the lava.' },
-  { id: 'fairy', name: 'Glimmer Glade', hp: 15, dmg: 3.2, coin: 9, boss: 'faequeen', elite: 'unicorn',
+  { id: 'fairy', name: 'Glimmer Glade', hp: 33, dmg: 4.1, coin: 9, boss: 'faequeen', elite: 'unicorn',
     enemies: ['pixie', 'shroom', 'sprite', 'wisp', 'unicorn'], ground: ['#1e3a3a', '#122626', '#0a1414'], blade: ['#2e5a4a', '#244a3e'], stone: '#1a3030',
     blurb: 'Pixie swarms, armoured mushroom walkers, sprites that heal other enemies, will-o-wisps that fade in and out, and charging unicorns. The Fairy Queen holds court.' },
-  { id: 'sakura', name: 'Blossom Ridge', hp: 17, dmg: 3.4, coin: 11.5, boss: 'oni', elite: 'tanuki',
+  { id: 'sakura', name: 'Blossom Ridge', hp: 36, dmg: 4.3, coin: 11.5, boss: 'oni', elite: 'tanuki',
     enemies: ['monkey', 'crane', 'kitsune', 'petal', 'tanuki'], ground: ['#3c3440', '#2a2230', '#16101a'], blade: ['#6a3a50', '#4a2e3c'], stone: '#3a2430',
     blurb: 'Leaping monkeys, cranes, kitsune that blink out of sight, petal sprite swarms and armoured tanuki. The Oni guards the ridge.' },
   // The last world: built so only a fully upgraded crow wins it reliably, with its own gentler difficulty steps (Nightmare stays hard even maxed)
@@ -7787,7 +7787,7 @@ requestAnimationFrame(frame);
 // Test hook for automated balance runs. Not used by the game itself.
 if (save.testMode) { try { testUnlockAll(false); persist(); if (state === 'menu') renderMenu(); } catch (e) {} }
 setTimeout(() => { try { if (!api.sim) catchUpAch(); } catch (e) {} }, 1500);
-Object.assign(api, { catchUpAch, grant, paintUpIcon, replayStory, playBossStory, playIntro, bossCard, showEnding, playEggStage, toastSmall, goldenPop, openGift, startForm, startSandbox, icyRoar, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
+Object.assign(api, { takeGift, crackGolden, nextWave, catchUpAch, grant, paintUpIcon, replayStory, playBossStory, playIntro, bossCard, showEnding, playEggStage, toastSmall, goldenPop, openGift, startForm, startSandbox, icyRoar, audioState: () => actx && actx.state, newRun, startWave, update, buy, reroll, heal, cast, caw, openShop, endRun, priceOf,
   get: () => ({ state, run, P, enemies, spawnQ, offers, spellCds, cawT, healCost, healsLeft, rerollCost, bossDeaths, scale, vw, vh }),
   setSave: s => { save = Object.assign(freshSave(), s); }, getSave: () => save, setEndless: () => { run.endless = true; openShop(); },
   audio: () => ({ ctx: !!actx, state: actx && actx.state, step: music.step, song: music.song, boss: music.boss, muted, vol: { ...vol } }), clearWave: () => { spawnQ = []; enemies = []; }, spawnAt: (k, x, y) => { const e = makeEnemy(k, x, y); e.spd = 0; e.stun = 999; return e; }, BIOMES, SPELLS, ITEMS });
