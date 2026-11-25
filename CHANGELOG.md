@@ -1,5 +1,9 @@
 # Nestguard changelog
 
+## 2.99.8 — The Old Gator circles the nest
+
+- After every bite, the Old Gator now dives and **circles around the nest underwater** (about half a lap, either way round), spitting frogs all around it, then surfaces and comes in again. He used to swim straight away from the nest.
+
 ## 2.99.7 — The Old Gator bites and runs
 
 - **Bite and dive:** after every bite (including a death roll, whether it ends or you break it with a caw), the Old Gator sinks underwater, swims away from the nest and **spits frogs out behind him** for a few seconds. Then he swims back, surfaces and comes in again.
