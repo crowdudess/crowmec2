@@ -1,7 +1,14 @@
 # Nestguard changelog
 
-## 2.99.6 — Tougher challenges
+## 2.99.6 — The Old Gator wakes up, and tougher challenges
 
+### Old Gator rework
+The boss of Murkwater Marsh finally gets moves of his own:
+- **Death Roll:** after he surfaces from a dive, his next bite clamps onto the nest and rolls it, hurting it every half second for 2.5 seconds. **Caw to break free** (this works even while your caw is recharging) and stun him.
+- **Young Again:** once, when he drops to half health, the shard he swallowed glows. He heals 15%, his hide hardens, he moves faster and a chorus of frogs answers his call.
+- His monster index entry tells you how to deal with him.
+
+### Challenges
 - **Glass Nest:** the nest now has 33% of its HP (was 40%).
 - **Swarm:** 80% more enemies (was 60%), and they move 25% faster (was 20%).
 - **No Spells** is unchanged; it was already about right.

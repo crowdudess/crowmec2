@@ -72,6 +72,7 @@ function playRun(c) {
     if (g.state === 'choice') return { win: true, wave: 30 + g.run.hp / g.run.maxHp, coins: g.run.coins };
     if (g.state === 'wave') {
       const live = g.enemies.filter(e => !e.dead && !e.under);
+      if (live.some(e => e.roll > 0)) A.caw(); // break the Old Gator's death roll
       if (g.cawT <= 0 && live.some(e => Math.hypot(e.x, e.y) < g.P.cawR * 0.85 + e.r)) A.caw();
       c.loadout.forEach((id, i) => {
         if (g.run.wave < SLOT_WAVE[i] || g.spellCds[id] > 0) return;
