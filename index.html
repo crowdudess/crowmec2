@@ -1040,7 +1040,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.14</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.15</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1861,7 +1861,7 @@ const SKINS = [
   { id: 'phoenix', name: 'Phoenix Crow', body: '#b0301a', wing: '#e0702a', sheen: 'rgba(255,220,80,.7)', beak: '#ffd040', eye: '#fff', glow: '#ff7a2a', cond: 'Defeat the Magma Dragon.', has: s => !!s.ach.wyrm },
   { id: 'fae', name: 'Fae Crow', body: '#5a3a7a', wing: '#3a2a5a', sheen: 'rgba(160,240,224,.7)', beak: '#f0a0d8', eye: '#fff', glow: '#a0f0e0', cond: 'Defeat the Fairy Queen.', has: s => !!s.ach.faequeen },
   { id: 'blossom', name: 'Blossom Crow', body: '#2a1a24', wing: '#1a0e16', sheen: 'rgba(255,176,208,.75)', beak: '#ffb0d0', eye: '#fff', cond: 'Defeat the Oni.', has: s => !!s.ach.oni },
-  { id: 'eclipse', name: 'Eclipse Crow', body: '#05030a', wing: '#000', sheen: 'rgba(255,58,106,.7)', beak: '#1a0a30', eye: '#ff3a6a', glow: '#6a3aa0', crown: true, cond: 'Defeat the Maw.', has: s => !!s.ach.maw },
+  { id: 'eclipse', name: 'Eclipse Crow', body: '#05030a', wing: '#000', sheen: 'rgba(255,58,106,.7)', beak: '#1a0a30', eye: '#ff3a6a', glow: '#6a3aa0', cond: 'Defeat the Maw.', has: s => !!s.ach.maw },
   { id: 'ch-forest', name: 'Mossback', body: '#2a4a2a', wing: '#1a3a1a', sheen: 'rgba(160,220,120,.6)', beak: '#6a5030', eye: '#e8d24a', cond: 'Complete all 3 Whispering Wood challenges.', has: s => chDone(s, 'forest') },
   { id: 'ch-marsh', name: 'Bogwitch', body: '#1a3a3a', wing: '#0e2626', sheen: 'rgba(120,220,200,.6)', beak: '#3a2a1a', eye: '#c8f04a', cond: 'Complete all 3 Murkwater Marsh challenges.', has: s => chDone(s, 'marsh') },
   { id: 'ch-snow', name: 'Glacier', body: '#dce8f4', wing: '#a8c4dc', sheen: 'rgba(120,180,230,.7)', beak: '#5a6a7a', eye: '#2a6aa0', cond: 'Complete all 3 Frostfang Pass challenges.', has: s => chDone(s, 'snow') },
@@ -1876,8 +1876,8 @@ const SKINS = [
   { id: 'bananacrow', name: 'Banana Crow', body: '#e8c43a', wing: '#c8a028', sheen: 'rgba(255,250,200,.7)', beak: '#5a4010', eye: '#222', cond: 'Defeat the Monkey King.', has: s => !!s.ach.kong },
   { id: 'ch-jungle', name: 'Canopy', body: '#1e4a24', wing: '#14361a', sheen: 'rgba(240,208,64,.7)', beak: '#f0d040', eye: '#fff', cond: 'Complete all 3 Banana Jungle challenges.', has: s => chDone(s, 'jungle') },
   { id: 'ch-office', name: 'Middle Manager', body: '#3a4252', wing: '#262c38', sheen: 'rgba(240,240,240,.6)', beak: '#c8a050', eye: '#fff', crown: false, cond: 'Complete all 3 Corporate Office challenges.', has: s => chDone(s, 'office') },
-  { id: 'shard', name: 'Shardbearer', rainbow: true, body: '#141026', wing: '#0c0a18', sheen: 'rgba(255,214,120,.75)', beak: '#f4cf6a', eye: '#ffe6a0', glow: '#ffb84a', crown: true, cond: 'Recover all the egg shards (beat every boss).', has: s => BIOMES.filter(b => b.boss && !b.mode && !b.dlc).every(b => s.biomes && s.biomes[b.id] && s.biomes[b.id].cleared) },
-  { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', crown: true, cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
+  { id: 'shard', name: 'Shardbearer', rainbow: true, body: '#141026', wing: '#0c0a18', sheen: 'rgba(255,214,120,.75)', beak: '#f4cf6a', eye: '#ffe6a0', glow: '#ffb84a', cond: 'Recover all the egg shards (beat every boss).', has: s => BIOMES.filter(b => b.boss && !b.mode && !b.dlc).every(b => s.biomes && s.biomes[b.id] && s.biomes[b.id].cleared) },
+  { id: 'royal', name: 'Royal Crow', body: '#1a1430', wing: '#100c20', sheen: 'rgba(184,138,224,.55)', beak: '#3d3a36', eye: '#f2e6b8', cond: 'Earn 12 achievements.', has: s => Object.keys(s.ach).length >= 12 },
 ];
 
 // ---------- data: achievements ----------
@@ -4619,7 +4619,6 @@ function drawCrow(S, a, flap, bob, time, wk) {
     else { ctx.fillStyle = S.eye; ctx.beginPath(); ctx.arc(19, -5, 2.2, 0, TAU); ctx.arc(19, 5, 2.2, 0, TAU); ctx.fill();
       ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.6, -5, 1.1, 0, TAU); ctx.arc(19.6, 5, 1.1, 0, TAU); ctx.fill(); }
   }
-  if (S.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(10, -8); ctx.lineTo(6, -12); ctx.lineTo(12, -10); ctx.lineTo(14, -15); ctx.lineTo(16, -10); ctx.lineTo(22, -12); ctx.lineTo(18, -7); ctx.closePath(); ctx.fill(); ctx.fillRect(9, -8, 10, 3); }
   if (S.eyeGlow) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = S.eyeGlow; ctx.globalAlpha = .45 + Math.sin(tt / 200) * .15; ctx.beginPath(); ctx.arc(19, -5, 4.5, 0, TAU); ctx.arc(19, 5, 4.5, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(19.4, -5, 1.5, 0, TAU); ctx.arc(19.4, 5, 1.5, 0, TAU); ctx.fill(); ctx.restore(); }
   if (S.monocle) { ctx.strokeStyle = S.monocle; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(19, -5, 3.6, 0, TAU); ctx.stroke(); ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(16, -7.5); ctx.quadraticCurveTo(10, -12, 6, -9); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(18, -6, 1.2, 0, TAU); ctx.fill(); }
   if (S.gcrown) { const [gc, gk] = S.gcrown;
