@@ -1,6 +1,6 @@
 {
   "name": "nestguard-mobile",
-  "version": "2.99.12",
+  "version": "2.99.13",
   "private": true,
   "description": "Android app for Nestguard, a game by crowdude.",
   "scripts": {

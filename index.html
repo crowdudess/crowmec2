@@ -617,7 +617,9 @@ canvas.manualaim { cursor: crosshair; }
 /* epic roll: light rays, flash, shockwave, confetti, needle kick */
 .eggstage .es-rays { position: absolute; left: 50%; top: 42%; width: 640px; height: 640px; margin: -320px 0 0 -320px; pointer-events: none; opacity: 0; transform: scale(.4) rotate(-12deg); transition: opacity .45s, transform 1.1s cubic-bezier(.2,1,.3,1); }
 .eggstage.shake .es-rays { opacity: .55; transform: scale(.75) rotate(0deg); }
-.eggstage.shake2 .es-rays { opacity: .95; transform: scale(1) rotate(8deg); transition-duration: .3s; }
+.eggstage.charging .es-glow { transform: scale(1.45); transition: transform 1.1s ease-in; }
+.eggstage .es-egg { transform-origin: 50% 82%; }
+.eggstage.charged .es-rays, .eggstage.shake2 .es-rays { opacity: .95; transform: scale(1) rotate(8deg); transition-duration: .3s; }
 .eggstage.reeling .es-rays { opacity: 0; transform: scale(1.1) rotate(20deg); }
 .eggstage.open .es-rays { opacity: 1; transform: scale(1.12) rotate(32deg); transition-duration: .45s, 2.5s; }
 .eggstage .es-needle { position: absolute; left: 50%; top: -2px; width: 0; height: 0; margin-left: -12px; border: 12px solid transparent; border-top: 16px solid #ffe27a; filter: drop-shadow(0 0 6px rgba(255,216,74,.9)); z-index: 3; transform-origin: 50% 0; }
@@ -1038,7 +1040,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.12</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.13</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -5622,7 +5624,7 @@ function rollOffers() {
   offers = picks; run.picked = null; run.crackT = 0; run.popSeen = new Set(); run.golden = null;
   if (Math.random() < goldenChance()) { const g = rollItem(new Set(picks.map(x => x.id)), 5, true); if (g) run.golden = { ...g, golden: true, cracked: false, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }; }
 }
-const EGG_SHAKE = 1200, SPIN_FAST = 2500, SPIN_SLOW = 1700, EGG_SPIN = SPIN_FAST + SPIN_SLOW, CRACK_MS = EGG_SHAKE + EGG_SPIN + 550, STAGE_HOLD = 1700;
+const EGG_SHAKE = 1500, SPIN_FAST = 2500, SPIN_SLOW = 1700, EGG_SPIN = SPIN_FAST + SPIN_SLOW, CRACK_MS = EGG_SHAKE + EGG_SPIN + 550, STAGE_HOLD = 1700;
 function runReel(win, lab, it, left) {
   const pool = ITEMS.filter(x => itemOpen(x.id)), t0 = performance.now(), end = t0 + Math.max(0, left - 150);
   let delay = 55;
@@ -5685,14 +5687,45 @@ function playEggStage(it, others = [], fromShop = false) {
   };
   setR(0); drawEgg(egg, it, 'whole');
   if (actx && !muted) tone(80, 160, EGG_SHAKE / 1000, 'sine', .05);
-  // the chick pecks from inside: slow knocks that speed up, the shell cracks, then it rattles hard and bursts
-  [120, 380, 590, 740, 860, 950, 1020, 1080, 1130].forEach((t, i, all) => setTimeout(() => { if (!alive()) return; const k = i / (all.length - 1);
-    if (egg.animate) { const dx = rnd(-4, 4) * (1 + k * 2), rz = (i % 2 ? 1 : -1) * (5 + k * 10); egg.animate([{ transform: 'none' }, { transform: `translate(${dx}px, ${-6 - k * 8}px) rotate(${rz}deg)` }, { transform: 'none' }], { duration: 140 - k * 50, easing: 'ease-out' }); }
-    if (actx && !muted) peckSfx(1 + k * .6, .5 + k * .5);
-    chips(st, egg, it.shell ? it.shell[0] : '#efe6d2', 2 + Math.round(k * 3)); shake = Math.max(shake, 1 + k * 3);
-    if (i === 3) { drawEgg(egg, it, 'crack'); if (actx && !muted) tone(900, 700, .06, 'square', .04); }
-    if (i === 6) { drawEgg(egg, it, 'crack2'); st.classList.add('shake2'); paintRays(rays, -1, 1.4); if (actx && !muted) { tone(800, 600, .07, 'square', .05); tone(300, 900, .3, 'sawtooth', .02); } }
-  }, t));
+  // how the egg hatches changes every time: pecks from inside, rocking, hopping, spinning, or charging up with light
+  const shellC = it.shell ? it.shell[0] : '#efe6d2', at = (t, f) => setTimeout(() => { if (alive()) f(); }, t);
+  const crack1 = () => { drawEgg(egg, it, 'crack'); if (actx && !muted) tone(900, 700, .06, 'square', .04); chips(st, egg, shellC, 3); };
+  const crack2 = (leak = false) => { drawEgg(egg, it, leak ? 'leak' : 'crack2'); st.classList.add('charged'); paintRays(rays, -1, 1.4); chips(st, egg, shellC, 4); if (actx && !muted) { tone(800, 600, .07, 'square', .05); tone(300, 900, .3, 'sawtooth', .02); } };
+  const STYLES = ['peck', 'rock', 'hop', 'spin', 'charge'], style = playEggStage.hatch || STYLES[Math.floor(Math.random() * STYLES.length)], T0 = 480, SPAN = EGG_SHAKE - T0 - 40;
+  st.dataset.hatch = style;
+  const anim = (kf, o) => egg.animate ? egg.animate(kf, o) : null;
+  if (style === 'peck') {
+    // slow knocks that speed up, the shell cracks, then it rattles hard and bursts
+    const ts = [120, 380, 590, 740, 860, 950, 1020, 1080, 1130].map(t => t * EGG_SHAKE / 1200);
+    ts.forEach((t, i) => at(t, () => { const k = i / (ts.length - 1);
+      const dx = rnd(-4, 4) * (1 + k * 2), rz = (i % 2 ? 1 : -1) * (5 + k * 10); anim([{ transform: 'none' }, { transform: `translate(${dx}px, ${-6 - k * 8}px) rotate(${rz}deg)` }, { transform: 'none' }], { duration: 140 - k * 50, easing: 'ease-out' });
+      if (actx && !muted) peckSfx(1 + k * .6, .5 + k * .5);
+      chips(st, egg, shellC, 2 + Math.round(k * 3)); shake = Math.max(shake, 1 + k * 3);
+      if (i === 3) crack1(); if (i === 6) { crack2(); st.classList.add('shake2'); } }));
+  } else if (style === 'rock') {
+    // rocks side to side, harder and harder, creaking, nearly tips over, then cracks
+    const sw = [0, -7, 9, -13, 17, -23, 27, -31, 20, -8, 0];
+    at(T0, () => anim(sw.map(a => ({ transform: `rotate(${a}deg)` })), { duration: SPAN, easing: 'ease-in-out' }));
+    sw.slice(1, -1).forEach((a, i) => at(T0 + SPAN * (i + 1) / (sw.length - 1), () => { const k = i / (sw.length - 3); if (actx && !muted) tone(240 - k * 80, 150 - k * 50, .12, 'triangle', .05 + k * .04); shake = Math.max(shake, 1 + k * 4); if (k > .4) chips(st, egg, shellC, 1 + Math.round(k * 2)); }));
+    at(T0 + SPAN * .42, crack1); at(T0 + SPAN * .78, () => crack2());
+  } else if (style === 'hop') {
+    // little hops, each one higher, landing with a thud and a squash
+    const hops = [[0, 16], [.27, 26], [.5, 40], [.72, 58]];
+    hops.forEach(([f, h], i) => at(T0 - 160 + SPAN * f, () => { const d = 250 + i * 25;
+      anim([{ transform: 'none' }, { transform: 'translateY(4px) scale(1.12, .88)', offset: .12 }, { transform: `translateY(${-h}px) scale(.92, 1.1) rotate(${(i % 2 ? 1 : -1) * 6}deg)`, offset: .5 }, { transform: 'translateY(0) scale(1.2, .82)', offset: .85 }, { transform: 'none' }], { duration: d, easing: 'linear' });
+      setTimeout(() => { if (!alive()) return; if (actx && !muted) { tone(150, 55, .14, 'sine', .12 + i * .03); peckSfx(.6, .4); } shake = Math.max(shake, 2 + i * 1.5); chips(st, egg, shellC, 2 + i); if (i === 1) crack1(); if (i === 3) crack2(); }, d * .85); }));
+  } else if (style === 'spin') {
+    // twirls faster and faster with a rising whirr, lifting off the ground a little
+    const N = 48, turns = 4.5, kf = []; for (let i = 0; i <= N; i++) { const p = i / N, a = p * p * turns * TAU, sx = Math.cos(a); kf.push({ transform: `translateY(${-p * 14}px) scaleX(${(Math.abs(sx) < .12 ? Math.sign(sx || 1) * .12 : sx).toFixed(3)})` }); }
+    kf.push({ transform: 'none' });
+    at(T0 - 120, () => { anim(kf, { duration: SPAN + 120, easing: 'linear' }); if (actx && !muted) { tone(160, 1300, (SPAN + 120) / 1000, 'sawtooth', .014); tone(80, 300, (SPAN + 120) / 1000, 'sine', .05); } });
+    at(T0 + SPAN * .45, crack1); at(T0 + SPAN * .8, () => crack2());
+    for (let i = 0; i < 4; i++) at(T0 + SPAN * (.5 + i * .12), () => chips(st, egg, shellC, 3));
+  } else {
+    // trembles and charges up: the glow swells and light leaks out of the cracks
+    at(T0 - 200, () => { st.classList.add('charging'); anim(Array.from({ length: 30 }, (_, i) => { const k = i / 29; return { transform: `translate(${(i % 2 ? 1 : -1) * k * 4}px, ${(i % 3 - 1) * k * 2}px) scale(${1 + k * .08})` }; }), { duration: SPAN + 200, easing: 'linear' }); if (actx && !muted) { tone(90, 380, (SPAN + 200) / 1000, 'sine', .07); tone(180, 760, (SPAN + 200) / 1000, 'triangle', .02); } });
+    at(T0 + SPAN * .3, crack1); at(T0 + SPAN * .6, () => crack2()); at(T0 + SPAN * .86, () => { crack2(true); paintRays(rays, -1, 1.8); if (actx && !muted) tone(1200, 1800, .25, 'triangle', .04); });
+  }
   const token = (run.stageToken = (run.stageToken || 0) + 1), aliveR = () => run.stageToken === token && !st.hidden, alive = () => aliveR() && !st._skipped;
   st._skipped = false; st._revealed = false;
   // build the reel: random fillers, a teaser next to the prize, the prize at WIN
@@ -6276,8 +6309,8 @@ function drawEgg(cv2, egg, state) {
   const g = c.createRadialGradient(-12, -20, 4, 0, 0, 52); g.addColorStop(0, '#fff'); g.addColorStop(.35, shell); g.addColorStop(1, dot); c.fillStyle = g; eggPath(); c.fill();
   c.save(); eggPath(); c.clip(); c.fillStyle = dot; for (let i = 0; i < 14; i++) { const a = egg.seed + i * 2.39, d = 8 + (i * 13 % 34); c.globalAlpha = .55; c.beginPath(); c.ellipse(Math.cos(a) * d, Math.sin(a) * d * 1.2, 2.5 + i % 3, 1.8 + i % 2, a, 0, TAU); c.fill(); } c.restore();
   if (egg.golden) { c.fillStyle = 'rgba(255,255,255,.9)'; for (const [x, y, r] of [[-14, -22, 3], [12, -8, 2.2], [-4, 14, 2.6], [18, 20, 1.8], [-22, 6, 1.8]]) { c.beginPath(); c.moveTo(x, y - r * 2.2); c.lineTo(x + r * .5, y - r * .5); c.lineTo(x + r * 2.2, y); c.lineTo(x + r * .5, y + r * .5); c.lineTo(x, y + r * 2.2); c.lineTo(x - r * .5, y + r * .5); c.lineTo(x - r * 2.2, y); c.lineTo(x - r * .5, y - r * .5); c.closePath(); c.fill(); } }
-  if (state === 'crack2' || state === 'cap') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-36, -6); c.lineTo(-22, 4); c.lineTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.lineTo(32, 2); c.moveTo(-10, -10); c.lineTo(-14, -26); c.lineTo(-6, -36); c.moveTo(14, -8); c.lineTo(22, -24); c.moveTo(2, 4); c.lineTo(6, 22); c.lineTo(-4, 34); c.moveTo(-22, 4); c.lineTo(-28, 20); c.moveTo(22, -24); c.lineTo(14, -38); c.stroke(); c.fillStyle = 'rgba(255,240,190,.55)'; c.beginPath(); c.moveTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.closePath(); c.fill();
-    c.fillStyle = '#f2a73a'; c.strokeStyle = '#7a4a10'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-3, -6); c.lineTo(8, -5); c.lineTo(3, 4); c.closePath(); c.fill(); c.stroke(); c.fillStyle = '#ffd27a'; c.beginPath(); c.moveTo(-1, -5); c.lineTo(5, -4.5); c.lineTo(2.5, -1); c.closePath(); c.fill(); }
+  if (state === 'crack2' || state === 'cap' || state === 'leak') { const lk = state === 'leak'; c.strokeStyle = lk ? '#fff3c0' : '#2a1e14'; c.lineWidth = lk ? 3.4 : 2.5; if (lk) { c.shadowColor = '#ffd860'; c.shadowBlur = 12; } c.beginPath(); c.moveTo(-36, -6); c.lineTo(-22, 4); c.lineTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.lineTo(32, 2); c.moveTo(-10, -10); c.lineTo(-14, -26); c.lineTo(-6, -36); c.moveTo(14, -8); c.lineTo(22, -24); c.moveTo(2, 4); c.lineTo(6, 22); c.lineTo(-4, 34); c.moveTo(-22, 4); c.lineTo(-28, 20); c.moveTo(22, -24); c.lineTo(14, -38); c.stroke(); c.fillStyle = 'rgba(255,240,190,.55)'; c.beginPath(); c.moveTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.closePath(); c.fill();
+    if (lk) { c.stroke(); c.shadowBlur = 0; } else { c.fillStyle = '#f2a73a'; c.strokeStyle = '#7a4a10'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-3, -6); c.lineTo(8, -5); c.lineTo(3, 4); c.closePath(); c.fill(); c.stroke(); c.fillStyle = '#ffd27a'; c.beginPath(); c.moveTo(-1, -5); c.lineTo(5, -4.5); c.lineTo(2.5, -1); c.closePath(); c.fill(); } }
   if (state === 'crack') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-34, 0); c.lineTo(-20, 8); c.lineTo(-8, -4); c.lineTo(4, 8); c.lineTo(16, -2); c.lineTo(30, 6); c.moveTo(-8, -4); c.lineTo(-4, -18); c.moveTo(16, -2); c.lineTo(20, -16); c.stroke(); }
   c.restore();
 }

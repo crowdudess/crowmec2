@@ -1,5 +1,16 @@
 # Nestguard changelog
 
+## 2.99.13 — Five ways to hatch
+
+Every egg now hatches in one of five ways, picked at random:
+- **Peck:** something knocks from inside, slowly and then faster, until a beak pokes through.
+- **Rock:** the egg rocks side to side, harder and harder and creaking, until it nearly tips over.
+- **Hop:** the egg hops, a little higher each time, and lands with a thud and a squash.
+- **Spin:** the egg twirls faster and faster with a rising whirr and lifts off the ground.
+- **Charge:** the egg trembles, its glow swells and golden light shines out through the cracks.
+
+The hatching lasts 0.3 seconds longer, so there's time to see it. You can still skip it with a tap or Space.
+
 ## 2.99.12 — A shinier egg roll
 
 - **The egg drops in:** it falls into view, squashes as it lands and bounces back before the pecking starts.
