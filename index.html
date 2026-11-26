@@ -4682,6 +4682,8 @@ const PROJ = {
 const projOf = id => PROJ[id] || PROJ.classic;
 // the darker and lighter shade of a leaf colour, worked out once per colour
 const leafToneCache = {}, leafTones = col => leafToneCache[col] || (leafToneCache[col] = (() => { const [r, g, b] = hexRgb(col).split(',').map(Number), f = m => `rgb(${Math.min(255, r * m) | 0},${Math.min(255, g * m) | 0},${Math.min(255, b * m) | 0})`; return [f(.68), f(1.18)]; })());
+// a soft round glow from a gradient (a canvas blur looks the same but is several times slower with lots of shots)
+function softGlow(col, x, y, r, al) { const g = ctx.createRadialGradient(x, y, 0, x, y, r), rgb = hexRgb(col); g.addColorStop(0, `rgba(${rgb},${al})`); g.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
 function drawProj(kind, col, a, k, t) {
   const spin = t / 90;
   switch (kind) {
@@ -4694,7 +4696,8 @@ function drawProj(kind, col, a, k, t) {
       ctx.strokeStyle = 'rgba(255,255,240,.55)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-L * .75, 0); ctx.lineTo(L * .85, 0);
       for (const x of [-.35, .05, .45]) for (const sd of [-1, 1]) { ctx.moveTo(x * L, 0); ctx.lineTo((x + .22) * L, sd * W * .75); } ctx.stroke(); break; }
     case 'ice': { ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(12 * k, 0); ctx.lineTo(-2 * k, -4 * k); ctx.lineTo(-10 * k, 0); ctx.lineTo(-2 * k, 4 * k); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.moveTo(10 * k, 0); ctx.lineTo(0, -1.5 * k); ctx.lineTo(-4 * k, 0); ctx.closePath(); ctx.fill(); break; }
-    case 'flame': { ctx.rotate(a); ctx.shadowColor = col; ctx.shadowBlur = 10; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-14 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, 5 * k, -4 * k); ctx.arc(5 * k, 0, 4.5 * k, -Math.PI / 2, Math.PI / 2); ctx.quadraticCurveTo(-4 * k, 6 * k, -14 * k, 0); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#fff6c0'; ctx.beginPath(); ctx.arc(5 * k, 0, 2.2 * k, 0, TAU); ctx.fill(); break; }
+    case 'flame': { ctx.rotate(a); const fl = g2 => { ctx.beginPath(); ctx.moveTo(-14 * k - g2, 0); ctx.quadraticCurveTo(-4 * k, -6 * k - g2, 5 * k, -4 * k - g2); ctx.arc(5 * k, 0, 4.5 * k + g2, -Math.PI / 2, Math.PI / 2); ctx.quadraticCurveTo(-4 * k, 6 * k + g2, -14 * k - g2, 0); ctx.fill(); };   // the glow is the same shape, bigger and see-through (a blur was too slow)
+      softGlow(col, 0, 0, 12 * k, .5); ctx.fillStyle = col; fl(0); ctx.fillStyle = '#fff6c0'; ctx.beginPath(); ctx.arc(5 * k, 0, 2.2 * k, 0, TAU); ctx.fill(); break; }
     case 'coin': { const w = Math.abs(Math.cos(spin)) * 6 * k + 1; ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, w, 6 * k, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#a07010'; ctx.lineWidth = 1.2; ctx.stroke(); break; }
     case 'gem': { ctx.rotate(spin * .5); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -7 * k); ctx.lineTo(6 * k, 0); ctx.lineTo(0, 7 * k); ctx.lineTo(-6 * k, 0); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.moveTo(0, -7 * k); ctx.lineTo(3 * k, -1 * k); ctx.lineTo(-2 * k, -1 * k); ctx.closePath(); ctx.fill(); break; }
     case 'goldegg': { ctx.rotate(.25); const s2 = k * .74, eg = () => { ctx.beginPath(); ctx.moveTo(0, -12 * s2); ctx.bezierCurveTo(7.5 * s2, -12 * s2, 10 * s2, 1 * s2, 9.6 * s2, 4 * s2); ctx.bezierCurveTo(9.2 * s2, 10 * s2, 5 * s2, 12 * s2, 0, 12 * s2); ctx.bezierCurveTo(-5 * s2, 12 * s2, -9.2 * s2, 10 * s2, -9.6 * s2, 4 * s2); ctx.bezierCurveTo(-10 * s2, 1 * s2, -7.5 * s2, -12 * s2, 0, -12 * s2); ctx.closePath(); };
@@ -4711,9 +4714,9 @@ function drawProj(kind, col, a, k, t) {
     case 'web': { ctx.rotate(a); ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-16 * k, 0); ctx.lineTo(4 * k, 0); ctx.stroke(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(6 * k, 0, 3.5 * k, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(6 * k, 0, 5.5 * k, 0, TAU); ctx.stroke(); break; }
     case 'star': { ctx.rotate(spin); ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i < 10; i++) { const rr = (i % 2 ? 3 : 7.5) * k, aa = i / 10 * TAU; i ? ctx.lineTo(Math.cos(aa) * rr, Math.sin(aa) * rr) : ctx.moveTo(rr, 0); } ctx.closePath(); ctx.fill(); break; }
     case 'shuriken': { ctx.rotate(spin * 1.5); ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i < 4; i++) { const aa = i / 4 * TAU; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(aa - .35) * 3 * k, Math.sin(aa - .35) * 3 * k); ctx.lineTo(Math.cos(aa) * 9 * k, Math.sin(aa) * 9 * k); ctx.lineTo(Math.cos(aa + .35) * 3 * k, Math.sin(aa + .35) * 3 * k); } ctx.fill(); ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(0, 0, 1.6 * k, 0, TAU); ctx.fill(); break; }
-    case 'orb': { ctx.shadowColor = col; ctx.shadowBlur = 12; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 5 * k, 0, TAU); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(-1.5 * k, -1.5 * k, 1.8 * k, 0, TAU); ctx.fill(); ctx.rotate(a); ctx.fillStyle = col + '66'; ctx.beginPath(); ctx.ellipse(-9 * k, 0, 6 * k, 2.5 * k, 0, 0, TAU); ctx.fill(); break; }
+    case 'orb': { softGlow(col, 0, 0, 11 * k, .65); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 5 * k, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(-1.5 * k, -1.5 * k, 1.8 * k, 0, TAU); ctx.fill(); ctx.rotate(a); ctx.fillStyle = col + '66'; ctx.beginPath(); ctx.ellipse(-9 * k, 0, 6 * k, 2.5 * k, 0, 0, TAU); ctx.fill(); break; }
     case 'petal': { ctx.rotate(a + spin * .6); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-7 * k, 0); ctx.quadraticCurveTo(0, -6 * k, 7 * k, -1 * k); ctx.lineTo(5 * k, 0); ctx.lineTo(7 * k, 1 * k); ctx.quadraticCurveTo(0, 6 * k, -7 * k, 0); ctx.fill(); break; }
-    case 'snowflake': { ctx.rotate(spin * .5); ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU, c = Math.cos(aa), sn = Math.sin(aa); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(c * 8 * k, sn * 8 * k); ctx.moveTo(c * 5 * k, sn * 5 * k); ctx.lineTo(c * 5 * k + Math.cos(aa + 1) * 2.5 * k, sn * 5 * k + Math.sin(aa + 1) * 2.5 * k); ctx.stroke(); } break; }
+    case 'snowflake': { ctx.rotate(spin * .5); ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.beginPath(); for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU, c = Math.cos(aa), sn = Math.sin(aa); ctx.moveTo(0, 0); ctx.lineTo(c * 8 * k, sn * 8 * k); ctx.moveTo(c * 5 * k, sn * 5 * k); ctx.lineTo(c * 5 * k + Math.cos(aa + 1) * 2.5 * k, sn * 5 * k + Math.sin(aa + 1) * 2.5 * k); } ctx.stroke(); break; }
     case 'cap': { ctx.rotate(spin); ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i < 16; i++) { const rr = (i % 2 ? 6 : 7) * k, aa = i / 16 * TAU; i ? ctx.lineTo(Math.cos(aa) * rr, Math.sin(aa) * rr) : ctx.moveTo(rr, 0); } ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(0, 0, 3.5 * k, 0, TAU); ctx.fill(); break; }
     case 'shard': { ctx.rotate(a); ctx.fillStyle = '#0e0c10'; ctx.beginPath(); ctx.moveTo(13 * k, 0); ctx.lineTo(-3 * k, -5 * k); ctx.lineTo(-11 * k, 1 * k); ctx.lineTo(-2 * k, 4 * k); ctx.closePath(); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.stroke(); break; }
     case 'plane': { ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(11 * k, 0); ctx.lineTo(-9 * k, -8 * k); ctx.lineTo(-5 * k, 0); ctx.lineTo(-9 * k, 8 * k); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#9aa4b8'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(11 * k, 0); ctx.lineTo(-5 * k, 0); ctx.stroke(); break; }
@@ -4740,11 +4743,13 @@ function shotFxNow() {
 }
 // glows under the feather (plain see-through ellipses: blurred shadows were far too slow with lots of feathers)
 const SHOT_GLOW = { l_forge: ['rgba(255,220,150,.22)', 'rgba(255,235,190,.4)'], m_bloodmoon: ['rgba(200,20,40,.22)', 'rgba(220,40,60,.4)'], m_void: ['rgba(120,50,200,.22)', 'rgba(150,80,230,.4)'] };
-function drawShotGlow(fx, k, [L, H] = [11, 3]) {
+function drawShotGlow(fx, k, body = PROJ_BODY.feather) {
+  const { L, H, cx } = bodyDims(body); ctx.save(); ctx.translate(cx * k, 0);
   const sx = Math.min(1.1, Math.max(1, L / 11)), sy = Math.min(1.35, Math.max(1, (H + 1.5) / 4));
   fx.ring.filter(id => SHOT_GLOW[id]).forEach((id, i) => { const [o, c] = SHOT_GLOW[id];
     ctx.fillStyle = o; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (16 + i * 2) * k * sx, (6.5 + i) * k * sy, 0, 0, TAU); ctx.fill();
     ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (12 + i * 2) * k * sx, (3.5 + i) * k * sy, 0, 0, TAU); ctx.fill(); });
+  ctx.restore();
 }
 // the marks a small feather shows: just the aura and the glint
 function shotFxSmall(fx) { return fx.small || (fx.small = { ring: fx.ring.slice(0, 1), glint: (fx.glint || []).slice(0, 1), nose: [], side: [], trail: [], all: [...fx.ring.slice(0, 1), ...(fx.glint || []).slice(0, 1)] }); }
@@ -4754,15 +4759,18 @@ function shotFxCut(fx, n) {
   return fx.cut[n] || (fx.cut[n] = (() => { const o = { ring: [], nose: [], side: [], trail: [], glint: [], all: fx.order.slice(0, n), order: fx.order }; for (const [k, id] of o.all) o[k].push(id); return o; })());
 }
 // rough size of each projectile skin (half length, half width), so the effects fit around it
-const PROJ_BODY = { feather: [11, 3], leaf: [11, 3.8], ice: [12, 4], flame: [14, 6], web: [12, 3.5], shard: [13, 5], plane: [11, 8], orb: [6, 6], petal: [7, 6] };
+// how far each projectile reaches in front, behind, and to the sides, so effects sit around it (not every shape is centred: fireballs, darts and orbs trail behind)
+const PROJ_BODY = { feather: [11, 11, 3], leaf: [11, 12, 3.8], ice: [12, 10, 4], flame: [9.5, 14, 5], web: [9.5, 16, 3.5], shard: [13, 11, 5], plane: [11, 9, 8], orb: [5, 15, 5], petal: [7, 7, 6],
+  coin: [6, 6, 6], gem: [7, 7, 7], star: [7.5, 7.5, 7.5], cap: [7, 7, 7], snowflake: [8, 8, 8], shuriken: [9, 9, 9], card: [8, 8, 8], banana: [8, 8, 8], cobweb: [10.5, 10.5, 10.5] };
+const bodyDims = ([F, Bk, H]) => ({ F, Bk, H, L: (F + Bk) / 2, cx: (F - Bk) / 2 });
 // under = the aura and barbs, drawn beneath the projectile so they stick out around it; over = everything else
 function drawShotFx(fx, ph, k, now, layer, body) {
   if (!fx.all.length) return;
   ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  const w = now / 1000, [L, H] = body || PROJ_BODY.feather, under = layer === 'under';
+  const w = now / 1000, { F, Bk, L, H, cx } = bodyDims(body || PROJ_BODY.feather), under = layer === 'under';
   if (under) {
   // around the projectile: each elemental item wraps it in a different way, stretched to fit the skin
-  ctx.save(); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4)));
+  ctx.save(); ctx.translate(cx * k, 0); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4)));
   fx.ring.forEach(id => { switch (id) {
     case 'ember': for (let j = 0; j < 3; j++) { const x = (-6 + j * 6) * k, h = (4 + Math.sin(w * 25 + j * 2 + ph) * 1.5) * k; ctx.fillStyle = j % 2 ? '#ffb040' : '#ff7a2a'; ctx.beginPath(); ctx.moveTo(x - 2, -1.5); ctx.quadraticCurveTo(x - 2.5, -h * .6, x - 1, -h - 1.5); ctx.quadraticCurveTo(x + 2, -h * .5, x + 2, -1.5); ctx.fill(); } break;   // flames licking up off the feather
     case 'u_ember': for (let j = 0; j < 2; j++) { const t = (w * 1.6 + j * .5 + ph) % 1; ctx.fillStyle = `rgba(120,110,100,${.5 * (1 - t)})`; ctx.beginPath(); ctx.arc((-8 - t * 10) * k, (3 + t * 4) * k, (1.5 + t * 2.5) * k, 0, TAU); ctx.fill(); } break;   // a wisp of smoke
@@ -4777,14 +4785,14 @@ function drawShotFx(fx, ph, k, now, layer, body) {
     case 'm_bloodmoon': break;   // just the red glow underneath
   } });
   ctx.restore();
-  fx.side.forEach(id => { if (id === 'barbs') { ctx.strokeStyle = '#9aa3ad'; ctx.lineWidth = 1.2; ctx.beginPath(); for (const x of [4, -1]) for (const sd of [-1, 1]) { ctx.moveTo(x * k, sd * 2); ctx.lineTo((x - 4) * k, sd * (H + 3) * k); } ctx.stroke(); } });
+  fx.side.forEach(id => { if (id === 'barbs') { ctx.strokeStyle = '#9aa3ad'; ctx.lineWidth = 1.2; ctx.beginPath(); for (const x0 of [4, -1]) for (const sd of [-1, 1]) { const x = x0 + cx; ctx.moveTo(x * k, sd * 2); ctx.lineTo((x - 4) * k, sd * (H + 3) * k); } ctx.stroke(); } });
   ctx.restore(); return; }
   // phoenix fire wings flap on top of the projectile, out to its edges
-  if (fx.ring.includes('phoenixf')) { ctx.save(); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4))); const f = Math.sin(w * 18 + ph) * .35; ctx.fillStyle = 'rgba(255,170,50,.85)'; for (const sd of [-1, 1]) { ctx.save(); ctx.scale(1, sd); ctx.rotate(-.5 - f); ctx.beginPath(); ctx.moveTo(-2 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, -10 * k, -7 * k); ctx.quadraticCurveTo(-6 * k, -3 * k, -7 * k, -1 * k); ctx.closePath(); ctx.fill(); ctx.restore(); } ctx.restore(); }
+  if (fx.ring.includes('phoenixf')) { ctx.save(); ctx.translate(cx * k, 0); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4))); const f = Math.sin(w * 18 + ph) * .35; ctx.fillStyle = 'rgba(255,170,50,.85)'; for (const sd of [-1, 1]) { ctx.save(); ctx.scale(1, sd); ctx.rotate(-.5 - f); ctx.beginPath(); ctx.moveTo(-2 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, -10 * k, -7 * k); ctx.quadraticCurveTo(-6 * k, -3 * k, -7 * k, -1 * k); ctx.closePath(); ctx.fill(); ctx.restore(); } ctx.restore(); }
   // the mana ribbon winds over the top
-  if (fx.ring.includes('mana')) { ctx.save(); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4))); ctx.strokeStyle = 'rgba(130,190,255,.95)'; ctx.lineWidth = 1.1; ctx.beginPath(); for (let j = 0; j <= 16; j++) { const x = (-12 + j * 1.5) * k, y = Math.sin(j * .9 - w * 14 + ph) * 3.2 * k; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); ctx.restore(); }
+  if (fx.ring.includes('mana')) { ctx.save(); ctx.translate(cx * k, 0); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4))); ctx.strokeStyle = 'rgba(130,190,255,.95)'; ctx.lineWidth = 1.1; ctx.beginPath(); for (let j = 0; j <= 16; j++) { const x = (-12 + j * 1.5) * k, y = Math.sin(j * .9 - w * 14 + ph) * 3.2 * k; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); ctx.restore(); }
   // the tip: pierce items line up in front of the feather
-  fx.nose.forEach((id, i) => { const x = (L + i * 4.5) * k;
+  fx.nose.forEach((id, i) => { const x = (F + i * 4.5) * k;
     if (id === 'needle') { ctx.strokeStyle = '#f2efe6'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x - 3, 0); ctx.lineTo(x + 5, 0); ctx.stroke(); }
     else if (id === 'sharp') { ctx.fillStyle = '#d8dce4'; ctx.beginPath(); ctx.moveTo(x + 4, 0); ctx.lineTo(x - 1, -2.2); ctx.lineTo(x, 0); ctx.lineTo(x - 1, 2.2); ctx.closePath(); ctx.fill(); }
     else if (id === 'u_bone') { ctx.fillStyle = '#efe6cc'; ctx.beginPath(); ctx.arc(x - 1, -1.4, 1.3, 0, TAU); ctx.arc(x - 1, 1.4, 1.3, 0, TAU); ctx.fill(); ctx.fillRect(x - 1, -.7, 4, 1.4); }
@@ -4795,12 +4803,12 @@ function drawShotFx(fx, ph, k, now, layer, body) {
   fx.side.forEach((id, i) => {
     if (id === 'barbs') return;   // drawn underneath
     const col = { hex: '#c08aff', u_spark: '#ffe14a', l_storm: '#6ae0ff', b_queen: '#f0eef4' }[id], q = w * 5 + ph;
-    ctx.fillStyle = col; for (const o of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) { const x = Math.cos(q + o) * Math.max(9, L * .9) * k, y = Math.sin(q + o) * Math.max(5.5, H + 3) * k;
+    ctx.fillStyle = col; for (const o of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) { const x = (cx + Math.cos(q + o) * Math.max(9, L * .9)) * k, y = Math.sin(q + o) * Math.max(5.5, H + 3) * k;
       if (id === 'hex') { ctx.save(); ctx.translate(x, y); ctx.rotate(q * 2); ctx.fillRect(-1.3, -1.3, 2.6, 2.6); ctx.restore(); }
       else if (id === 'b_queen') { ctx.beginPath(); ctx.arc(x, y, 1, 0, TAU); ctx.fill(); }
       else { ctx.beginPath(); ctx.moveTo(x, y - 2.2); ctx.lineTo(x + .7, y); ctx.lineTo(x, y + 2.2); ctx.lineTo(x - .7, y); ctx.closePath(); ctx.fill(); } } });
   // the glint: crit items twinkle above the feather, each in its own shape
-  (fx.glint || []).forEach(id => { const tw = .55 + .45 * Math.sin(w * 7 + ph * 3), x = L * .35 * k, y = -(H + 4.5) * k, r = 3.2 * k * tw;
+  (fx.glint || []).forEach(id => { const tw = .55 + .45 * Math.sin(w * 7 + ph * 3), x = (cx + L * .35) * k, y = -(H + 4.5) * k, r = 3.2 * k * tw;
     const star = (c, rr, n = 4, inner = .28) => { ctx.fillStyle = c; ctx.beginPath(); for (let j = 0; j < n * 2; j++) { const q = j / (n * 2) * TAU - Math.PI / 2, d = j % 2 ? rr * inner : rr; j ? ctx.lineTo(x + Math.cos(q) * d, y + Math.sin(q) * d) : ctx.moveTo(x + Math.cos(q) * d, y + Math.sin(q) * d); } ctx.closePath(); ctx.fill(); };
     switch (id) {
       case 'm_midas': ctx.fillStyle = '#f0c030'; ctx.beginPath(); ctx.ellipse(x, y, Math.max(.6, Math.abs(Math.cos(w * 6 + ph)) * 2.4 * k), 2.4 * k, 0, 0, TAU); ctx.fill(); star('#fff6c0', r * .8); break;   // a spinning gold coin that glints
@@ -4814,7 +4822,7 @@ function drawShotFx(fx, ph, k, now, layer, body) {
       case 'u_plume': star('#7ad05a', r * .85); break;   // a small green twinkle
     } });
   // the trail: each item adds its own mark behind the feather, one after the other
-  fx.trail.forEach((id, i) => { const x = (-L - 2 - i * 5.5) * k, y = Math.sin(w * 9 + i * 1.7 + ph) * 1.6, al = Math.max(.35, 1 - i * .08); ctx.globalAlpha = al;
+  fx.trail.forEach((id, i) => { const x = (-Bk - 2 - i * 5.5) * k, y = Math.sin(w * 9 + i * 1.7 + ph) * 1.6, al = Math.max(.35, 1 - i * .08); ctx.globalAlpha = al;
     switch (id) {
       case 'ember': { const f = 1 + Math.sin(w * 30 + i) * .2; ctx.fillStyle = '#ff8a3a'; ctx.beginPath(); ctx.moveTo(x + 3, y - 2.4); ctx.quadraticCurveTo(x - 4 * f, y, x + 3, y + 2.4); ctx.arc(x + 3, y, 2.4, Math.PI / 2, -Math.PI / 2, true); ctx.fill(); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(x + 3, y, 1.1, 0, TAU); ctx.fill(); break; }
       case 'u_ember': ctx.fillStyle = '#e8502a'; for (const d of [0, 1]) { ctx.beginPath(); ctx.arc(x - d * 2.5, y + (d ? 1.8 : -1.5) + Math.sin(w * 20 + d) * .8, 1.2, 0, TAU); ctx.fill(); } break;
@@ -4844,14 +4852,14 @@ function drawFeather(s) {
   const bw = s.bubble ? Math.sin(performance.now() / 90 + s.x) * .8 : 0;
   if (s.bubble) { ctx.fillStyle = 'rgba(160,230,200,.3)'; ctx.beginPath(); ctx.ellipse(0, 0, 8 + bw, 8 - bw, 0, 0, TAU); ctx.fill(); ctx.save(); ctx.scale(.55, .55); }
   if (s.small) {   // magpie and spell feathers: they burn, chill and crit but don't pierce or bounce, so only the aura and glint show, smaller
-    const l = 7, now = performance.now(), fx = shotFx.per ? shotFxSmall(shotFxNow()) : null, body = [7, 2.5], k = .65; ctx.rotate(a);
+    const l = 7, now = performance.now(), fx = shotFx.per ? shotFxSmall(shotFxNow()) : null, body = [7, 7, 2.5], k = .65; ctx.rotate(a);
     if (fx && fx.all.length) { drawShotGlow(fx, k, body); drawShotFx(fx, s.x * .05, k, now, 'under', body); }
     ctx.fillStyle = '#cfd6e6'; ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
     if (fx && fx.all.length) drawShotFx(fx, s.x * .05, k, now, 'over', body);
   } else {
     const [kind, col] = projOf(save.skin), now = performance.now(), R = s.big ? 14 : 9, fx0 = shotFxNow(), k = s.big ? 1.4 : 1;
     const fx = shotFxCut(fx0, shotFx.per ?? 99);
-    const body = PROJ_BODY[kind] || [9, 7], fa = a + (kind === 'leaf' ? Math.sin((now + s.x) / 90) * .22 : 0);   // the leaf sways, so its effects sway with it
+    const body = PROJ_BODY[kind] || [9, 9, 7], fa = a + (kind === 'leaf' ? Math.sin((now + s.x) / 90) * .22 : 0);   // the leaf sways, so its effects sway with it
     if (fx.all.length) { ctx.save(); ctx.rotate(fa); drawShotGlow(fx, k, body); drawShotFx(fx, s.x * .05, k, now, 'under', body); ctx.restore(); }
     else if (P.burn && save.shotFx !== 'off') { ctx.fillStyle = 'rgba(240,138,58,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     const dk = P.baseDmg ? Math.min(1.35, 1 + Math.max(0, P.dmg / P.baseDmg - 1) * .12) : 1;
