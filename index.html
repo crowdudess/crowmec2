@@ -1040,7 +1040,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.13</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.14</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4163,7 +4163,7 @@ function draw(time) {
   for (const z of zones) drawZone(z, time, true);
 
   if (rv) { riftLayer(rv, time, b => ambBack(b.id, reduceMotion ? 0 : time)); drawRiftCrack(rv, reduceMotion ? 0 : time); } else ambBack(biome.id, reduceMotion ? 0 : time);
-  drawNest();
+  drawNest(); if (run && state !== 'menu') drawGearNest(time);
   if (run && run.shield > 0 && state !== 'menu') { const a = Math.min(1, run.shield / 60); ctx.strokeStyle = `rgba(140,200,255,${.35 + .45 * a})`; ctx.lineWidth = 4 + 4 * a; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 16, 0, TAU); ctx.stroke(); ctx.fillStyle = `rgba(140,200,255,${.06 + .08 * a})`; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 16, 0, TAU); ctx.fill(); }
   drawQuakes(); drawFrostGround();
   for (const c of cheeses) if (c.t >= c.dur) drawCheeseWedge(c.x, c.y, 17, c.rot, Math.min(1, c.dur + c.life - c.t));
@@ -4180,7 +4180,8 @@ function draw(time) {
   const flap = P && cawT > P.cawCd - .3 ? 1 : 0;
   if (run && run.items && state !== 'menu' && ITEMS.some(it => it.rar === 5 && run.items[it.id])) { ctx.save(); ctx.rotate(time / 1500); ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { ctx.strokeStyle = `hsla(${(time / 15 + i * 60) % 360},90%,70%,.55)`; ctx.beginPath(); ctx.arc(0, 0, 30, i / 6 * TAU, (i + .7) / 6 * TAU); ctx.stroke(); } ctx.restore(); }
   if (run && state === 'wave') { const bf = [['furyT', '255,122,74'], ['razorT', '200,220,240'], ['eagleT', '255,216,74']].filter(([k]) => run[k] > 0); bf.forEach(([k, c], i) => { const rr = 30 + i * 7 + Math.sin(time / 120 + i) * 2; ctx.strokeStyle = `rgba(${c},${.45 + .3 * Math.sin(time / 90 + i)})`; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.lineDashOffset = time / (i % 2 ? 30 : -30); ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.stroke(); }); ctx.setLineDash([]); }
-  if (run && run.frogT > 0 && state !== 'menu') drawFrog(crowAng, time); else drawCrow(skinOf(save.skin), crowAng, flap, Math.sin(time / 300) * 1.2, time, crowWing);
+  if (run && run.frogT > 0 && state !== 'menu') drawFrog(crowAng, time); else { const inRun = run && state !== 'menu'; if (inRun) drawGearAround(time); drawCrow(inRun ? gearSkin() : skinOf(save.skin), crowAng, flap, Math.sin(time / 300) * 1.2, time, crowWing); }
+  if (run && state === 'wave') drawEquip(time);
   if (state === 'wave' || state === 'shop') { const nowS = performance.now(); drawCrowSay(Math.min(.1, (nowS - (drawCrowSay.last || nowS)) / 1000) * (paused ? 0 : 1)); drawCrowSay.last = nowS; }
   if (run && run.webT > 0) { ctx.strokeStyle = 'rgba(235,230,245,.75)'; ctx.lineWidth = 1.5; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 6, Math.sin(a) * 6); ctx.lineTo(Math.cos(a + .3) * 30, Math.sin(a + .3) * 30); ctx.stroke(); } ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.stroke(); }
   if (run && run.poisonT > 0) { ctx.strokeStyle = `rgba(120,220,80,${.3 + .2 * Math.sin(time / 120)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 8, 0, TAU); ctx.stroke(); }
@@ -4397,6 +4398,116 @@ function drawNest(skinId, eggsN, dark) {
   for (let i = 0; i < eggs; i++) { const [x, y] = pos[i]; ctx.fillStyle = N.egg; ctx.beginPath(); ctx.ellipse(x, y + 4, 8, 10, .3 * (i - 1), 0, TAU); ctx.fill(); ctx.fillStyle = N.spot; ctx.beginPath(); ctx.arc(x - 2, y + 2, 1.4, 0, TAU); ctx.arc(x + 3, y + 7, 1.2, 0, TAU); ctx.fill(); }
 }
 const skinOf = id => SKINS.find(s => s.id === id) || SKINS[0];
+// ---------- gear: every item shows up on the crow, around it, on the nest or on its feathers ----------
+// c: worn by the crow (merged into its skin), o: [kind, colour, count] things circling the crow, n: [kind, colour] nest pieces,
+// f: feather effects, a: a glow under the crow. Higher rarities win when two items want the same spot.
+const GEAR = {
+  needle: { f: { needle: 1 } }, golden: { n: [['goldegg']] }, murder: { o: ['crowlet', '#15141c', 2] }, pecker: { c: { crest: ['#d8342a', 3, 1] } },
+  feast: { n: [['berries', '#c8323a']] }, quiver: { c: { pack: ['quiver', '#8a5a2a'] } }, lucky: { n: [['clover', '#4ab84a']] }, swift: { c: { tip: '#e8e4d8' } },
+  scav: { n: [['bones', '#e8e0c8']] }, frostbite: { f: { ice: 1 } }, barbs: { f: { barbs: 1 }, c: { beakTip: '#9aa3ad' } }, doublecaw: { c: { scarf: '#c8322a' } },
+  overcharge: { o: ['spark', '#ffe14a', 2] }, guardian: { o: ['feather', '#7fb2ff', 1] }, shrine: { n: [['shrine', '#9a9488']] }, pebble: { o: ['pebble', '#9a9488', 3] },
+  whistle: { c: { band: '#e8b84a' } }, twigs: { n: [['moss', '#5a8a3a']] }, glint: { c: { monocle: '#e8b84a' } }, acorn: { n: [['acorns', '#8a5a2a']] },
+  shout: { c: { paint: '#f2efe6' } }, bark: { n: [['bands', '#6a4a2a']] }, dew: { n: [['dew', '#9fe0ff']] }, flint: { c: { beakTip: '#5a5a62' } },
+  hex: { c: { halo: '#b88ae0' } }, vamp: { c: { beakTip: '#b01e2a', eyeGlow: '#ff3040' } }, coldsnap: { n: [['icicles', '#bfefff']] },
+  phoenixf: { c: { tail: 'flame' }, f: { fire: 1 } }, tempest: { c: { tip: '#6ae0ff' }, o: ['wind', '#bfefff', 2] }, crownthorn: { c: { gcrown: ['#7a8a3a', 'thorn'] } },
+  m_glass: { c: { beakTip: '#bfefff' }, a: '#9fe0ff' }, m_sun: { o: ['sun', '#ffd84a', 1], a: '#ffcc4a' }, m_storm: { c: { gcrown: ['#ffd84a', 'bolt'] }, f: { bolt: 1 } },
+  m_nova: { c: { heart: '#ff6ab0' }, a: '#ff6ab0' }, m_warp: { o: ['hourglass', '#e8d8a0', 1] }, m_midas: { c: { gild: '#ffd84a' }, n: [['coins', '#f0c030']] },
+  m_flock: { o: ['crowlet', '#15141c', 4] }, m_doom: { c: { horns: '#2a1a1a', eyeGlow: '#ff4a2a' } }, u_talon: { c: { band: '#a0a6ac' } },
+  u_pine: { n: [['resin', '#e8a030']] }, u_shiny: { n: [['shiny', '#ffffff']] }, u_owl: { c: { tufts: '#8a6a4a' } }, u_throat: { c: { scarf: '#7a8a9a' } },
+  u_sap: { n: [['resin', '#a8c040']] }, u_hazel: { o: ['leaf', '#b88ae0', 2] }, u_perch: { c: { crest: ['#4a8a3a', 2, .8] } }, u_bone: { c: { beakTip: '#e8e0c8' } },
+  l_hydra: { c: { crest: ['#3aa860', 3, 1.3] } }, l_bastion: { n: [['bands', '#8a96a2'], ['stones', '#8a8478']] }, l_drum: { c: { pack: ['drum', '#c8322a'] } },
+  l_tome: { o: ['book', '#7a4ab8', 1] }, l_gilded: { c: { tip: '#ffd84a' } }, l_eagleking: { c: { crest: ['#e8b84a', 5, 1.5] } }, m_twin: { o: ['twin', '#000', 1] },
+  m_phoenix: { c: { tail: 'flame', cape: ['#ff7a2a', '#ffd84a'] }, a: '#ff9a3a' }, m_void: { c: { eyeGlow: '#c07aff' }, f: { void: 1 }, a: '#7a3ac8' },
+  m_bloodmoon: { o: ['moon', '#d0282a', 1], f: { blood: 1 } }, m_chaos: { a: 'rainbow' }, l_storm: { f: { bolt: 1 }, o: ['spark', '#6ae0ff', 2] },
+  l_forge: { c: { beakTip: '#ff7a2a' }, f: { fire: 1 } }, l_aegis: { n: [['aegis', '#7fb2ff']] }, l_quiver: { c: { pack: ['quiver', '#e8b84a'] } },
+  l_moon: { o: ['sickle', '#e0e6ff', 1] }, l_rook: { c: { gcrown: ['#3a3a48', 'rook'] } }, l_vampire: { c: { cape: ['#4a0a12', '#a01828'], eyeGlow: '#ff3040' } },
+  l_spellblade: { o: ['blade', '#6ae0ff', 2] }, l_titan: { n: [['shell', '#4a6a3a']] }, u_spark: { o: ['spark', '#ffe14a', 1] }, u_ember: { f: { fire: 1 }, o: ['ember', '#ff8a3a', 1] },
+  u_plume: { c: { crest: ['#5ac85a', 1, .8] } }, u_echo: { c: { band: '#7fb2c9' } }, u_moth: { o: ['moth', '#d8c8a0', 2] }, u_marrow: { n: [['bones', '#e8e0c8']] },
+  u_twine: { n: [['twine', '#c8a870']] }, u_gale: { c: { tip: '#f0f0f0' } }, u_cinder: { c: { beakTip: '#8a2a1a' } }
+};
+let gear = { sig: null, run: null, crow: {}, orbit: [], nest: [], f: {}, aura: null, counts: {}, skin: null, S: null }, equipQ = [];
+function gearNow() {
+  if (!run || !run.items) return gear;
+  const sig = Object.keys(run.items).map(k => k + run.items[k]).join(',');
+  if (sig === gear.sig && gear.run === run) return gear;
+  const fresh = gear.run !== run;
+  // what was just picked up flies onto the crow at the start of the next wave
+  if (!fresh) for (const k of Object.keys(run.items)) if ((run.items[k] || 0) > (gear.counts[k] || 0) && GEAR[k] && equipQ.length < 6) equipQ.push({ id: k, t0: 0 });
+  if (fresh) equipQ = [];
+  const ids = Object.keys(run.items).filter(k => run.items[k] > 0 && GEAR[k]).sort((x, y) => ((ITEMS.find(i => i.id === x) || {}).rar || 0) - ((ITEMS.find(i => i.id === y) || {}).rar || 0));
+  const crow = {}, orbit = [], nest = [], f = {}; let aura = null;
+  for (const id of ids) { const g = GEAR[id];
+    if (g.c) Object.assign(crow, g.c);
+    if (g.o) { const [kind, col, n] = g.o; for (let i = 0; i < n && orbit.length < 12; i++) orbit.push({ kind, col }); }
+    if (g.n) for (const [kind, col] of g.n) if (!nest.some(p => p.kind === kind)) nest.push({ kind, col });
+    if (g.f) Object.assign(f, g.f);
+    if (g.a) aura = g.a; }
+  gear = { sig, run, crow, orbit, nest, f, aura, counts: { ...run.items }, skin: null, S: null };
+  return gear;
+}
+const gearSkin = () => { const g = gearNow(), id = save.skin; if (!g.S || g.skin !== id) { g.S = { ...skinOf(id), ...g.crow }; g.skin = id; } return g.S; };
+const upIconCache = {};
+// things circling the crow, and a glow under it (drawn unrotated around the nest centre)
+function drawGearAround(time) {
+  const g = gearNow();
+  if (g.aura) { const pul = .8 + Math.sin(time / 380) * .2, col = g.aura === 'rainbow' ? `hsl(${(time / 12) % 360},90%,60%)` : g.aura;
+    ctx.save(); ctx.globalAlpha = .28 * pul; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 30, 0, TAU); ctx.fill(); ctx.globalAlpha = .14 * pul; ctx.beginPath(); ctx.arc(0, 0, 40, 0, TAU); ctx.fill(); ctx.restore(); }
+  const n = g.orbit.length; if (!n) return;
+  for (let i = 0; i < n; i++) { const o = g.orbit[i], a = time / 1400 + i / n * TAU, rr = 40 + (i % 2) * 6 + Math.sin(time / 500 + i) * 2, x = Math.cos(a) * rr, y = Math.sin(a) * rr;
+    ctx.save(); ctx.translate(x, y); drawOrbitThing(o.kind, o.col, a, time + i * 300); ctx.restore(); }
+}
+function drawOrbitThing(kind, col, a, t) {
+  ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+  if (kind === 'pebble') { ctx.beginPath(); ctx.ellipse(0, 0, 4, 3.2, a, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(-1, -1, 1.2, 0, TAU); ctx.fill(); }
+  else if (kind === 'spark' || kind === 'ember') { const s = 3.5 + Math.sin(t / 90) * 1.2; ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(0, 0, s * 1.8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); if (kind === 'spark') { for (let i = 0; i < 8; i++) { const r = i % 2 ? s * .35 : s; ctx.lineTo(Math.cos(i / 8 * TAU + t / 300) * r, Math.sin(i / 8 * TAU + t / 300) * r); } } else ctx.arc(0, 0, s * .7, 0, TAU); ctx.closePath(); ctx.fill(); }
+  else if (kind === 'feather' || kind === 'leaf' || kind === 'wind') { ctx.rotate(a + Math.PI / 2); if (kind === 'wind') { ctx.globalAlpha = .6; ctx.beginPath(); ctx.arc(0, 0, 6, -1.2, 1.2); ctx.stroke(); ctx.globalAlpha = 1; return; }
+    ctx.beginPath(); ctx.moveTo(0, -7); ctx.quadraticCurveTo(4.5, 0, 0, 7); ctx.quadraticCurveTo(-4.5, 0, 0, -7); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(0, 6); ctx.stroke(); }
+  else if (kind === 'book') { ctx.rotate(Math.sin(t / 600) * .3); ctx.fillRect(-6, -5, 12, 10); ctx.fillStyle = '#f2ead8'; ctx.fillRect(-5, -4, 4.5, 8); ctx.fillRect(.5, -4, 4.5, 8); ctx.fillStyle = '#e8b84a'; ctx.fillRect(-.5, -5, 1, 10); }
+  else if (kind === 'hourglass') { ctx.rotate(t / 900); ctx.fillStyle = '#8a6a3a'; ctx.fillRect(-5, -7, 10, 2); ctx.fillRect(-5, 5, 10, 2); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-4, -5); ctx.lineTo(4, -5); ctx.lineTo(0, 0); ctx.lineTo(4, 5); ctx.lineTo(-4, 5); ctx.lineTo(0, 0); ctx.closePath(); ctx.fill(); }
+  else if (kind === 'crowlet') { ctx.rotate(a + Math.PI / 2); const fl = Math.sin(t / 70) * 3; ctx.beginPath(); ctx.ellipse(0, 0, 2.6, 4.5, 0, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(-8, -2 - fl); ctx.lineTo(-2, 2); ctx.moveTo(0, -1); ctx.lineTo(8, -2 - fl); ctx.lineTo(2, 2); ctx.fill(); ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(-1, -4.5); ctx.lineTo(0, -7); ctx.lineTo(1, -4.5); ctx.fill(); }
+  else if (kind === 'sun') { ctx.globalAlpha = .4; ctx.beginPath(); ctx.arc(0, 0, 10, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; for (let i = 0; i < 8; i++) { const r = i / 8 * TAU + t / 700; ctx.beginPath(); ctx.moveTo(Math.cos(r) * 7, Math.sin(r) * 7); ctx.lineTo(Math.cos(r) * 11, Math.sin(r) * 11); ctx.stroke(); } ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, TAU); ctx.fill(); }
+  else if (kind === 'moon' || kind === 'sickle') { ctx.rotate(kind === 'sickle' ? t / 250 : -.6); ctx.globalAlpha = kind === 'moon' ? .35 : 0; ctx.beginPath(); ctx.arc(0, 0, 10, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(0, 0, 7, 0, TAU); ctx.arc(3, -2, 6, 0, TAU, true); ctx.fill(); }
+  else if (kind === 'blade') { ctx.rotate(a + Math.PI); ctx.globalAlpha = .9; ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(2, -2); ctx.lineTo(0, 4); ctx.lineTo(-2, -2); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#8a6a3a'; ctx.fillRect(-3.5, 4, 7, 1.6); ctx.fillRect(-.8, 5.5, 1.6, 4); }
+  else if (kind === 'moth') { const fl = Math.abs(Math.sin(t / 60)); ctx.rotate(a + Math.PI / 2); ctx.globalAlpha = .9; ctx.beginPath(); ctx.ellipse(-3, 0, 3.5 * (.3 + fl), 4, -.3, 0, TAU); ctx.ellipse(3, 0, 3.5 * (.3 + fl), 4, .3, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; ctx.fillStyle = '#4a3a2a'; ctx.fillRect(-.7, -3, 1.4, 6); }
+  else if (kind === 'twin') { ctx.globalAlpha = .4; ctx.scale(.55, .55); drawCrow(skinOf(save.skin), a + Math.PI / 2, 0, 0, t); ctx.globalAlpha = 1; }
+}
+// pieces sitting on the nest rim
+function drawGearNest(time) {
+  const g = gearNow(), R = NEST_R;
+  g.nest.forEach((p, idx) => {
+    const base = idx * 2.39 + .4, col = p.col;
+    const each = (n, spread, f) => { for (let i = 0; i < n; i++) { const a = base + (i - (n - 1) / 2) * spread; ctx.save(); ctx.rotate(a); ctx.translate(R - 4, 0); f(i, a); ctx.restore(); } };
+    if (p.kind === 'bands') { ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, R - 1, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.45)'; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + idx; ctx.beginPath(); ctx.arc(Math.cos(a) * (R - 1), Math.sin(a) * (R - 1), 1.3, 0, TAU); ctx.fill(); } return; }
+    if (p.kind === 'aegis') { ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = .55 + Math.sin(time / 400) * .2; ctx.lineWidth = 2; ctx.setLineDash([5, 7]); ctx.lineDashOffset = -time / 60; ctx.beginPath(); ctx.arc(0, 0, R + 8, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.restore(); return; }
+    if (p.kind === 'shell') { ctx.fillStyle = col; ctx.strokeStyle = 'rgba(20,30,10,.6)'; ctx.lineWidth = 1.5; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + .2; ctx.beginPath(); ctx.arc(0, 0, R + 6, a, a + .62); ctx.arc(0, 0, R - 3, a + .62, a, true); ctx.closePath(); ctx.fill(); ctx.stroke(); } return; }
+    if (p.kind === 'twine') { ctx.strokeStyle = col; ctx.lineWidth = 1.6; for (let i = 0; i < 9; i++) { const a = i / 9 * TAU + idx; ctx.beginPath(); ctx.moveTo(Math.cos(a) * (R - 10), Math.sin(a) * (R - 10)); ctx.lineTo(Math.cos(a + .35) * (R + 4), Math.sin(a + .35) * (R + 4)); ctx.stroke(); } return; }
+    if (p.kind === 'goldegg') { ctx.save(); ctx.rotate(base); ctx.translate(R - 10, 0); ctx.rotate(.4); ctx.fillStyle = '#f0c030'; ctx.beginPath(); ctx.ellipse(0, 0, 6, 8, 0, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(-2, -3, 1.6, 2.4, 0, 0, TAU); ctx.fill(); ctx.restore(); return; }
+    if (p.kind === 'shrine') { ctx.save(); ctx.rotate(base); ctx.translate(R + 2, 0); ctx.fillStyle = col; ctx.fillRect(-5, -5, 10, 10); ctx.fillStyle = '#6a645a'; ctx.fillRect(-7, -7, 14, 3); ctx.fillStyle = `rgba(255,216,120,${.5 + Math.sin(time / 300) * .3})`; ctx.beginPath(); ctx.arc(0, 1, 2.4, 0, TAU); ctx.fill(); ctx.restore(); return; }
+    if (p.kind === 'moss') each(4, .5, i => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 5 - i % 2, 0, TAU); ctx.arc(3, 3, 3.5, 0, TAU); ctx.arc(-2, 4, 3, 0, TAU); ctx.fill(); });
+    else if (p.kind === 'coins') each(5, .3, i => { ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, i % 2 * 3, 4.2, 3.4, i, 0, TAU); ctx.fill(); ctx.strokeStyle = '#a8801a'; ctx.lineWidth = .8; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(-1.5, -1.5 + i % 2 * 3, 1.5, 1.5); });
+    else if (p.kind === 'bones') each(2, .7, i => { ctx.rotate(.9 + i); ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(6, 0); ctx.stroke(); ctx.fillStyle = col; for (const x of [-6, 6]) { ctx.beginPath(); ctx.arc(x, -1.4, 1.8, 0, TAU); ctx.arc(x, 1.4, 1.8, 0, TAU); ctx.fill(); } });
+    else if (p.kind === 'resin') each(3, .4, i => { ctx.fillStyle = col; ctx.globalAlpha = .9; ctx.beginPath(); ctx.moveTo(-4, 0); ctx.quadraticCurveTo(0, -5, 4, 0); ctx.arc(0, 0, 4, 0, Math.PI); ctx.fill(); ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(-1.2, -.5, 1, 0, TAU); ctx.fill(); });
+    else if (p.kind === 'clover') each(2, .8, i => { ctx.fillStyle = col; for (let k = 0; k < 3; k++) { const a = k / 3 * TAU + i; ctx.beginPath(); ctx.arc(Math.cos(a) * 2.6, Math.sin(a) * 2.6, 2.6, 0, TAU); ctx.fill(); } });
+    else if (p.kind === 'acorns') each(3, .35, i => { ctx.rotate(i); ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 1, 3, 4, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#5a3a1a'; ctx.beginPath(); ctx.arc(0, -2, 3.4, Math.PI, 0); ctx.fill(); });
+    else if (p.kind === 'berries') each(3, .3, i => { ctx.fillStyle = col; for (const [x, y] of [[0, 0], [3, 2], [-2, 3]]) { ctx.beginPath(); ctx.arc(x, y, 2.3, 0, TAU); ctx.fill(); } ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(-.8, -1, 1, 1); });
+    else if (p.kind === 'stones') each(3, .45, i => { ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, 5 - i % 2, 4, i, 0, TAU); ctx.fill(); });
+    else if (p.kind === 'icicles') each(5, .28, i => { ctx.fillStyle = col; ctx.globalAlpha = .85; ctx.beginPath(); ctx.moveTo(2, -2.5); ctx.lineTo(12 + i % 2 * 4, 0); ctx.lineTo(2, 2.5); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; });
+    else if (p.kind === 'dew' || p.kind === 'shiny') each(p.kind === 'dew' ? 4 : 1, .5, i => { const tw = .5 + .5 * Math.sin(time / 260 + i * 1.7 + idx); ctx.fillStyle = col; ctx.globalAlpha = .4 + tw * .6; const s = (p.kind === 'shiny' ? 5 : 2.6) * (.6 + tw * .5); ctx.beginPath(); ctx.moveTo(0, -s); ctx.lineTo(s * .3, 0); ctx.lineTo(0, s); ctx.lineTo(-s * .3, 0); ctx.closePath(); ctx.moveTo(-s, 0); ctx.lineTo(0, s * .3); ctx.lineTo(s, 0); ctx.lineTo(0, -s * .3); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; });
+  });
+}
+// a freshly picked-up item flies down onto the crow when the next wave starts
+function drawEquip(time) {
+  if (!equipQ.length || state !== 'wave' || !run) return;
+  const e = equipQ[0], now = performance.now(); if (!e.t0) e.t0 = now + 350;
+  const k = (now - e.t0) / 900; if (k < 0) return;
+  if (k >= 1.35) { equipQ.shift(); return; }
+  const ic = upIconCache[e.id] || (upIconCache[e.id] = upIcon(e.id, 64));
+  if (k < .75) { const p = k / .75, ease = 1 - Math.pow(1 - p, 3), y = -150 * (1 - ease), s = 1.3 - .8 * ease;
+    ctx.save(); ctx.globalAlpha = Math.min(1, p * 4); ctx.translate(0, y); ctx.rotate((1 - ease) * .6); ctx.drawImage(ic, -32 * s, -32 * s, 64 * s, 64 * s); ctx.restore(); }
+  else { if (!e.hit) { e.hit = 1; const it = ITEMS.find(x => x.id === e.id) || { rar: 0 }; rings.push({ x: 0, y: 0, r: 16, max: 70, t: 0, c: RAR_RGB[it.rar] }); for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; parts.push({ x: 0, y: 0, vx: Math.cos(a) * 120, vy: Math.sin(a) * 120, t: .5, c: `rgb(${RAR_RGB[it.rar]})`, r: 2.5 }); } if (actx && !muted) { tone(520, 1040, .18, 'triangle', .05); tone(780, 1560, .22, 'sine', .03); } }
+    const it = ITEMS.find(x => x.id === e.id); const p = (k - .75) / .6; if (it) { ctx.save(); ctx.globalAlpha = Math.max(0, 1 - p); ctx.fillStyle = `rgb(${RAR_RGB[it.rar]})`; ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(it.name, 0, -44 - p * 16); ctx.restore(); } }
+}
 function drawCrow(S, a, flap, bob, time, wk) {
   // rainbow skins shift through every colour, like the Mythic items
   if (S.rainbow) { const h = ((time || performance.now()) / 18) % 360; S = { ...S, body: `hsl(${h},70%,42%)`, wing: `hsl(${(h + 40) % 360},75%,30%)`, sheen: `hsla(${(h + 180) % 360},95%,72%,.8)`, glow: `hsl(${(h + 90) % 360},100%,60%)`, beak: `hsl(${(h + 200) % 360},90%,65%)` }; }
@@ -4407,15 +4518,20 @@ function drawCrow(S, a, flap, bob, time, wk) {
   const wf = Math.max(flap, Math.abs(ruffle));
   ctx.save(); ctx.rotate(a);
   if (tt) ctx.scale(1 + breath * .025, 1 + breath * .04);
+  if (S.cape) { const w1 = Math.sin(tt / 220) * 3, w2 = Math.sin(tt / 220 + 1.3) * 3; ctx.fillStyle = S.cape[0]; ctx.beginPath(); ctx.moveTo(8, -11); ctx.quadraticCurveTo(-12, -22 + w1, -36, -17 + w1); ctx.lineTo(-40, w2); ctx.lineTo(-36, 17 + w1); ctx.quadraticCurveTo(-12, 22 + w1, 8, 11); ctx.closePath(); ctx.fill(); ctx.strokeStyle = S.cape[1]; ctx.lineWidth = 2; ctx.stroke(); }
   if (S.glow) { ctx.shadowColor = S.glow; ctx.shadowBlur = 18 + Math.sin(time / 200) * 6; }
   ctx.fillStyle = S.wing;
   // wk: how far each wing is into its throw (0..1), it snaps forward and eases back
   const kL = wk ? Math.sin(Math.min(1, wk[0]) * Math.PI * .5) : 0, kR = wk ? Math.sin(Math.min(1, wk[1]) * Math.PI * .5) : 0;
   ctx.beginPath(); ctx.ellipse(-4 + kL * 6, -14 - wf * 8 - kL * 4 - breath * .8, 18 + kL * 3, 7 + wf * 4, -.3 - wf * .4 - kL * 1.05, 0, TAU); ctx.fill();
   ctx.beginPath(); ctx.ellipse(-4 + kR * 6, 14 + wf * 8 + kR * 4 + breath * .8, 18 + kR * 3, 7 + wf * 4, .3 + wf * .4 + kR * 1.05, 0, TAU); ctx.fill();
+  if (S.tip || S.gild) { const sb = ctx.shadowBlur; ctx.shadowBlur = 0; for (const [k, sd] of [[kL, -1], [kR, 1]]) { const cx = -4 + k * 6, cy = sd * (14 + wf * 8 + k * 4 + breath * .8), rx = 18 + k * 3, ry = 7 + wf * 4, rot = sd * (.3 + wf * .4 + k * 1.05);
+      if (S.tip) { ctx.fillStyle = S.tip; ctx.beginPath(); ctx.ellipse(cx - Math.cos(rot) * rx * .62, cy - Math.sin(rot) * rx * .62, rx * .4, ry * .72, rot, 0, TAU); ctx.fill(); }
+      if (S.gild) { ctx.strokeStyle = S.gild; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, rot, 0, TAU); ctx.stroke(); } } ctx.shadowBlur = sb; ctx.fillStyle = S.wing; }
   if (kL > .5 || kR > .5) { ctx.save(); ctx.shadowBlur = 0; ctx.strokeStyle = S.sheen; ctx.lineWidth = 1.5; ctx.globalAlpha = .6;
     for (const [k, sd] of [[kL, -1], [kR, 1]]) if (k > .5) { ctx.beginPath(); ctx.arc(-4, sd * 14, 26, sd < 0 ? -1.9 : .7, sd < 0 ? -.7 : 1.9); ctx.stroke(); } ctx.restore(); }
   ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(-32, -8 + tail); ctx.lineTo(-34, tail * 1.2); ctx.lineTo(-32, 8 + tail); ctx.closePath(); ctx.fill();
+  if (S.tail === 'flame') { const sb = ctx.shadowBlur; ctx.shadowBlur = 0; for (const [c, k] of [['#ff5a1a', 1], ['#ff9a2a', .72], ['#ffe27a', .45]]) { ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(-30, -7 * k + tail); for (let i = 0; i <= 4; i++) { const y = (-7 + i * 3.5) * k + tail, l = (12 + Math.sin(tt / 70 + i * 1.9) * 5) * k; ctx.lineTo(-32 - l, y); ctx.lineTo(-31 - l * .45, y + 1.75 * k); } ctx.lineTo(-30, 7 * k + tail); ctx.closePath(); ctx.fill(); } ctx.shadowBlur = sb; ctx.fillStyle = S.wing; }
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.ellipse(0, bob * .3, 18, 13, 0, 0, TAU); ctx.fill();
   ctx.shadowBlur = 0;
   ctx.strokeStyle = S.sheen; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, 0, 13, 8, 0, 2.2, 4.1); ctx.stroke();
@@ -4424,9 +4540,21 @@ function drawCrow(S, a, flap, bob, time, wk) {
     ctx.fillStyle = '#c8322a'; ctx.beginPath(); ctx.moveTo(6, -2.2); ctx.lineTo(6, 2.2); ctx.lineTo(3, 3); ctx.lineTo(-13, 0); ctx.lineTo(3, -3); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#9a1e18'; ctx.beginPath(); ctx.arc(5.5, 0, 2.4, 0, TAU); ctx.fill();
   }
+  if (S.pack) { const [pk, pc] = S.pack; if (pk === 'quiver') { ctx.save(); ctx.rotate(.5); ctx.fillStyle = pc; ctx.fillRect(-16, -3.5, 14, 7); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-16, 1.5, 14, 2); for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#f2efe6', '#d8342a', '#f2efe6'][i]; ctx.beginPath(); ctx.moveTo(-16, -2.5 + i * 2.5); ctx.lineTo(-23, -4 + i * 2.5); ctx.lineTo(-22, -1 + i * 2.5); ctx.closePath(); ctx.fill(); } ctx.restore(); }
+    else { ctx.fillStyle = pc; ctx.beginPath(); ctx.arc(-9, 0, 6.5, 0, TAU); ctx.fill(); ctx.strokeStyle = '#f2e6c8'; ctx.lineWidth = 1.4; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-14, -3); ctx.lineTo(-4, 3); ctx.moveTo(-14, 3); ctx.lineTo(-4, -3); ctx.stroke(); } }
+  if (S.heart) { const pu = .6 + .4 * Math.sin(tt / 180); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = S.heart; ctx.globalAlpha = .35 * pu; ctx.beginPath(); ctx.arc(1, 0, 9, 0, TAU); ctx.fill(); ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(1, 0, 3 + pu, 0, TAU); ctx.fill(); ctx.restore(); }
+  if (S.band || S.scarf) { ctx.strokeStyle = S.scarf || S.band; ctx.lineWidth = S.scarf ? 4 : 2.4; ctx.beginPath(); ctx.moveTo(7, -10); ctx.quadraticCurveTo(11, 0, 7, 10); ctx.stroke();
+    if (S.scarf) { ctx.fillStyle = S.scarf; const w = Math.sin(tt / 150) * 2.5; ctx.beginPath(); ctx.moveTo(6, 8); ctx.quadraticCurveTo(-6, 14 + w, -18, 13 + w * 1.6); ctx.lineTo(-17, 9 + w * 1.6); ctx.quadraticCurveTo(-6, 9 + w, 5, 4); ctx.closePath(); ctx.fill(); }
+    else { ctx.fillStyle = S.band; ctx.beginPath(); ctx.arc(10.5, 0, 2.2, 0, TAU); ctx.fill(); } }
   ctx.save(); if (headA) { ctx.translate(8, 0); ctx.rotate(headA); ctx.translate(-8, 0); }
+  if (S.halo) { ctx.strokeStyle = S.halo; ctx.globalAlpha = .55 + Math.sin(tt / 300) * .2; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(16, 0, 14, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
+  if (S.horns) { ctx.fillStyle = S.horns; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(14, sd * 5); ctx.quadraticCurveTo(8, sd * 16, 1, sd * 15); ctx.quadraticCurveTo(7, sd * 11, 11, sd * 2); ctx.closePath(); ctx.fill(); } }
+  if (S.crest) { const [cc, cn, cs] = S.crest; ctx.fillStyle = cc; for (let i = 0; i < cn; i++) { const off = (i - (cn - 1) / 2) * 3.2, sw = Math.sin(tt / 240 + i) * 1.2; ctx.beginPath(); ctx.moveTo(14, off * .6); ctx.quadraticCurveTo(6, off - 3, 2 - 9 * cs, off * 1.5 + sw); ctx.quadraticCurveTo(6, off + 3, 14, off * .6); ctx.fill(); } }
+  if (S.tufts) { ctx.fillStyle = S.tufts; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(15, sd * 6); ctx.lineTo(7, sd * 14); ctx.lineTo(11, sd * 4); ctx.closePath(); ctx.fill(); } }
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(16, 0, 10, 0, TAU); ctx.fill();
+  if (S.paint) { ctx.strokeStyle = S.paint; ctx.lineWidth = 1.6; ctx.beginPath(); for (const sd of [-1, 1]) { ctx.moveTo(11, sd * 4); ctx.lineTo(17, sd * 8.5); ctx.moveTo(9, sd * 2); ctx.lineTo(14, sd * 7.5); } ctx.stroke(); }
   ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
+  if (S.beakTip) { ctx.fillStyle = S.beakTip; ctx.beginPath(); ctx.moveTo(29, -2.3); ctx.lineTo(38.5, 0); ctx.lineTo(29, 2.3); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.moveTo(30, -1.6); ctx.lineTo(36, -.3); ctx.lineTo(30, -.4); ctx.closePath(); ctx.fill(); }
   if (flap) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
   if (S.googly) {
     if (S.bandana) { ctx.fillStyle = S.bandana; ctx.beginPath(); ctx.moveTo(8, -10); ctx.lineTo(13, -10); ctx.lineTo(13, 10); ctx.lineTo(8, 10); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(8, 9); ctx.lineTo(0, 16 + Math.sin(time / 150) * 2); ctx.lineTo(4, 8); ctx.fill(); }
@@ -4446,6 +4574,13 @@ function drawCrow(S, a, flap, bob, time, wk) {
       ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.6, -5, 1.1, 0, TAU); ctx.arc(19.6, 5, 1.1, 0, TAU); ctx.fill(); }
   }
   if (S.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(10, -8); ctx.lineTo(6, -12); ctx.lineTo(12, -10); ctx.lineTo(14, -15); ctx.lineTo(16, -10); ctx.lineTo(22, -12); ctx.lineTo(18, -7); ctx.closePath(); ctx.fill(); ctx.fillRect(9, -8, 10, 3); }
+  if (S.eyeGlow) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = S.eyeGlow; ctx.globalAlpha = .45 + Math.sin(tt / 200) * .15; ctx.beginPath(); ctx.arc(19, -5, 4.5, 0, TAU); ctx.arc(19, 5, 4.5, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(19.4, -5, 1.5, 0, TAU); ctx.arc(19.4, 5, 1.5, 0, TAU); ctx.fill(); ctx.restore(); }
+  if (S.monocle) { ctx.strokeStyle = S.monocle; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(19, -5, 3.6, 0, TAU); ctx.stroke(); ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(16, -7.5); ctx.quadraticCurveTo(10, -12, 6, -9); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(18, -6, 1.2, 0, TAU); ctx.fill(); }
+  if (S.gcrown) { const [gc, gk] = S.gcrown;
+    if (gk === 'thorn') { ctx.strokeStyle = gc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(15, 0, 9, 0, TAU); ctx.stroke(); ctx.fillStyle = gc; for (let i = 0; i < 10; i++) { const r = i / 10 * TAU; ctx.beginPath(); ctx.moveTo(15 + Math.cos(r - .15) * 9, Math.sin(r - .15) * 9); ctx.lineTo(15 + Math.cos(r) * 14, Math.sin(r) * 14); ctx.lineTo(15 + Math.cos(r + .15) * 9, Math.sin(r + .15) * 9); ctx.fill(); } }
+    else { ctx.fillStyle = gc; ctx.beginPath(); for (let i = 0; i < 10; i++) { const r = i / 10 * TAU, rr = i % 2 ? 7 : 12; ctx.lineTo(14 + Math.cos(r) * rr, Math.sin(r) * rr); } ctx.closePath(); ctx.fill(); ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(14, 0, 5.5, 0, TAU); ctx.fill();
+      ctx.fillStyle = gk === 'bolt' ? '#6ae0ff' : '#c8322a'; for (let i = 0; i < 5; i++) { const r = i / 5 * TAU; ctx.beginPath(); ctx.arc(14 + Math.cos(r) * 10.5, Math.sin(r) * 10.5, 1.4, 0, TAU); ctx.fill(); }
+      if (gk === 'bolt' && Math.sin(tt / 130) > .6) { ctx.strokeStyle = '#bfefff'; ctx.lineWidth = 1.2; const r = (tt / 400) % TAU; ctx.beginPath(); ctx.moveTo(14 + Math.cos(r) * 12, Math.sin(r) * 12); ctx.lineTo(14 + Math.cos(r + .2) * 17, Math.sin(r + .2) * 17 - 2); ctx.lineTo(14 + Math.cos(r + .1) * 19, Math.sin(r + .1) * 19 + 2); ctx.stroke(); } } }
   ctx.restore();
   ctx.restore();
 }
@@ -4512,9 +4647,17 @@ function drawFeather(s) {
     const l = 7; ctx.rotate(a); ctx.fillStyle = '#cfd6e6';
     ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
   } else {
-    const [kind, col] = projOf(save.skin);
-    if (P.burn) { ctx.fillStyle = 'rgba(240,138,58,.35)'; ctx.beginPath(); ctx.arc(0, 0, s.big ? 14 : 9, 0, TAU); ctx.fill(); }
-    drawProj(kind, s.big ? '#e8b84a' : col, a, s.big ? 1.5 : 1, performance.now() + s.x);
+    const [kind, col] = projOf(save.skin), gf = gear.run === run ? gear.f : {},   // gear is refreshed once a frame when the nest is drawn
+      now = performance.now(), R = s.big ? 14 : 9;
+    if (P.burn || gf.fire) { ctx.fillStyle = 'rgba(240,138,58,.35)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); if (gf.fire) { ctx.fillStyle = 'rgba(255,200,80,.6)'; ctx.beginPath(); ctx.arc(-Math.cos(a) * 9 + Math.sin(now / 40 + s.x) * 2, -Math.sin(a) * 9, 2.6, 0, TAU); ctx.fill(); } }
+    if (gf.ice) { ctx.fillStyle = 'rgba(160,225,255,.32)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
+    if (gf.void) { ctx.fillStyle = 'rgba(150,80,230,.35)'; ctx.beginPath(); ctx.arc(0, 0, R + 1, 0, TAU); ctx.fill(); }
+    if (gf.blood) { ctx.fillStyle = 'rgba(210,30,40,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
+    const dk = P.baseDmg ? Math.min(1.35, 1 + Math.max(0, P.dmg / P.baseDmg - 1) * .12) : 1;
+    drawProj(kind, s.big ? '#e8b84a' : col, a, (s.big ? 1.5 : 1) * dk, now + s.x);
+    if (gf.needle || gf.barbs) { ctx.save(); ctx.rotate(a); ctx.strokeStyle = gf.barbs ? '#9aa3ad' : '#e8e4d8'; ctx.lineWidth = 1.2; ctx.beginPath(); if (gf.needle) { ctx.moveTo(8, 0); ctx.lineTo(16, 0); } if (gf.barbs) { ctx.moveTo(2, -2); ctx.lineTo(-2, -6); ctx.moveTo(2, 2); ctx.lineTo(-2, 6); } ctx.stroke(); ctx.restore(); }
+    if (gf.ice) { ctx.fillStyle = '#e8f8ff'; ctx.beginPath(); ctx.moveTo(-Math.cos(a) * 9, -Math.sin(a) * 9 - 2); ctx.lineTo(-Math.cos(a) * 9 + 2, -Math.sin(a) * 9); ctx.lineTo(-Math.cos(a) * 9, -Math.sin(a) * 9 + 2); ctx.lineTo(-Math.cos(a) * 9 - 2, -Math.sin(a) * 9); ctx.fill(); }
+    if (gf.bolt && Math.sin(now / 45 + s.x) > 0) { ctx.save(); ctx.rotate(a); ctx.strokeStyle = 'rgba(190,240,255,.9)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-5, -4); ctx.lineTo(0, 2); ctx.lineTo(5, -3); ctx.lineTo(9, 1); ctx.stroke(); ctx.restore(); }
   }
   ctx.restore();
 }

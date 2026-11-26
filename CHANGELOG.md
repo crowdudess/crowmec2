@@ -1,5 +1,16 @@
 # Nestguard changelog
 
+## 2.99.14 — Wear your loot
+
+Every item now shows. Your crow wears it, it circles around you, it sits on your nest or it changes your feathers:
+- **On the crow:** metal, bone, glass or ember beak tips, the Thunder Crown, the Crown of Thorns and the Rook King's crown, crests (woodpeckers, hydras, the Eagle King), owl tufts, a monocle, glowing eyes, war paint, horns, halos, capes (Vampire Lord, Eternal Phoenix), coloured or gilded wing tips, scarves and neck charms, a quiver or a war drum on its back, a flaming tail and a glowing heart.
+- **Around the crow:** pebbles, sparks, embers, a guardian feather, leaves, moths, a spell book, the Hourglass of Ages, the sun, the blood moon, the Moon Sickle, spell blades, little crows and a ghostly twin.
+- **On the nest:** moss, gold coins, metal or bark bands, bones, amber resin, clover, acorns, berries, stones, icicles, dew, a golden egg, a small shrine, an Aegis ring and Titan shell plates.
+- **On your feathers:** fire, ice, lightning, void or blood glows, needle tips and barbs. Feathers also grow a little as your damage goes up.
+- **Equipping:** when you get an item, it drops onto your crow at the start of the next wave, with its name and a ring burst in its rarity colour.
+
+When two items want the same spot, the rarer one wins.
+
 ## 2.99.13 — Five ways to hatch
 
 Every egg now hatches in one of five ways, picked at random:
