@@ -1,5 +1,11 @@
 # Nestguard changelog
 
+## 2.99.10 — Pecking eggs and a smoother roll
+
+- **Smooth egg rolls again:** the new light rays were a huge spinning layer that made every egg roll drop frames. They're now smaller, painted once, and only shown while the egg shakes and when you see your item. The shockwave rings were redrawn every frame and now aren't, and the battlefield hidden behind the egg screen is no longer drawn. The roll runs as smoothly as it did before 2.99.9.
+- **Eggs peck from inside:** eggs in the nest knock now and then with a little *tok*, hop and throw off bits of shell. Rarer and golden eggs are more restless, and hovering over an egg makes it peck.
+- **A nicer roll:** the egg is pecked from inside, slowly at first and then faster and faster, until it cracks, a beak pokes through and it bursts. The reel overshoots a little and slides back. When it stops at the edge of an item, it can slide onto the better item next to it for a moment before settling back. Rays are soft for common items and brighter for rarer ones.
+
 ## 2.99.9 — Faster pace and a bigger egg roll
 
 - **No more waiting after an egg:** once you see what you got, the next wave starts after 2.5 seconds (was 8). Tap anywhere or press Space to start it right away. The first monster now shows up almost as soon as the wave begins.
