@@ -4188,8 +4188,12 @@ function draw(time) {
   ctx.globalAlpha = 1; for (const c of cheeses) if (c.t < c.dur) { const k = c.t / c.dur, x = c.x0 + (c.x - c.x0) * k, y = c.y0 + (c.y - c.y0) * k, h = Math.sin(k * Math.PI) * 90; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y, 18, 9, 0, 0, TAU); ctx.fill(); drawCheeseWedge(x, y - h, 18 + Math.sin(k * Math.PI) * 6, c.rot + c.t * c.spin, 1); }
   ctx.globalAlpha = 1;
   for (const z of zones) drawZone(z, time, false);
-  { const auto = Math.max(1, Math.floor(400 / Math.max(1, shots.length))), mode = save.shotFx || 'full';   // Settings > Feather effects: full, simple (1 per feather) or off
-    shotFx.per = mode === 'off' ? 0 : mode === 'simple' ? 1 : document.body.classList.contains('lowfx') ? Math.min(3, auto) : auto; } for (const s of shots) drawFeather(s);
+  { // Feather effects adapt to the device: if the game drops below ~50 fps while lots of feathers fly, fewer effects are drawn (down to none), and they come back once it runs smoothly
+    const ft = Math.min(100, time - (shotFx.lastT || time)); shotFx.lastT = time; shotFx.ms = (shotFx.ms ?? 16.7) * .9 + ft * .1;
+    if (shots.length > 40) shotFx.budget = shotFx.ms > 20 ? Math.max(0, (shotFx.budget ?? 400) * .93 - 4) : shotFx.ms < 18 ? Math.min(400, (shotFx.budget ?? 400) * 1.03 + 4) : (shotFx.budget ?? 400);
+    else shotFx.budget = Math.min(400, (shotFx.budget ?? 400) + 8);
+    const auto = Math.floor((shotFx.budget ?? 400) / Math.max(1, shots.length)), mode = save.shotFx || 'full';   // Settings > Feather effects: full, simple (1 per feather) or off
+    shotFx.per = mode === 'off' ? 0 : Math.min(mode === 'simple' ? 1 : document.body.classList.contains('lowfx') ? 3 : 99, auto); } for (const s of shots) drawFeather(s);
   ctx.strokeStyle = 'rgba(235,230,245,.7)'; ctx.lineWidth = 2;
   for (const w of webLines) { ctx.globalAlpha = w.t * 2; ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.quadraticCurveTo(w.x * .4 + 20, w.y * .4 - 20, 0, 0); ctx.stroke(); }
   ctx.globalAlpha = 1;
@@ -4739,7 +4743,7 @@ function shotFxNow() {
   const nose = pick(SHOT_NOSE), side = pick(SHOT_SIDE), trail = pick(SHOT_TRAIL), glint = pick(SHOT_GLINT), full = { ring, nose, side, trail, glint }, order = [];
   // when there are lots of feathers each one only shows its first few marks: take one from each spot in turn so they still look different
   for (let i = 0; order.length < ring.length + nose.length + side.length + trail.length + glint.length; i++) for (const k of ['ring', 'nose', 'glint', 'side', 'trail']) if (full[k][i]) order.push([k, full[k][i]]);
-  return shotFx = { per: shotFx.per, sig: g.sig, ...full, all: order, order, cut: {} };
+  return shotFx = { per: shotFx.per, budget: shotFx.budget, ms: shotFx.ms, lastT: shotFx.lastT, sig: g.sig, ...full, all: order, order, cut: {} };
 }
 // glows under the feather (plain see-through ellipses: blurred shadows were far too slow with lots of feathers)
 const SHOT_GLOW = { l_forge: ['rgba(255,220,150,.22)', 'rgba(255,235,190,.4)'], m_bloodmoon: ['rgba(200,20,40,.22)', 'rgba(220,40,60,.4)'], m_void: ['rgba(120,50,200,.22)', 'rgba(150,80,230,.4)'] };
@@ -4747,8 +4751,7 @@ function drawShotGlow(fx, k, body = PROJ_BODY.feather) {
   const { L, H, cx } = bodyDims(body); ctx.save(); ctx.translate(cx * k, 0);
   const sx = Math.min(1.1, Math.max(1, L / 11)), sy = Math.min(1.35, Math.max(1, (H + 1.5) / 4));
   fx.ring.filter(id => SHOT_GLOW[id]).forEach((id, i) => { const [o, c] = SHOT_GLOW[id];
-    ctx.fillStyle = o; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (16 + i * 2) * k * sx, (6.5 + i) * k * sy, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (12 + i * 2) * k * sx, (3.5 + i) * k * sy, 0, 0, TAU); ctx.fill(); });
+    ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (13 + i * 2) * k * sx, (4.5 + i) * k * sy, 0, 0, TAU); ctx.fill(); });
   ctx.restore();
 }
 // the marks a small feather shows: just the aura and the glint
@@ -4861,7 +4864,7 @@ function drawFeather(s) {
     const fx = shotFxCut(fx0, shotFx.per ?? 99);
     const body = PROJ_BODY[kind] || [9, 9, 7], fa = a + (kind === 'leaf' ? Math.sin((now + s.x) / 90) * .22 : 0);   // the leaf sways, so its effects sway with it
     if (fx.all.length) { ctx.save(); ctx.rotate(fa); drawShotGlow(fx, k, body); drawShotFx(fx, s.x * .05, k, now, 'under', body); ctx.restore(); }
-    else if (P.burn && save.shotFx !== 'off') { ctx.fillStyle = 'rgba(240,138,58,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
+    else if (P.burn && !fx0.all.length && shotFx.per !== 0) { ctx.fillStyle = 'rgba(240,138,58,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     const dk = P.baseDmg ? Math.min(1.35, 1 + Math.max(0, P.dmg / P.baseDmg - 1) * .12) : 1;
     ctx.save(); drawProj(kind, s.big ? '#e8b84a' : col, a, (s.big ? 1.5 : 1) * dk, now + s.x); ctx.restore();
     if (fx.all.length) { ctx.save(); ctx.rotate(fa); drawShotFx(fx, s.x * .05, k, now, 'over', body); ctx.restore(); }
