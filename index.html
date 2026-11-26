@@ -6675,7 +6675,8 @@ function renderShop() {
       const slot = el('div', 'nestslot'), b = el('button', 'nestegg'); b.type = 'button'; const cv2 = document.createElement('canvas'); cv2.width = cv2.height = 260;
       const shown = done && (i === picked ? crackLeft <= 0 : crackLeft <= -STAGE_HOLD - 300 - 300 * i);
       if (!done) { drawEgg(cv2, it, 'whole'); b.dataset.shell = it.shell[0]; b.onclick = () => buy(i); if (it.rar >= 3 || it.golden) b.classList.add('shimmer'); if (it.golden) b.classList.add('golden'); b.setAttribute('aria-label', T('egg_n', i + 1)); }
-      else { drawEgg(cv2, it, shown || i === picked ? 'open' : 'crack'); b.disabled = true; if (!shown) b.classList.add(i === picked ? 'gone' : 'waiting'); }
+      else { const rolling = crackLeft > 0;   // while your egg is rolling, the others stay whole and still behind it
+        drawEgg(cv2, it, shown || i === picked ? 'open' : rolling ? 'whole' : 'crack'); b.disabled = true; if (!shown) b.classList.add(i === picked ? 'gone' : rolling ? 'idle' : 'waiting'); }
       if (shown) {
         anyShown = true; const base = ITEMS.find(x => x.id === it.id) || it, seen = (run.popSeen = run.popSeen || new Set()), pop = el('div', 'nestpop' + (i === picked ? ' got' : ' miss') + (seen.has(i) ? ' still' : '')); seen.add(i);
         pop.style.setProperty('--rgb', RAR_RGB[it.rar]); pop.title = base.name + ': ' + base.desc;
