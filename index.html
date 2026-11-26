@@ -4188,7 +4188,7 @@ function draw(time) {
   ctx.globalAlpha = 1; for (const c of cheeses) if (c.t < c.dur) { const k = c.t / c.dur, x = c.x0 + (c.x - c.x0) * k, y = c.y0 + (c.y - c.y0) * k, h = Math.sin(k * Math.PI) * 90; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y, 18, 9, 0, 0, TAU); ctx.fill(); drawCheeseWedge(x, y - h, 18 + Math.sin(k * Math.PI) * 6, c.rot + c.t * c.spin, 1); }
   ctx.globalAlpha = 1;
   for (const z of zones) drawZone(z, time, false);
-  shotFx.per = document.body.classList.contains('lowfx') ? 3 : Math.max(3, Math.floor(600 / Math.max(1, shots.length))); for (const s of shots) drawFeather(s);
+  shotFx.per = document.body.classList.contains('lowfx') ? 3 : Math.max(1, Math.floor(400 / Math.max(1, shots.length))); for (const s of shots) drawFeather(s);
   ctx.strokeStyle = 'rgba(235,230,245,.7)'; ctx.lineWidth = 2;
   for (const w of webLines) { ctx.globalAlpha = w.t * 2; ctx.beginPath(); ctx.moveTo(w.x, w.y); ctx.quadraticCurveTo(w.x * .4 + 20, w.y * .4 - 20, 0, 0); ctx.stroke(); }
   ctx.globalAlpha = 1;
@@ -4679,12 +4679,14 @@ const PROJ = {
   'ch-jungle': ['leaf', '#c8d040', 'Jungle leaves'], royal: ['gem', '#b88ae0', 'Crown jewels'],
 };
 const projOf = id => PROJ[id] || PROJ.classic;
+// the darker and lighter shade of a leaf colour, worked out once per colour
+const leafToneCache = {}, leafTones = col => leafToneCache[col] || (leafToneCache[col] = (() => { const [r, g, b] = hexRgb(col).split(',').map(Number), f = m => `rgb(${Math.min(255, r * m) | 0},${Math.min(255, g * m) | 0},${Math.min(255, b * m) | 0})`; return [f(.68), f(1.18)]; })());
 function drawProj(kind, col, a, k, t) {
   const spin = t / 90;
   switch (kind) {
     case 'feather': { const l = 11 * k; ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4 * k, -l, 0); ctx.quadraticCurveTo(0, 4 * k, l, 0); ctx.fill(); ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(l, 0); ctx.lineTo(-l - 3, 0); ctx.stroke(); break; }
     case 'leaf': {   // a slim pointed leaf with a stem: one half a shade darker, a midrib and a few veins
-      ctx.rotate(a + Math.sin(spin) * .22); const L = 11 * k, W = 3.6 * k, [r, g, b] = hexRgb(col).split(',').map(Number), dark = `rgb(${r * .68 | 0},${g * .68 | 0},${b * .68 | 0})`, lite = `rgb(${Math.min(255, r * 1.18) | 0},${Math.min(255, g * 1.18) | 0},${Math.min(255, b * 1.18) | 0})`;
+      ctx.rotate(a + Math.sin(spin) * .22); const L = 11 * k, W = 3.6 * k, [dark, lite] = leafTones(col);
       const half = sd => { ctx.beginPath(); ctx.moveTo(L, 0); ctx.bezierCurveTo(L * .45, sd * W * 1.25, -L * .45, sd * W * 1.2, -L * .8, 0); ctx.closePath(); };
       ctx.fillStyle = lite; half(-1); ctx.fill(); ctx.fillStyle = dark; half(1); ctx.fill();
       ctx.strokeStyle = dark; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-L * .8, 0); ctx.lineTo(-L * 1.05, k * 1.2); ctx.stroke();   // stem
