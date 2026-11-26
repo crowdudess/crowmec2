@@ -1,5 +1,14 @@
 # Nestguard changelog
 
+## 2.99.17 — Ten ways to hatch
+
+Five new ways for an egg to crack, on top of peck, rock, hop, spin and charge:
+- **Heartbeat:** a thump-thump inside the egg, faster and faster, with the glow pulsing along.
+- **Slam:** the egg flies up out of sight and crashes back down with a shockwave and a bounce.
+- **Inflate:** the egg swells up like a balloon, wobbling and creaking, until it can't hold any more.
+- **Zap:** lightning strikes the egg three times, cracking it more each time.
+- **Waddle:** the egg waddles off to one side and back on its own, then trips and cracks.
+
 ## 2.99.16 — Webs on the ground, rarest item wins
 
 - **Sticky Cobwebs** (and the Silk Crown) now spread a whole cobweb on the ground all around your nest, with dew drops glinting in it.
