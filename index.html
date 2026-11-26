@@ -4730,36 +4730,49 @@ function shotFxNow() {
 }
 // glows under the feather (plain see-through ellipses: blurred shadows were far too slow with lots of feathers)
 const SHOT_GLOW = { l_forge: ['rgba(255,220,150,.22)', 'rgba(255,235,190,.4)'], m_bloodmoon: ['rgba(200,20,40,.22)', 'rgba(220,40,60,.4)'], m_void: ['rgba(120,50,200,.22)', 'rgba(150,80,230,.4)'] };
-function drawShotGlow(fx, k) {
+function drawShotGlow(fx, k, [L, H] = [11, 3]) {
+  const sx = Math.min(1.1, Math.max(1, L / 11)), sy = Math.min(1.35, Math.max(1, (H + 1.5) / 4));
   fx.ring.filter(id => SHOT_GLOW[id]).forEach((id, i) => { const [o, c] = SHOT_GLOW[id];
-    ctx.fillStyle = o; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (16 + i * 2) * k, (6.5 + i) * k, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (12 + i * 2) * k, (3.5 + i) * k, 0, 0, TAU); ctx.fill(); });
+    ctx.fillStyle = o; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (16 + i * 2) * k * sx, (6.5 + i) * k * sy, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (12 + i * 2) * k * sx, (3.5 + i) * k * sy, 0, 0, TAU); ctx.fill(); });
 }
 // a trimmed copy of the marks with only the first n kept
 function shotFxCut(fx, n) {
   if (n >= fx.order.length) return fx;
   return fx.cut[n] || (fx.cut[n] = (() => { const o = { ring: [], nose: [], side: [], trail: [], all: fx.order.slice(0, n), order: fx.order }; for (const [k, id] of o.all) o[k].push(id); return o; })());
 }
-function drawShotFx(fx, ph, k, now) {
+// rough size of each projectile skin (half length, half width), so the effects fit around it
+const PROJ_BODY = { feather: [11, 3], leaf: [10, 5], ice: [12, 4], flame: [14, 6], web: [12, 3.5], shard: [13, 5], plane: [11, 8], orb: [6, 6], petal: [7, 6] };
+// under = the aura and barbs, drawn beneath the projectile so they stick out around it; over = everything else
+function drawShotFx(fx, ph, k, now, layer, body) {
   if (!fx.all.length) return;
   ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  const w = now / 1000;
-  // on the feather itself: each elemental item wraps it in a different way
+  const w = now / 1000, [L, H] = body || PROJ_BODY.feather, under = layer === 'under';
+  if (under) {
+  // around the projectile: each elemental item wraps it in a different way, stretched to fit the skin
+  ctx.save(); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4)));
   fx.ring.forEach(id => { switch (id) {
     case 'ember': for (let j = 0; j < 3; j++) { const x = (-6 + j * 6) * k, h = (4 + Math.sin(w * 25 + j * 2 + ph) * 1.5) * k; ctx.fillStyle = j % 2 ? '#ffb040' : '#ff7a2a'; ctx.beginPath(); ctx.moveTo(x - 2, -1.5); ctx.quadraticCurveTo(x - 2.5, -h * .6, x - 1, -h - 1.5); ctx.quadraticCurveTo(x + 2, -h * .5, x + 2, -1.5); ctx.fill(); } break;   // flames licking up off the feather
     case 'u_ember': for (let j = 0; j < 2; j++) { const t = (w * 1.6 + j * .5 + ph) % 1; ctx.fillStyle = `rgba(120,110,100,${.5 * (1 - t)})`; ctx.beginPath(); ctx.arc((-8 - t * 10) * k, (3 + t * 4) * k, (1.5 + t * 2.5) * k, 0, TAU); ctx.fill(); } break;   // a wisp of smoke
-    case 'phoenixf': { const f = Math.sin(w * 18 + ph) * .35; ctx.fillStyle = 'rgba(255,170,50,.85)'; for (const sd of [-1, 1]) { ctx.save(); ctx.scale(1, sd); ctx.rotate(-.5 - f); ctx.beginPath(); ctx.moveTo(-2 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, -10 * k, -7 * k); ctx.quadraticCurveTo(-6 * k, -3 * k, -7 * k, -1 * k); ctx.closePath(); ctx.fill(); ctx.restore(); } break; }   // little fire wings that flap
+    case 'phoenixf': break;   // its wings go on top, below
     case 'frostbite': ctx.strokeStyle = '#d8f2ff'; ctx.lineWidth = 1; ctx.beginPath(); for (let j = 0; j < 4; j++) { const x = (-7 + j * 4.5) * k, sd = j % 2 ? 1 : -1; ctx.moveTo(x, sd * 1.5); ctx.lineTo(x - 1.5 * k, sd * 4.5 * k); } ctx.stroke(); break;   // frost spikes along the shaft
     case 'l_winter': ctx.fillStyle = '#f4fbff'; for (let j = 0; j < 4; j++) { const t = (w * .9 + j * .25 + ph) % 1; ctx.globalAlpha = 1 - t; ctx.fillRect((-12 + j * 5 - t * 4) * k, (t * 9 - 2) * (j % 2 ? 1 : -1) * k, 1.4, 1.4); } ctx.globalAlpha = 1; break;   // snow flurries shaking off
     case 'b_bear': ctx.strokeStyle = 'rgba(150,215,255,.9)'; ctx.fillStyle = 'rgba(190,235,255,.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(13 * k, 0); ctx.lineTo(4 * k, -4.5 * k); ctx.lineTo(-9 * k, -3.5 * k); ctx.lineTo(-13 * k, 0); ctx.lineTo(-9 * k, 3.5 * k); ctx.lineTo(4 * k, 4.5 * k); ctx.closePath(); ctx.fill(); ctx.stroke(); break;   // encased in a crystal of ice
     case 'blood': for (let j = 0; j < 2; j++) { const t = (w * 2.2 + j * .5 + ph) % 1, x = (-3 - j * 6) * k; ctx.fillStyle = '#c81a26'; ctx.beginPath(); ctx.ellipse(x, (2 + t * 7) * k, 1.1 * k, (1.3 + t * .8) * k, 0, 0, TAU); ctx.fill(); } break;   // drips falling off
-    case 'mana': { ctx.strokeStyle = 'rgba(130,190,255,.95)'; ctx.lineWidth = 1.1; ctx.beginPath(); for (let j = 0; j <= 16; j++) { const x = (-12 + j * 1.5) * k, y = Math.sin(j * .9 - w * 14 + ph) * 3.2 * k; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); break; }   // a ribbon of mana winding round it
-    case 'l_forge': ctx.strokeStyle = '#fff0c0'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-9 * k, 0); ctx.lineTo(9 * k, 0); ctx.stroke(); break;   // white-hot shaft
+    case 'mana-over': { ctx.strokeStyle = 'rgba(130,190,255,.95)'; ctx.lineWidth = 1.1; ctx.beginPath(); for (let j = 0; j <= 16; j++) { const x = (-12 + j * 1.5) * k, y = Math.sin(j * .9 - w * 14 + ph) * 3.2 * k; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); break; }   // a ribbon of mana winding round it
+    case 'l_forge': ctx.strokeStyle = '#fff0c0'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-14 * k, 0); ctx.lineTo(14 * k, 0); ctx.stroke(); ctx.strokeStyle = 'rgba(255,190,90,.8)'; ctx.lineWidth = 1; ctx.beginPath(); for (const sd of [-1, 1]) { ctx.moveTo(-9 * k, sd * 4.2 * k); ctx.quadraticCurveTo(0, sd * 5.5 * k, 9 * k, sd * 4.2 * k); } ctx.stroke(); break;   // white-hot shaft poking out both ends, glowing edges
     case 'm_void': { ctx.strokeStyle = 'rgba(200,140,255,.8)'; ctx.lineWidth = .9; ctx.beginPath(); for (const sd of [-1, 1]) { ctx.moveTo(10 * k, sd * 2 * k); ctx.bezierCurveTo(0, sd * (5 + Math.sin(w * 10 + ph) * 1.5) * k, -10 * k, sd * 2 * k, -18 * k, sd * 5 * k); } ctx.stroke(); break; }   // space bending past it
     case 'm_bloodmoon': break;   // just the red glow underneath
   } });
+  ctx.restore();
+  fx.side.forEach(id => { if (id === 'barbs') { ctx.strokeStyle = '#9aa3ad'; ctx.lineWidth = 1.2; ctx.beginPath(); for (const x of [4, -1]) for (const sd of [-1, 1]) { ctx.moveTo(x * k, sd * 2); ctx.lineTo((x - 4) * k, sd * (H + 3) * k); } ctx.stroke(); } });
+  ctx.restore(); return; }
+  // phoenix fire wings flap on top of the projectile, out to its edges
+  if (fx.ring.includes('phoenixf')) { ctx.save(); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4))); const f = Math.sin(w * 18 + ph) * .35; ctx.fillStyle = 'rgba(255,170,50,.85)'; for (const sd of [-1, 1]) { ctx.save(); ctx.scale(1, sd); ctx.rotate(-.5 - f); ctx.beginPath(); ctx.moveTo(-2 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, -10 * k, -7 * k); ctx.quadraticCurveTo(-6 * k, -3 * k, -7 * k, -1 * k); ctx.closePath(); ctx.fill(); ctx.restore(); } ctx.restore(); }
+  // the mana ribbon winds over the top
+  if (fx.ring.includes('mana')) { ctx.save(); ctx.scale(Math.min(1.15, Math.max(.8, L / 11)), Math.min(1.45, Math.max(1, (H + 1.5) / 4))); ctx.strokeStyle = 'rgba(130,190,255,.95)'; ctx.lineWidth = 1.1; ctx.beginPath(); for (let j = 0; j <= 16; j++) { const x = (-12 + j * 1.5) * k, y = Math.sin(j * .9 - w * 14 + ph) * 3.2 * k; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); ctx.restore(); }
   // the tip: pierce items line up in front of the feather
-  fx.nose.forEach((id, i) => { const x = (11 + i * 4.5) * k;
+  fx.nose.forEach((id, i) => { const x = (L + i * 4.5) * k;
     if (id === 'needle') { ctx.strokeStyle = '#f2efe6'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x - 3, 0); ctx.lineTo(x + 5, 0); ctx.stroke(); }
     else if (id === 'sharp') { ctx.fillStyle = '#d8dce4'; ctx.beginPath(); ctx.moveTo(x + 4, 0); ctx.lineTo(x - 1, -2.2); ctx.lineTo(x, 0); ctx.lineTo(x - 1, 2.2); ctx.closePath(); ctx.fill(); }
     else if (id === 'u_bone') { ctx.fillStyle = '#efe6cc'; ctx.beginPath(); ctx.arc(x - 1, -1.4, 1.3, 0, TAU); ctx.arc(x - 1, 1.4, 1.3, 0, TAU); ctx.fill(); ctx.fillRect(x - 1, -.7, 4, 1.4); }
@@ -4768,14 +4781,14 @@ function drawShotFx(fx, ph, k, now) {
     else if (id === 'm_void') { ctx.fillStyle = '#1a0a2a'; ctx.strokeStyle = '#c07aff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + 4, 0); ctx.lineTo(x - 1, -2.6); ctx.lineTo(x - 1, 2.6); ctx.closePath(); ctx.fill(); ctx.stroke(); } });
   // the sides: barbs, and little things circling the feather
   fx.side.forEach((id, i) => {
-    if (id === 'barbs') { ctx.strokeStyle = '#9aa3ad'; ctx.lineWidth = 1.2; ctx.beginPath(); for (const x of [4, -1]) { ctx.moveTo(x * k, -2); ctx.lineTo((x - 4) * k, -6 * k); ctx.moveTo(x * k, 2); ctx.lineTo((x - 4) * k, 6 * k); } ctx.stroke(); return; }
+    if (id === 'barbs') return;   // drawn underneath
     const col = { hex: '#c08aff', u_spark: '#ffe14a', l_storm: '#6ae0ff', b_queen: '#f0eef4' }[id], q = w * 5 + ph;
-    ctx.fillStyle = col; for (const o of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) { const x = Math.cos(q + o) * 9 * k, y = Math.sin(q + o) * 5.5 * k;
+    ctx.fillStyle = col; for (const o of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) { const x = Math.cos(q + o) * Math.max(9, L * .9) * k, y = Math.sin(q + o) * Math.max(5.5, H + 3) * k;
       if (id === 'hex') { ctx.save(); ctx.translate(x, y); ctx.rotate(q * 2); ctx.fillRect(-1.3, -1.3, 2.6, 2.6); ctx.restore(); }
       else if (id === 'b_queen') { ctx.beginPath(); ctx.arc(x, y, 1, 0, TAU); ctx.fill(); }
       else { ctx.beginPath(); ctx.moveTo(x, y - 2.2); ctx.lineTo(x + .7, y); ctx.lineTo(x, y + 2.2); ctx.lineTo(x - .7, y); ctx.closePath(); ctx.fill(); } } });
   // the trail: each item adds its own mark behind the feather, one after the other
-  fx.trail.forEach((id, i) => { const x = (-13 - i * 5.5) * k, y = Math.sin(w * 9 + i * 1.7 + ph) * 1.6, al = Math.max(.35, 1 - i * .08); ctx.globalAlpha = al;
+  fx.trail.forEach((id, i) => { const x = (-L - 2 - i * 5.5) * k, y = Math.sin(w * 9 + i * 1.7 + ph) * 1.6, al = Math.max(.35, 1 - i * .08); ctx.globalAlpha = al;
     switch (id) {
       case 'ember': { const f = 1 + Math.sin(w * 30 + i) * .2; ctx.fillStyle = '#ff8a3a'; ctx.beginPath(); ctx.moveTo(x + 3, y - 2.4); ctx.quadraticCurveTo(x - 4 * f, y, x + 3, y + 2.4); ctx.arc(x + 3, y, 2.4, Math.PI / 2, -Math.PI / 2, true); ctx.fill(); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(x + 3, y, 1.1, 0, TAU); ctx.fill(); break; }
       case 'u_ember': ctx.fillStyle = '#e8502a'; for (const d of [0, 1]) { ctx.beginPath(); ctx.arc(x - d * 2.5, y + (d ? 1.8 : -1.5) + Math.sin(w * 20 + d) * .8, 1.2, 0, TAU); ctx.fill(); } break;
@@ -4807,11 +4820,12 @@ function drawFeather(s) {
   } else {
     const [kind, col] = projOf(save.skin), now = performance.now(), R = s.big ? 14 : 9, fx0 = shotFxNow(), k = s.big ? 1.4 : 1;
     const fx = shotFxCut(fx0, shotFx.per ?? 99);
-    if (fx.ring.length) { ctx.save(); ctx.rotate(a); drawShotGlow(fx, k); ctx.restore(); }
+    const body = PROJ_BODY[kind] || [9, 7], fa = a + (kind === 'leaf' ? Math.sin((now + s.x) / 90) * .4 : 0);   // the leaf sways, so its effects sway with it
+    if (fx.all.length) { ctx.save(); ctx.rotate(fa); drawShotGlow(fx, k, body); drawShotFx(fx, s.x * .05, k, now, 'under', body); ctx.restore(); }
     else if (P.burn) { ctx.fillStyle = 'rgba(240,138,58,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     const dk = P.baseDmg ? Math.min(1.35, 1 + Math.max(0, P.dmg / P.baseDmg - 1) * .12) : 1;
     ctx.save(); drawProj(kind, s.big ? '#e8b84a' : col, a, (s.big ? 1.5 : 1) * dk, now + s.x); ctx.restore();
-    if (fx.all.length) { ctx.rotate(a); drawShotFx(fx, s.x * .05, k, now); }
+    if (fx.all.length) { ctx.rotate(fa); drawShotFx(fx, s.x * .05, k, now, 'over', body); }
   }
   ctx.restore();
 }
