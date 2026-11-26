@@ -5,6 +5,9 @@
 - Switching between auto fire and point-and-click now has a 1 second cooldown, whether you use the AUTO button, its key or a gamepad. A bar on the button drains while it recharges, and the button shakes if you press it too early.
 - **Upgrades tab:** your coin count now follows you as you scroll. Once the one at the top scrolls out of view, a small coin counter stays in the top-right corner.
 - **Egg screen:** when you open an egg, the other eggs in the nest no longer crack and shake behind it. They stay whole until your roll is over.
+- **Item info without pausing:** the items on the left side of the screen no longer pause the game and open a pop-up when you click them. Hover over one (or tap it on a phone) to see a see-through bubble with its rarity, name and what it does, while the game keeps going.
+- **More time before the next wave:** after you see what came out of your egg, the next wave now starts after 4.5 seconds (was 2.5). Tap or press Space to start it sooner.
+- **Lucky Charm** (Upgrades tab) now has **20 levels** at **+5%** egg luck each (was 10 levels at +12%), so it tops out at +100% instead of +120%. The first levels are cheaper (90 coins instead of 150). If you already bought some levels, you keep them, at +5% each.
 
 ## 2.99.17 — Ten ways to hatch
 
