@@ -1,5 +1,10 @@
 # Nestguard changelog
 
+## 2.99.20 — Feathers show every item
+
+- **Feather items stack on your shots.** Every item that changes your feathers now leaves its own mark: pierce items line up at the tip, barbs and stun charms sit on the sides or circle the feather, each fire, ice, void, blood or mana item adds its own ring, and the rest leave their own mark in the trail. Two items no longer look the same, so you can see everything you're carrying.
+- **No more beak in the egg.** The orange beak that poked out of every cracking egg is gone. Now a small chip of shell falls out and warm light glows through.
+
 ## 2.99.19 — A fairer Lucky Charm price
 
 - **Lucky Charm** levels now cost from 90 up to about 1,280 coins. All 20 levels cost about 9,200 coins in total (was about 31,800). It's a small nerf: a bit more than the old 10 levels cost, for slightly less luck at the top.
