@@ -888,6 +888,10 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
 @media (pointer: coarse) { button:focus-visible, .card:focus-visible, .sp:focus-visible, .cawkey:focus-visible, .nestegg:focus-visible, .tab:focus-visible { outline: none !important; } }
 /* menu lists scroll with a finger, even when the swipe starts on a card */
 #menu .card, #menu .card *, #skinList, #skinList * { touch-action: pan-y; }
+/* the coin count follows you down the Upgrades tab once the one at the top scrolls away */
+.coinfloat { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 80; display: flex; align-items: baseline; gap: 8px; padding: 8px 14px; border-radius: 12px; background: var(--moss); border: 1px solid var(--moss-2); box-shadow: 0 8px 24px rgba(0,0,0,.45); font: 13px var(--mono); color: var(--bone-dim); pointer-events: none; opacity: 0; transform: translateY(-8px); transition: opacity .18s, transform .18s; }
+.coinfloat.on { opacity: 1; transform: none; }
+.coinfloat b { font: 800 22px var(--display); color: var(--coin); letter-spacing: .02em; }
 #menu { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 .mscroll { position: fixed; z-index: 40; right: max(4px, env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: 26px; display: none; touch-action: none; }
 .mscroll.on { display: block; }
@@ -7407,11 +7411,19 @@ addEventListener('blur', () => setPause(true));
 
 // ---------- menu ----------
 let curTab = 'fly';
+function syncCoinFloat() {
+  let f = $('coinFloat'); const m = $('menu'), src = $('mCoins'); if (!m || !src) return;
+  if (!f) { f = el('div', 'coinfloat'); f.id = 'coinFloat'; f.setAttribute('aria-hidden', 'true'); f.append(el('span', '', T('coins')), el('b', '', '')); document.body.append(f);
+    m.addEventListener('scroll', syncCoinFloat, { passive: true }); addEventListener('resize', syncCoinFloat);
+    try { const mo = new MutationObserver(syncCoinFloat); mo.observe(src, { childList: true, characterData: true, subtree: true }); mo.observe(m, { attributes: true, attributeFilter: ['hidden'] }); } catch (e) {} }
+  f.firstChild.textContent = T('coins'); f.lastChild.textContent = src.textContent;
+  f.classList.toggle('on', !m.hidden && curTab === 'roost' && src.getBoundingClientRect().bottom < 8);
+}
 function renderMenu(tab) {
   try { const sb = $('sandboxBtn'); sb.hidden = !(save.codes && save.codes.sandbox); sb.textContent = T('sb_open'); } catch (e) {}
   try { $('mPct').textContent = T('cp_total', completion(save).pct); } catch (e) {}
   if (tab) curTab = tab;
-  $('mCoins').textContent = save.coins;
+  $('mCoins').textContent = save.coins; setTimeout(syncCoinFloat, 0);
   for (const t of document.querySelectorAll('.tab')) {
     t.setAttribute('aria-selected', String(t.dataset.tab === curTab));
     t.querySelector('.dot')?.remove();

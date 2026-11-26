@@ -1,8 +1,9 @@
 # Nestguard changelog
 
-## 2.99.18 — Auto fire switch cooldown
+## 2.99.18 — Auto fire cooldown and coins that follow you
 
 - Switching between auto fire and point-and-click now has a 1 second cooldown, whether you use the AUTO button, its key or a gamepad. A bar on the button drains while it recharges, and the button shakes if you press it too early.
+- **Upgrades tab:** your coin count now follows you as you scroll. Once the one at the top scrolls out of view, a small coin counter stays in the top-right corner.
 
 ## 2.99.17 — Ten ways to hatch
 
