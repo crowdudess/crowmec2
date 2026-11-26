@@ -1,5 +1,12 @@
 # Nestguard changelog
 
+## 2.99.9 — Faster pace and a bigger egg roll
+
+- **No more waiting after an egg:** once you see what you got, the next wave starts after 2.5 seconds (was 8). Tap anywhere or press Space to start it right away. The first monster now shows up almost as soon as the wave begins.
+- **Busier early waves:** waves 1 to 11 bring up to 70% more monsters, coming in closer together. Each one has a bit less HP, so the early game is livelier without getting harder overall.
+- **A more epic egg roll:** light rays build up while the egg shakes, it bursts with a flash and a shockwave, the needle kicks on every item that passes, and the prize lands with confetti in its rarity colour. Rare, epic, legendary and mythic items get more rings, more confetti and a little fanfare. The roll is also a bit shorter.
+- **Golden eggs no longer lag the game:** the egg screen used to blur the whole battlefield every frame. It now covers it with a plain dark backdrop, and the paused battlefield isn't redrawn behind a golden egg. The shop's nest is also drawn once instead of several times a second.
+
 ## 2.99.8 — The Old Gator circles the nest
 
 - After every bite, the Old Gator now dives and **circles around the nest underwater** (about half a lap, either way round), spitting frogs all around it, then surfaces and comes in again. He used to swim straight away from the nest.

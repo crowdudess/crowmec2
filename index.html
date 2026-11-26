@@ -559,7 +559,7 @@ canvas.manualaim { cursor: crosshair; }
 @keyframes aurapulse { 50% { transform: scale(1.15); opacity: .8; } }
 .card.egg.missed .aura::after { animation: none; }
 @media (prefers-reduced-motion: reduce) { .aura::after, .aura::before, .reelwin.tick canvas { animation: none !important; } }
-.eggstage { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; grid-template-rows: 1fr auto auto auto auto; background: radial-gradient(circle at 50% 42%, rgba(20,24,16,.75), rgba(4,6,4,.94)); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: pointer; animation: esfade .25s ease-out; }
+.eggstage { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; grid-template-rows: 1fr auto auto auto auto; background: radial-gradient(circle at 50% 42%, rgba(20,24,16,.86), rgba(4,6,4,.97)); cursor: pointer; animation: esfade .25s ease-out; }
 .eggstage[hidden] { display: none; }
 @keyframes esfade { from { opacity: 0; } }
 .eggstage .es-glow { position: absolute; left: 50%; top: 42%; width: 620px; height: 620px; margin: -310px 0 0 -310px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--rgb, 230,224,210), .45), rgba(var(--rgb, 230,224,210), .12) 40%, transparent 70%); transition: background .08s; pointer-events: none; }
@@ -613,6 +613,32 @@ canvas.manualaim { cursor: crosshair; }
 .eggstage .es-hint { grid-row: 5; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone-dim); margin-bottom: 8vh; }
 .eggstage.open .es-glow { animation: aurapulse 1.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .eggstage .es-aura, .eggstage.shake .es-egg, .eggstage.open .es-item, .eggstage.open .es-glow { animation: none; } }
+/* epic roll: light rays, flash, shockwave, confetti, needle kick */
+.eggstage .es-rays { position: absolute; left: 50%; top: 42%; width: 980px; height: 980px; margin: -490px 0 0 -490px; border-radius: 50%; pointer-events: none; background: repeating-conic-gradient(rgba(var(--rgb, 255,236,190), .26) 0 5deg, transparent 5deg 15deg); -webkit-mask: radial-gradient(circle, #000 6%, transparent 64%); mask: radial-gradient(circle, #000 6%, transparent 64%); opacity: 0; scale: .35; transition: opacity .45s, scale 1.1s cubic-bezier(.2,1,.3,1); animation: auraspin 16s linear infinite; }
+.eggstage .es-rays[data-rar="5"] { background: repeating-conic-gradient(rgba(255,216,74,.32) 0 5deg, transparent 5deg 15deg, rgba(255,106,176,.32) 15deg 20deg, transparent 20deg 30deg, rgba(138,122,255,.32) 30deg 35deg, transparent 35deg 45deg); }
+.eggstage.shake .es-rays { opacity: .55; scale: .7; animation-duration: 6s; }
+.eggstage.shake2 .es-rays { opacity: .9; scale: .95; animation-duration: 2.2s; }
+.eggstage.reeling .es-rays { opacity: .22; scale: 1.1; animation-duration: 12s; }
+.eggstage.open .es-rays { opacity: 1; scale: 1.25; animation-duration: 9s; }
+.eggstage .es-needle { position: absolute; left: 50%; top: -2px; width: 0; height: 0; margin-left: -12px; border: 12px solid transparent; border-top: 16px solid #ffe27a; filter: drop-shadow(0 0 6px rgba(255,216,74,.9)); z-index: 3; transform-origin: 50% 0; }
+.eggstage .es-reel::before { display: none; }
+.eggstage .es-reel { border-color: rgba(var(--rgb, 232,184,74), .75); transition: opacity .2s, border-color .12s; }
+.eggstage .es-tile.hot { transform: scale(1.1) translateY(-3px); border-color: rgb(var(--rgb)); box-shadow: 0 0 18px rgba(var(--rgb), .8); transition: transform .08s, box-shadow .08s; }
+.eggstage .es-tile.win { animation: eswin .55s cubic-bezier(.2,1.8,.4,1); }
+@keyframes eswin { 0% { transform: scale(1.1); } 40% { transform: scale(1.32) rotate(-4deg); } 100% { transform: scale(1.12); } }
+.es-flash { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,.95), rgba(var(--rgb), .55) 35%, transparent 75%); animation: esflash .55s ease-out forwards; }
+@keyframes esflash { from { opacity: 1; } to { opacity: 0; } }
+.es-ring { position: absolute; left: 50%; top: 42%; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; border: 7px solid rgb(var(--rgb)); box-shadow: 0 0 34px rgb(var(--rgb)), inset 0 0 24px rgba(var(--rgb), .6); pointer-events: none; animation: esring .75s cubic-bezier(.1,.7,.3,1) forwards; }
+@keyframes esring { from { transform: scale(.2); opacity: 1; } to { transform: scale(4.2); opacity: 0; border-width: 1px; } }
+.es-conf { position: absolute; left: 50%; top: 42%; width: 9px; height: 15px; margin: -7px 0 0 -4px; border-radius: 2px; background: var(--c); box-shadow: 0 0 6px var(--c); pointer-events: none; animation: esconf var(--d, 1.2s) cubic-bezier(.12,.75,.35,1) forwards; }
+@keyframes esconf { 0% { transform: translate(0, 0) rotate(0) scale(1.2); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rr)) scale(.5); opacity: 0; } }
+.eggstage.open .es-rar { animation: esslam .5s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes esslam { from { transform: scale(2.8); opacity: 0; letter-spacing: .7em; } to { transform: none; opacity: 1; } }
+.eggstage.open .es-name { animation: esrise .5s .1s cubic-bezier(.2,1.4,.4,1) both; }
+.eggstage.open .es-desc { animation: esrise .5s .22s ease-out both; }
+@keyframes esrise { from { transform: translateY(22px); opacity: 0; } to { transform: none; opacity: 1; } }
+body.lowfx .es-rays, body.lowfx .es-conf { display: none; }
+@media (prefers-reduced-motion: reduce) { .eggstage .es-rays, .es-conf, .es-ring { animation: none; } .es-conf, .es-ring { display: none; } }
 @keyframes eggglow { 0% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); } 30% { filter: drop-shadow(0 0 12px rgba(138,216,112,.9)); } 55% { filter: drop-shadow(0 0 14px rgba(127,178,201,.9)); } 80% { filter: drop-shadow(0 0 18px rgba(255,106,176,.9)); } 100% { filter: drop-shadow(0 0 26px rgba(var(--rgb),1)); } }
 .card.egg.waiting { opacity: .55; }
 .card.egg.revealed { animation: eggpop .45s cubic-bezier(.2,1.6,.4,1) both; text-align: left; justify-items: stretch; border: 2px solid rgba(var(--rgb), .9); box-shadow: 0 0 26px rgba(var(--rgb), .35); }
@@ -787,7 +813,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   html body .ach .ai { width: 32px; height: 32px; } html body .ach .ai svg { width: 19px; height: 19px; } html body .ach .at { font-size: 12px; }
   .eggstage > * { zoom: .74; }
   .eggstage .es-side { zoom: 1.15; }
-  .eggstage .es-item, .eggstage .es-egg, .eggstage .es-aura, .eggstage .es-glow, .eggstage .es-burst, .eggstage .es-reel { translate: 0 -30px; }
+  .eggstage .es-item, .eggstage .es-egg, .eggstage .es-aura, .eggstage .es-glow, .eggstage .es-burst, .eggstage .es-reel, .eggstage .es-rays, .es-ring, .es-conf { translate: 0 -30px; }
 }
 /* touch screens: no keyboard hints */
 @media (pointer: coarse) { .kbd, .cawkbd { display: none !important; } }
@@ -984,7 +1010,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.8</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.9</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2011,7 +2037,9 @@ function startWave() {
   const w = run.wave;
   if (w === 1 && !api.sim) setTimeout(() => { try { tutMaybe(); } catch (e) {} }, 1400);
   const we = ew(w);
-  let budget = (6 + we * 3.4 + (we > 10 ? (we - 10) * 1.5 : 0)) * (B.mode ? 1 : 2) * (run.countMult || 1) * (chaosOn(3) ? 1.3 : 1) * (run.endless ? 1.3 * (1 + .05 * we) : 1);
+  // early waves felt empty: up to 1.8x more monsters (fading out by wave 12), each a bit weaker so the difficulty stays close
+  const early = B.mode || run.endless ? 1 : 1 + .7 * Math.max(0, (12 - w) / 11); run.early = early;
+  let budget = early * (6 + we * 3.4 + (we > 10 ? (we - 10) * 1.5 : 0)) * (B.mode ? 1 : 2) * (run.countMult || 1) * (chaosOn(3) ? 1.3 : 1) * (run.endless ? 1.3 * (1 + .05 * we) : 1);
   let pool = B.enemies.filter(k => E[k].from <= we);
   if (B.mode === 'endless') {
     const all = []; for (const b of BIOMES) if (!b.mode && (!b.dlc || biomeState(b.id).unlocked)) for (const k of b.enemies) if (E[k].from <= Math.max(1, w) && !all.includes(k)) all.push(k);
@@ -2041,15 +2069,15 @@ function startWave() {
     list.push(k); budget -= d.cost;
   }
   if (fresh.length) for (let i = list.length - 1; i > 0; i--) { const j2 = Math.floor(Math.random() * (i + 1)); [list[i], list[j2]] = [list[j2], list[i]]; }
-  const gap = Math.max(.2, 1.05 - we * .045) * ((th && th.gap) || 1);
+  const gap = Math.max(.2, 1.05 - we * .045) * ((th && th.gap) || 1) / Math.pow(early, .85);
   const pinA = rnd(0, TAU), burstA = [];
   spawnQ = list.map((k, i) => {
-    const q = { k, t: .8 + i * gap * rnd(.6, 1.3) };
+    const q = { k, t: .25 + i * gap * rnd(.6, 1.3) };
     if (th) {
       if (th.spd) q.spd = th.spd;
       if (th.hp) q.hpx = th.hp;
       if (th.sides) q.ang = pinA + (i % 2) * Math.PI + rnd(-.3, .3);
-      if (th.burst) { const g = Math.floor(i / th.burst); if (burstA[g] == null) burstA[g] = rnd(0, TAU); q.ang = burstA[g] + rnd(-.25, .25); q.t = .8 + g * gap * th.burst * 1.3 + (i % th.burst) * .12; }
+      if (th.burst) { const g = Math.floor(i / th.burst); if (burstA[g] == null) burstA[g] = rnd(0, TAU); q.ang = burstA[g] + rnd(-.25, .25); q.t = .25 + g * gap * th.burst * 1.3 + (i % th.burst) * .12; }
     }
     if (run.riftPair) q.side = riftSideOf(k);
     return q;
@@ -2115,6 +2143,7 @@ function makeEnemy(k, x, y, q = {}) {
   if (run.diff) { const D = (B.diffs && B.diffs[run.diff]) || DIFFS[run.diff]; e.hp *= D.hp; e.dmg *= D.dmg; e.spd *= D.spd; }
   if (q.spd) e.spd *= q.spd;
   if (q.hpx) e.hp *= q.hpx;
+  if (run.early > 1 && !q.boss && !q.elite) e.hp /= run.early;
   if (run.chaos) { const L = run.chaos; e.hp *= (1 + .08 * L) * (L >= 2 ? 1.25 : 1) * (L >= 10 ? 1.5 : 1); e.spd *= (L >= 1 ? 1.15 : 1) * (L >= 10 ? 1.1 : 1); if (L >= 4) e.dmg *= 1.4; }
   if (d.fly) e.spd = Math.min(e.spd * .72, d.spd * .72 * 1.2);
   if (run.endless) { const x = Math.max(0, run.wave - EBW()); e.dmg *= 1 + .05 * x; e.spd *= 1 + Math.min(.3, .01 * x); }
@@ -5555,7 +5584,7 @@ function rollOffers() {
   offers = picks; run.picked = null; run.crackT = 0; run.popSeen = new Set(); run.golden = null;
   if (Math.random() < goldenChance()) { const g = rollItem(new Set(picks.map(x => x.id)), 5, true); if (g) run.golden = { ...g, golden: true, cracked: false, shell: ['#ffe27a', '#b8860b'], seed: Math.random() * 99 }; }
 }
-const EGG_SHAKE = 1600, SPIN_FAST = 3300, SPIN_SLOW = 2000, EGG_SPIN = SPIN_FAST + SPIN_SLOW, CRACK_MS = EGG_SHAKE + EGG_SPIN + 550, STAGE_HOLD = 1700;
+const EGG_SHAKE = 1200, SPIN_FAST = 2500, SPIN_SLOW = 1700, EGG_SPIN = SPIN_FAST + SPIN_SLOW, CRACK_MS = EGG_SHAKE + EGG_SPIN + 550, STAGE_HOLD = 1700;
 function runReel(win, lab, it, left) {
   const pool = ITEMS.filter(x => itemOpen(x.id)), t0 = performance.now(), end = t0 + Math.max(0, left - 150);
   let delay = 55;
@@ -5573,15 +5602,26 @@ function runReel(win, lab, it, left) {
 }
 function playEggStage(it, others = [], fromShop = false) {
   let st = $('eggStage');
-  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-desc"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (performance.now() - (st._revealedAt || 0) < 600) return; if (st.classList.contains('open') && !st.dataset.next) closeEggStage(); }; st.querySelector('.es-next').onclick = () => stageNext(); }
+  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<div class="es-rays"></div><div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-needle"></div><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-desc"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (performance.now() - (st._revealedAt || 0) < 600) return; if (st.classList.contains('open')) { if (st.dataset.next) stageNext(); else closeEggStage(); } }; st.querySelector('.es-next').onclick = () => stageNext(); }
   if (!st._skipHook) { st._skipHook = true; st.addEventListener('pointerdown', ev => { if (ev.target.closest('.es-next')) return; if (!st._revealed && st._skip && performance.now() - (st._shownAt || 0) > 250) { ev.preventDefault(); st._skip(); } }); }
   st._shownAt = performance.now();
   const egg = st.querySelector('.es-egg'), aura = st.querySelector('.es-aura'), glow = st.querySelector('.es-glow'), item = st.querySelector('.es-item'), reel = st.querySelector('.es-reel'), strip = st.querySelector('.es-strip');
   st.hidden = false; st.className = 'eggstage shake' + (fromShop ? ' full' : ''); st.dataset.next = fromShop ? '1' : ''; st.querySelector('.es-next').hidden = true; clearInterval(st._cd); item.innerHTML = ''; const sides = st.querySelector('.es-sides'); if (sides) sides.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-desc').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
-  const setR = r => { aura.dataset.rar = r; glow.style.setProperty('--rgb', RAR_RGB[r]); aura.style.setProperty('--rgb', RAR_RGB[r]); };
+  const rays = st.querySelector('.es-rays'), needle = st.querySelector('.es-needle');
+  const setR = r => { aura.dataset.rar = r; rays.dataset.rar = r; for (const n of [glow, aura, rays, reel]) n.style.setProperty('--rgb', RAR_RGB[r]); };
+  // flash, shockwave rings and confetti in the rarity colour (n = how much confetti)
+  const boom = (r, n, rings = 1, flash = true) => {
+    const rgb = RAR_RGB[r], lowfx = document.body.classList.contains('lowfx');
+    if (flash) { const f = el('div', 'es-flash'); f.style.setProperty('--rgb', rgb); st.append(f); setTimeout(() => f.remove(), 600); }
+    for (let i = 0; i < rings; i++) { const g = el('div', 'es-ring'); g.style.setProperty('--rgb', rgb); g.style.animationDelay = i * 140 + 'ms'; st.append(g); setTimeout(() => g.remove(), 800 + i * 140); }
+    if (lowfx) return;
+    const cols = r >= 5 ? ['#ffd84a', '#ff6ab0', '#8a7aff', '#6ae0ff', '#fff'] : [`rgb(${rgb})`, `rgb(${rgb})`, '#fff6d0', '#ffe27a'];
+    for (let i = 0; i < n; i++) { const c = el('span', 'es-conf'), a = rnd(0, TAU), d = rnd(120, 340 + r * 40); c.style.setProperty('--c', cols[i % cols.length]); c.style.setProperty('--dx', Math.cos(a) * d + 'px'); c.style.setProperty('--dy', Math.sin(a) * d * .8 + rnd(40, 160) + 'px'); c.style.setProperty('--rr', rnd(-720, 720) + 'deg'); c.style.setProperty('--d', rnd(.9, 1.5) + 's'); st.append(c); setTimeout(() => c.remove(), 1600); }
+  };
   setR(0); drawEgg(egg, it, 'whole');
-  setTimeout(() => { if (alive()) { drawEgg(egg, it, 'crack'); if (actx && !muted) tone(900, 700, .06, 'square', .04); } }, 550);
-  setTimeout(() => { if (alive()) { drawEgg(egg, it, 'crack2'); st.classList.add('shake2'); if (actx && !muted) tone(800, 600, .07, 'square', .05); } }, 1050);
+  if (actx && !muted) { tone(160, 640, EGG_SHAKE / 1000, 'sawtooth', .02); tone(80, 160, EGG_SHAKE / 1000, 'sine', .06); }
+  setTimeout(() => { if (alive()) { drawEgg(egg, it, 'crack'); shake = Math.max(shake, 3); if (actx && !muted) tone(900, 700, .06, 'square', .04); } }, 400);
+  setTimeout(() => { if (alive()) { drawEgg(egg, it, 'crack2'); st.classList.add('shake2'); shake = Math.max(shake, 5); if (actx && !muted) tone(800, 600, .07, 'square', .05); } }, 800);
   const token = (run.stageToken = (run.stageToken || 0) + 1), aliveR = () => run.stageToken === token && !st.hidden, alive = () => aliveR() && !st._skipped;
   st._skipped = false; st._revealed = false;
   // build the reel: random fillers, a teaser next to the prize, the prize at WIN
@@ -5594,15 +5634,15 @@ function playEggStage(it, others = [], fromShop = false) {
   setTimeout(() => {
     if (!alive()) return;
     drawEgg(egg, it, 'open'); st.className = 'eggstage reeling' + (fromShop ? ' full' : ''); shake = Math.max(shake, 6);
-    { const fx = el('div', 'es-burst'); st.append(fx); setTimeout(() => fx.remove(), 700); for (let i = 0; i < 10; i++) { const sh = el('span', 'es-shard'); const a = i / 10 * TAU + rnd(-.2, .2), d = rnd(140, 260); sh.style.setProperty('--dx', Math.cos(a) * d + 'px'); sh.style.setProperty('--dy', Math.sin(a) * d + 'px'); sh.style.setProperty('--rr', rnd(-300, 300) + 'deg'); sh.style.background = it.shell ? it.shell[0] : '#efe6d2'; st.append(sh); setTimeout(() => sh.remove(), 800); } }
-    if (actx && !muted) tone(220, 90, .25, 'sawtooth', .05);
+    { const fx = el('div', 'es-burst'); st.append(fx); setTimeout(() => fx.remove(), 700); boom(0, 0, 1); for (let i = 0; i < 18; i++) { const sh = el('span', 'es-shard'); const a = i / 18 * TAU + rnd(-.2, .2), d = rnd(160, 340); sh.style.setProperty('--dx', Math.cos(a) * d + 'px'); sh.style.setProperty('--dy', Math.sin(a) * d + 'px'); sh.style.setProperty('--rr', rnd(-300, 300) + 'deg'); sh.style.background = it.shell ? it.shell[0] : '#efe6d2'; st.append(sh); setTimeout(() => sh.remove(), 800); } }
+    if (actx && !muted) { tone(220, 90, .25, 'sawtooth', .05); tone(110, 35, .6, 'sine', .14); }
     const TW = 104, w = reel.clientWidth, target = WIN * TW + (stopAt === 'left' ? rnd(6, 26) : stopAt === 'right' ? rnd(TW - 34, TW - 14) : rnd(30, TW - 38)) - w / 2;
     void strip.offsetWidth; strip.style.transition = `transform ${EGG_SPIN}ms cubic-bezier(.04,.78,.08,1)`; strip.style.transform = `translateX(${-target}px)`;
     setTimeout(() => { if (!alive()) return; st.classList.add('crawl'); if (actx && !muted) for (let i = 0; i < 4; i++) setTimeout(() => { if (alive()) tone(70, 50, .22, 'sine', .09); }, i * 480); }, SPIN_FAST);
     let last = -1; const t0 = performance.now();
-    const tick = () => { if (!alive() || performance.now() - t0 > EGG_SPIN + 50) return; const m = new DOMMatrixReadOnly(getComputedStyle(strip).transform), idx = Math.floor((-m.m41 + w / 2) / TW); if (idx !== last) { last = idx; const x = tiles[idx]; if (x) setR(x.rar); if (actx && !muted) tone(700 + (x ? x.rar : 0) * 80, 700 + (x ? x.rar : 0) * 80, .03, 'square', .025); } requestAnimationFrame(tick); };
+    const tick = () => { if (!alive() || performance.now() - t0 > EGG_SPIN + 50) return; const m = new DOMMatrixReadOnly(getComputedStyle(strip).transform), idx = Math.floor((-m.m41 + w / 2) / TW); if (idx !== last) { if (strip.children[last]) strip.children[last].classList.remove('hot'); if (strip.children[idx]) strip.children[idx].classList.add('hot'); last = idx; const x = tiles[idx]; if (x) setR(x.rar); if (needle.animate) needle.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-22deg)' }, { transform: 'rotate(0)' }], { duration: 110 }); if (actx && !muted) tone(700 + (x ? x.rar : 0) * 80, 700 + (x ? x.rar : 0) * 80, .03, 'square', .025); } requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
-    setTimeout(() => { if (!alive()) return; setR(it.rar); strip.children[WIN].classList.add('win'); if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); } }, EGG_SPIN);
+    setTimeout(() => { if (!alive()) return; setR(it.rar); strip.children[WIN].classList.add('win'); boom(it.rar, 6 + it.rar * 5, 1, false); shake = Math.max(shake, 4 + it.rar); if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); } }, EGG_SPIN);
   }, EGG_SHAKE);
   const reveal = () => {
     if (!aliveR() || st._revealed) return; st._revealed = true; st._revealedAt = performance.now();   // the tap that skipped the roll must not also close the reveal
@@ -5612,9 +5652,12 @@ function playEggStage(it, others = [], fromShop = false) {
     { const base = ITEMS.find(x => x.id === it.id) || it; st.querySelector('.es-name').textContent = base.name; st.querySelector('.es-desc').textContent = base.desc; } st.querySelector('.es-hint').textContent = fromShop ? '' : T('egg_tapon');
     if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; if (it.rar >= 3) setTimeout(() => tone(top, top * 1.5, .3, 'triangle', .06), 60); if (it.rar >= 4) setTimeout(() => tone(top * 1.5, top * 2, .45, 'sine', .06), 240); }
     shake = Math.max(shake, 4 + it.rar * 2);
+    boom(it.rar, 14 + it.rar * 10, it.rar >= 4 ? 3 : it.rar >= 2 ? 2 : 1);
+    if (it.rar >= 4) setTimeout(() => { if (aliveR()) boom(it.rar, 20 + (it.rar - 4) * 20, 1, false); }, 380);
+    if (actx && !muted && it.rar >= 2) { const base = [262, 294, 330, 392, 440, 523][it.rar]; [1, 1.25, 1.5, 2].forEach((m, i) => setTimeout(() => tone(base * m, base * m, .35, 'triangle', .035), i * 70)); }
     const sd = st.querySelector('.es-sides'); if (sd) { sd.innerHTML = ''; others.slice(0, 2).forEach((o, i) => { const base = ITEMS.find(x => x.id === o.id) || o, c = el('div', 'es-side ' + (i ? 'right' : 'left')); c.style.setProperty('--rgb', RAR_RGB[o.rar]); c.style.animationDelay = (350 + i * 250) + 'ms'; const au = el('span', 'aura'); au.dataset.rar = o.rar; au.style.setProperty('--rgb', RAR_RGB[o.rar]); au.append(upIcon(o.id, 84)); c.append(el('b', 'es-stamp', T('egg_missed')), au, el('span', 'es-srar', T('rar' + o.rar)), el('span', 'es-sname', base.name), el('span', 'es-sdesc', base.desc)); sd.append(c); setTimeout(() => { if (alive() && actx && !muted && o.rar > it.rar) tone(300, 180, .35, 'sawtooth', .04); }, 350 + i * 250); }); }
     if (fromShop) {
-      const nb = st.querySelector('.es-next'); nb.hidden = false; const end = performance.now() + 8000 + (others.length ? 900 : 0);
+      const nb = st.querySelector('.es-next'); nb.hidden = false; const end = performance.now() + 2500 + (others.length ? 700 : 0);
       const upd = () => { if (!aliveR()) { clearInterval(st._cd); return; } const left = Math.max(0, Math.ceil((end - performance.now()) / 1000)); nb.innerHTML = ''; nb.append(el('span', '', T('next_in', left)), el('span', 'kbd', T('space'))); if (performance.now() >= end) { clearInterval(st._cd); stageNext(); } };
       upd(); st._cd = setInterval(upd, 200);
     } else setTimeout(() => { if (run && run.stageToken === token) closeEggStage(); }, (st._skipped ? 2600 : STAGE_HOLD) + (others.length ? 900 : 0));   // after a skip, leave time to read what you got
@@ -6103,7 +6146,14 @@ function closeEggStage() {
   if (run && run.goldPause) { run.goldPause = false; paused = false; renderHudItems(); return; }
   if (run && run.picked >= 0) { const now = performance.now(); if (now - run.crackAt < CRACK_MS + STAGE_HOLD) run.crackAt = now - CRACK_MS - STAGE_HOLD; if (state === 'shop') renderShop(); }
 }
+// the shop redraws the nest several times a second while eggs open: paint each half once and copy it
+const nestBowlCache = {};
 function drawNestBowl(cv2, part) {
+  const key = part + cv2.width + 'x' + cv2.height;
+  if (!nestBowlCache[key]) { const off = document.createElement('canvas'); off.width = cv2.width; off.height = cv2.height; paintNestBowl(off, part); nestBowlCache[key] = off; }
+  const c = cv2.getContext('2d'); c.clearRect(0, 0, cv2.width, cv2.height); c.drawImage(nestBowlCache[key], 0, 0);
+}
+function paintNestBowl(cv2, part) {
   const c = cv2.getContext('2d'), W = cv2.width, H = cv2.height; c.clearRect(0, 0, W, H);
   let sd = 7; const rr = () => { sd = (sd * 9301 + 49297) % 233280; return sd / 233280; };
   const cx = W / 2, cy = H * .42, rx = W * .47, ry = H * .34;
@@ -6266,7 +6316,7 @@ function renderShop() {
   $('nextBtn').disabled = mustPick();
   if (done && !run.autoTimer) { const myRun = run, myWave = run.wave;
     const id = setInterval(() => { if (run !== myRun || state !== 'shop' || run.wave !== myWave) { clearInterval(id); if (myRun.autoTimer === id) myRun.autoTimer = 0; return; }
-      if (!$('pause').hidden || ($('eggStage') && !$('eggStage').hidden) || mustPick()) { setNextLabel(); return; } const rem = Math.max(run.crackAt, run.golden ? run.golden.crackAt : 0) + CRACK_MS + STAGE_HOLD + 300 + 300 * offers.length + 5000 - performance.now(); setNextLabel(Math.max(0, Math.ceil(rem / 1000))); if (rem <= 0) nextWave(); }, 200);
+      if (!$('pause').hidden || ($('eggStage') && !$('eggStage').hidden) || mustPick()) { setNextLabel(); return; } const rem = Math.max(run.crackAt, run.golden ? run.golden.crackAt : 0) + CRACK_MS + STAGE_HOLD + 300 + 300 * offers.length + 1200 - performance.now(); setNextLabel(Math.max(0, Math.ceil(rem / 1000))); if (rem <= 0) nextWave(); }, 200);
     run.autoTimer = id; }
   if (!done) setNextLabel();
   $('healBtn').hidden = false;
@@ -7815,7 +7865,8 @@ function frame(now) {
   if (!api.sim) { try { pollPad(dt); } catch (e) {} }
   if (!paused && !api.sim) update(dt);
   if (!api.sim && state === 'menu' && !$('menu').hidden && curTab === 'fly') drawBiomePreview(now);
-  if (!api.sim) { draw(now); hud(); if (actx) { if (music.preview) music.set(music.preview, true); else { const bossOn = !!(run && run.boss && !run.boss.dead && state === 'wave'), home = bossOn && B && B.mode ? BIOMES.find(x => x.boss === run.boss.k) : null; music.set(state === 'menu' || !B ? 'menu' : home ? home.id : B.mode && run && run.riftPair ? run.riftPair[0] : B.id, bossOn); } } }
+  // while a golden egg opens mid-wave the game is paused under the overlay: keep the last frame instead of redrawing it
+  if (!api.sim) { if (!(run && run.goldPause && paused)) draw(now); hud(); if (actx) { if (music.preview) music.set(music.preview, true); else { const bossOn = !!(run && run.boss && !run.boss.dead && state === 'wave'), home = bossOn && B && B.mode ? BIOMES.find(x => x.boss === run.boss.k) : null; music.set(state === 'menu' || !B ? 'menu' : home ? home.id : B.mode && run && run.riftPair ? run.riftPair[0] : B.id, bossOn); } } }
   } catch (err) { showErr(err); }
 }
 requestAnimationFrame(frame);
