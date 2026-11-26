@@ -567,10 +567,11 @@ canvas.manualaim { cursor: crosshair; }
 .eggstage .es-aura[data-rar="5"] { background: repeating-conic-gradient(#ffd84a 0 6deg, transparent 6deg 20deg, #ff6ab0 20deg 26deg, transparent 26deg 40deg, #8a7aff 40deg 46deg, transparent 46deg 60deg); animation-duration: 1.4s; }
 .eggstage .es-aura[data-rar="4"] { animation-duration: 2s; }
 .eggstage .es-egg { position: absolute; left: 50%; top: 42%; width: 260px; height: 260px; margin: -130px 0 0 -130px; animation: espop .45s cubic-bezier(.2,1.7,.4,1); }
-.eggstage.shake .es-egg { animation: espop .45s cubic-bezier(.2,1.7,.4,1); }
+.eggstage.shake .es-egg { animation: esdrop .55s cubic-bezier(.3,.6,.4,1); }
 .eggstage.open .es-egg { opacity: .9; transform: translateY(70px) scale(.8); transition: transform .4s, opacity .4s; }
 .eggstage .es-reel { position: absolute; left: 50%; top: 42%; width: min(92vw, 780px); height: 128px; transform: translate(-50%, -50%); overflow: hidden; border-radius: 16px; background: rgba(8,10,6,.92); border: 2px solid rgba(232,184,74,.55); box-shadow: 0 0 40px rgba(0,0,0,.6), inset 0 0 30px rgba(0,0,0,.8); opacity: 0; pointer-events: none; transition: opacity .2s; -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
 .eggstage.reeling .es-reel { opacity: 1; }
+.eggstage.shake .es-reel { opacity: .01; }   /* drawn (invisibly) while the egg shakes, so the reel doesn't stutter when it appears */
 .eggstage .es-reel::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: linear-gradient(#ffe27a, #e8b84a); box-shadow: 0 0 12px rgba(255,216,74,.9); }
 .eggstage .es-reel::before { content: ''; position: absolute; left: 50%; top: -2px; margin-left: -10px; border: 10px solid transparent; border-top-color: #ffe27a; z-index: 2; }
 .eggstage .es-strip { display: flex; gap: 8px; padding: 12px 0; will-change: transform; }
@@ -642,6 +643,30 @@ body.lowfx .es-rays, body.lowfx .es-conf { display: none; }
 @keyframes eschip { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rr)); opacity: 0; } }
 body.lowfx .es-chip { display: none; }
 @media (prefers-reduced-motion: reduce) { .eggstage .es-rays, .es-conf, .es-ring { animation: none; } .es-conf, .es-ring { display: none; } }
+/* roll polish: egg drops in, shell cap flies off, light beam, reel unrolls, speed streaks, settled focus, floating item with sparkles */
+@keyframes esdrop { 0% { transform: translateY(-300px) scale(.85, 1.15); opacity: 0; } 45% { transform: translateY(0) scale(.95, 1.05); opacity: 1; } 62% { transform: translateY(0) scale(1.18, .8); } 78% { transform: translateY(-14px) scale(.94, 1.07); } 100% { transform: none; } }
+.eggstage .es-cap { position: absolute; left: 50%; top: 42%; width: 260px; height: 260px; margin: -130px 0 0 -130px; pointer-events: none; opacity: 0; }
+.eggstage .es-cap.fly { animation: escap .8s cubic-bezier(.2,.7,.4,1) forwards; }
+@keyframes escap { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--cx), -260px) rotate(var(--cr)); } }
+.es-beam { position: absolute; left: 50%; top: 0; bottom: 0; width: 180px; margin-left: -90px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(var(--rgb), .45) 35%, rgba(255,255,255,.85) 50%, rgba(var(--rgb), .45) 65%, transparent); transform-origin: 50% 42%; animation: esbeam .7s ease-out forwards; }
+@keyframes esbeam { 0% { transform: scale(.2, 0); opacity: 1; } 30% { transform: scale(1, 1); opacity: 1; } 100% { transform: scale(.35, 1); opacity: 0; } }
+.eggstage.reeling .es-reel { animation: esunfurl .4s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes esunfurl { from { scale: .06 .6; } to { scale: 1 1; } }
+.eggstage .es-speed { position: absolute; left: 0; top: 0; bottom: 0; width: 200%; pointer-events: none; z-index: 2; opacity: 0; background: repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,240,200,.16) 46px 48px, transparent 48px 97px, rgba(255,240,200,.08) 97px 98px); transition: opacity .5s; }
+.eggstage.reeling .es-speed { opacity: 1; animation: esspeed .25s linear infinite; }
+.eggstage.crawl .es-speed { opacity: 0; }
+@keyframes esspeed { from { transform: translateX(0); } to { transform: translateX(-98px); } }
+.eggstage .es-strip.settled .es-tile:not(.win) { opacity: .28; transform: scale(.88); transition: opacity .35s, transform .35s; }
+.eggstage .es-tile { position: relative; overflow: hidden; }
+.eggstage .es-tile.win::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 40%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.75), transparent); transform: translateX(-160%) skewX(-12deg); animation: esshine .7s .15s ease-out forwards; }
+@keyframes esshine { to { transform: translateX(330%) skewX(-12deg); } }
+.eggstage.open .es-item canvas { animation: esfloat 2.4s ease-in-out .6s infinite; }
+@keyframes esfloat { 50% { transform: translateY(-8px); } }
+.es-orbit { position: absolute; left: 50%; top: 42%; width: 300px; height: 300px; margin: -150px 0 0 -150px; pointer-events: none; animation: auraspin 7s linear infinite; }
+.es-orbit i { position: absolute; left: 50%; top: 0; width: 12px; height: 12px; margin-left: -6px; background: var(--c); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); transform-origin: 6px 150px; animation: estwinkle 1.2s ease-in-out infinite; }
+@keyframes estwinkle { 50% { scale: .35; opacity: .5; } }
+body.lowfx .es-orbit, body.lowfx .es-speed, body.lowfx .es-beam { display: none; }
+@media (prefers-reduced-motion: reduce) { .es-orbit, .eggstage.reeling .es-speed, .eggstage.open .es-item canvas, .es-beam { animation: none; } }
 @keyframes eggglow { 0% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); } 30% { filter: drop-shadow(0 0 12px rgba(138,216,112,.9)); } 55% { filter: drop-shadow(0 0 14px rgba(127,178,201,.9)); } 80% { filter: drop-shadow(0 0 18px rgba(255,106,176,.9)); } 100% { filter: drop-shadow(0 0 26px rgba(var(--rgb),1)); } }
 .card.egg.waiting { opacity: .55; }
 .card.egg.revealed { animation: eggpop .45s cubic-bezier(.2,1.6,.4,1) both; text-align: left; justify-items: stretch; border: 2px solid rgba(var(--rgb), .9); box-shadow: 0 0 26px rgba(var(--rgb), .35); }
@@ -816,7 +841,7 @@ body.lowfx .es-aura, body.lowfx .es-shard { display: none; }
   html body .ach .ai { width: 32px; height: 32px; } html body .ach .ai svg { width: 19px; height: 19px; } html body .ach .at { font-size: 12px; }
   .eggstage > * { zoom: .74; }
   .eggstage .es-side { zoom: 1.15; }
-  .eggstage .es-item, .eggstage .es-egg, .eggstage .es-aura, .eggstage .es-glow, .eggstage .es-burst, .eggstage .es-reel, .eggstage .es-rays, .es-ring, .es-conf { translate: 0 -30px; }
+  .eggstage .es-item, .eggstage .es-egg, .eggstage .es-aura, .eggstage .es-glow, .eggstage .es-burst, .eggstage .es-reel, .eggstage .es-rays, .eggstage .es-cap, .es-orbit, .es-ring, .es-conf { translate: 0 -30px; }
 }
 /* touch screens: no keyboard hints */
 @media (pointer: coarse) { .kbd, .cawkbd { display: none !important; } }
@@ -1013,7 +1038,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.11</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.12</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -5639,12 +5664,14 @@ function chips(host, from, col, n = 3) {
 }
 function playEggStage(it, others = [], fromShop = false) {
   let st = $('eggStage');
-  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<canvas class="es-rays" width="400" height="400"></canvas><div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><div class="es-reel"><div class="es-needle"></div><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-desc"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (performance.now() - (st._revealedAt || 0) < 600) return; if (st.classList.contains('open')) { if (st.dataset.next) stageNext(); else closeEggStage(); } }; st.querySelector('.es-next').onclick = () => stageNext(); }
+  if (!st) { st = el('div', 'eggstage'); st.id = 'eggStage'; st.innerHTML = '<canvas class="es-rays" width="400" height="400"></canvas><div class="es-glow"></div><div class="es-aura"></div><canvas class="es-egg" width="320" height="320"></canvas><canvas class="es-cap" width="320" height="320"></canvas><div class="es-reel"><div class="es-needle"></div><div class="es-speed"></div><div class="es-strip"></div></div><div class="es-sides"></div><div class="es-item"></div><div class="es-rar"></div><div class="es-name"></div><div class="es-desc"></div><div class="es-hint"></div><button class="btn es-next" type="button" hidden></button>'; document.body.append(st); st.onclick = ev => { if (ev.target.closest('.es-next')) return; if (performance.now() - (st._revealedAt || 0) < 600) return; if (st.classList.contains('open')) { if (st.dataset.next) stageNext(); else closeEggStage(); } }; st.querySelector('.es-next').onclick = () => stageNext(); }
   if (!st._skipHook) { st._skipHook = true; st.addEventListener('pointerdown', ev => { if (ev.target.closest('.es-next')) return; if (!st._revealed && st._skip && performance.now() - (st._shownAt || 0) > 250) { ev.preventDefault(); st._skip(); } }); }
   st._shownAt = performance.now();
   const egg = st.querySelector('.es-egg'), aura = st.querySelector('.es-aura'), glow = st.querySelector('.es-glow'), item = st.querySelector('.es-item'), reel = st.querySelector('.es-reel'), strip = st.querySelector('.es-strip');
   st.hidden = false; st.className = 'eggstage shake' + (fromShop ? ' full' : ''); st.dataset.next = fromShop ? '1' : ''; st.querySelector('.es-next').hidden = true; clearInterval(st._cd); item.innerHTML = ''; const sides = st.querySelector('.es-sides'); if (sides) sides.innerHTML = ''; st.querySelector('.es-rar').textContent = ''; st.querySelector('.es-name').textContent = ''; st.querySelector('.es-desc').textContent = ''; st.querySelector('.es-hint').textContent = T('egg_cracking');
-  const rays = st.querySelector('.es-rays'), needle = st.querySelector('.es-needle');
+  const rays = st.querySelector('.es-rays'), needle = st.querySelector('.es-needle'), cap = st.querySelector('.es-cap');
+  cap.classList.remove('fly'); st.querySelectorAll('.es-orbit,.es-beam').forEach(n => n.remove());
+  const beam = rgb => { if (document.body.classList.contains('lowfx')) return; const b = el('div', 'es-beam'); b.style.setProperty('--rgb', rgb); st.append(b); setTimeout(() => b.remove(), 750); };
   const setR = r => { aura.dataset.rar = r; for (const n of [glow, aura]) n.style.setProperty('--rgb', RAR_RGB[r]); };
   paintRays(rays, -1);
   // flash, shockwave rings and confetti in the rarity colour (n = how much confetti)
@@ -5673,13 +5700,14 @@ function playEggStage(it, others = [], fromShop = false) {
   const WIN = 36, N = 42, tiles = [];
   for (let i = 0; i < N; i++) tiles.push(i === WIN ? it : pick());
   const tease = pool.filter(x => x.rar >= Math.max(3, it.rar + 1)); const mode = Math.random(), stopAt = mode < .5 ? 'left' : mode < .8 ? 'right' : 'mid'; if (tease.length) tiles[stopAt === 'left' ? WIN - 1 : stopAt === 'right' ? WIN + 1 : WIN + (Math.random() < .5 ? 1 : -1)] = tease[Math.floor(Math.random() * tease.length)];
-  strip.innerHTML = ''; strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
+  strip.innerHTML = ''; strip.classList.remove('settled'); strip.style.transition = 'none'; strip.style.transform = 'translateX(0px)';
   tiles.forEach((x, i) => { const t = el('div', 'es-tile'); t.style.setProperty('--rgb', RAR_RGB[x.rar]); t.append(upIcon(x.id, 64)); if (i === WIN) t.classList.add('prize'); strip.append(t); });
   setTimeout(() => {
     if (!alive()) return;
+    drawEgg(cap, it, 'cap'); cap.style.setProperty('--cx', rnd(-90, 90) + 'px'); cap.style.setProperty('--cr', (Math.random() < .5 ? -1 : 1) * rnd(160, 300) + 'deg'); cap.classList.remove('fly'); void cap.offsetWidth; cap.classList.add('fly'); beam('255,236,190');
     drawEgg(egg, it, 'open'); st.className = 'eggstage reeling' + (fromShop ? ' full' : ''); shake = Math.max(shake, 6);
-    { const fx = el('div', 'es-burst'); st.append(fx); setTimeout(() => fx.remove(), 700); boom(0, 0, 1); for (let i = 0; i < 18; i++) { const sh = el('span', 'es-shard'); const a = i / 18 * TAU + rnd(-.2, .2), d = rnd(160, 340); sh.style.setProperty('--dx', Math.cos(a) * d + 'px'); sh.style.setProperty('--dy', Math.sin(a) * d + 'px'); sh.style.setProperty('--rr', rnd(-300, 300) + 'deg'); sh.style.background = it.shell ? it.shell[0] : '#efe6d2'; st.append(sh); setTimeout(() => sh.remove(), 800); } }
-    if (actx && !muted) { tone(220, 90, .25, 'sawtooth', .05); tone(110, 35, .6, 'sine', .14); }
+    { const fx = el('div', 'es-burst'); st.append(fx); setTimeout(() => fx.remove(), 700); boom(0, 0, 1, false); for (let i = 0; i < 18; i++) { const sh = el('span', 'es-shard'); const a = i / 18 * TAU + rnd(-.2, .2), d = rnd(160, 340); sh.style.setProperty('--dx', Math.cos(a) * d + 'px'); sh.style.setProperty('--dy', Math.sin(a) * d + 'px'); sh.style.setProperty('--rr', rnd(-300, 300) + 'deg'); sh.style.background = it.shell ? it.shell[0] : '#efe6d2'; st.append(sh); setTimeout(() => sh.remove(), 800); } }
+    if (actx && !muted) { tone(220, 90, .25, 'sawtooth', .05); tone(110, 35, .6, 'sine', .14); setTimeout(() => { if (alive()) tone(1200, 240, .45, 'sawtooth', .018); }, 120); }
     const TW = 104, w = reel.clientWidth, target = WIN * TW + (stopAt === 'left' ? rnd(6, 26) : stopAt === 'right' ? rnd(TW - 34, TW - 14) : rnd(30, TW - 38)) - w / 2;
     const ov = stopAt === 'right' ? rnd(34, 44) : rnd(10, 18), BACK = 320;
     void strip.offsetWidth; strip.style.transition = `transform ${EGG_SPIN - BACK}ms cubic-bezier(.04,.78,.08,1)`; strip.style.transform = `translateX(${-target - ov}px)`;
@@ -5688,12 +5716,13 @@ function playEggStage(it, others = [], fromShop = false) {
     let last = -1; const t0 = performance.now();
     const tick = () => { if (!alive() || performance.now() - t0 > EGG_SPIN + 50) return; const m = new DOMMatrixReadOnly(getComputedStyle(strip).transform), idx = Math.floor((-m.m41 + w / 2) / TW); if (idx !== last) { if (strip.children[last]) strip.children[last].classList.remove('hot'); if (strip.children[idx]) strip.children[idx].classList.add('hot'); last = idx; const x = tiles[idx]; if (x) setR(x.rar); if (needle.animate) needle.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-22deg)' }, { transform: 'rotate(0)' }], { duration: 110 }); if (actx && !muted) tone(700 + (x ? x.rar : 0) * 80, 700 + (x ? x.rar : 0) * 80, .03, 'square', .025); } requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
-    setTimeout(() => { if (!alive()) return; setR(it.rar); strip.children[WIN].classList.add('win'); boom(it.rar, 6 + it.rar * 5, 1, false); shake = Math.max(shake, 4 + it.rar); if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); } }, EGG_SPIN);
+    setTimeout(() => { if (!alive()) return; setR(it.rar); strip.children[WIN].classList.add('win'); strip.classList.add('settled'); boom(it.rar, 6 + it.rar * 5, 1, false); if (it.rar >= 3) beam(RAR_RGB[it.rar]); shake = Math.max(shake, 4 + it.rar); if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; tone(top * .5, top, .25, 'triangle', .07); } }, EGG_SPIN);
   }, EGG_SHAKE);
   const reveal = () => {
     if (!aliveR() || st._revealed) return; st._revealed = true; st._revealedAt = performance.now();   // the tap that skipped the roll must not also close the reveal
     setR(it.rar); paintRays(rays, it.rar); st.className = 'eggstage open' + (fromShop ? ' full' : '');
-    item.innerHTML = ''; item.append(upIcon(it.id, 160));
+    item.innerHTML = ''; item.append(upIcon(it.id, 160)); cap.classList.remove('fly');
+    if (!document.body.classList.contains('lowfx') && it.rar >= 1) { const o = el('div', 'es-orbit'), n = 4 + it.rar * 2, cols = it.rar >= 5 ? ['#ffd84a', '#ff6ab0', '#8a7aff', '#6ae0ff'] : [`rgb(${RAR_RGB[it.rar]})`, '#fff6d0']; for (let i = 0; i < n; i++) { const sp = el('i'); sp.style.transform = `rotate(${i / n * 360}deg)`; sp.style.setProperty('--c', cols[i % cols.length]); sp.style.animationDelay = (i * .17) + 's'; o.append(sp); } st.append(o); }
     st.querySelector('.es-rar').textContent = T('rar' + it.rar); st.querySelector('.es-rar').style.color = `rgb(${RAR_RGB[it.rar]})`;
     { const base = ITEMS.find(x => x.id === it.id) || it; st.querySelector('.es-name').textContent = base.name; st.querySelector('.es-desc').textContent = base.desc; } st.querySelector('.es-hint').textContent = fromShop ? '' : T('egg_tapon');
     if (actx && !muted) { const top = [523, 587, 659, 784, 988, 1175][it.rar]; if (it.rar >= 3) setTimeout(() => tone(top, top * 1.5, .3, 'triangle', .06), 60); if (it.rar >= 4) setTimeout(() => tone(top * 1.5, top * 2, .45, 'sine', .06), 240); }
@@ -6243,10 +6272,11 @@ function drawEgg(cv2, egg, state) {
     c.fillStyle = shell; c.beginPath(); c.moveTo(-38, 14); for (let i = 0; i <= 8; i++) c.lineTo(-38 + i * 9.5, 14 + (i % 2 ? -9 : 3)); c.lineTo(38, 18); c.bezierCurveTo(36, 38, 18, 46, 0, 46); c.bezierCurveTo(-18, 46, -36, 38, -38, 18); c.closePath(); c.fill();
     c.restore(); return;
   }
+  if (state === 'cap') { c.beginPath(); c.moveTo(-60, -60); c.lineTo(60, -60); c.lineTo(60, 18); c.lineTo(38, 18); for (let i = 8; i >= 0; i--) c.lineTo(-38 + i * 9.5, 14 + (i % 2 ? -9 : 3)); c.lineTo(-60, 14); c.closePath(); c.clip(); }
   const g = c.createRadialGradient(-12, -20, 4, 0, 0, 52); g.addColorStop(0, '#fff'); g.addColorStop(.35, shell); g.addColorStop(1, dot); c.fillStyle = g; eggPath(); c.fill();
   c.save(); eggPath(); c.clip(); c.fillStyle = dot; for (let i = 0; i < 14; i++) { const a = egg.seed + i * 2.39, d = 8 + (i * 13 % 34); c.globalAlpha = .55; c.beginPath(); c.ellipse(Math.cos(a) * d, Math.sin(a) * d * 1.2, 2.5 + i % 3, 1.8 + i % 2, a, 0, TAU); c.fill(); } c.restore();
   if (egg.golden) { c.fillStyle = 'rgba(255,255,255,.9)'; for (const [x, y, r] of [[-14, -22, 3], [12, -8, 2.2], [-4, 14, 2.6], [18, 20, 1.8], [-22, 6, 1.8]]) { c.beginPath(); c.moveTo(x, y - r * 2.2); c.lineTo(x + r * .5, y - r * .5); c.lineTo(x + r * 2.2, y); c.lineTo(x + r * .5, y + r * .5); c.lineTo(x, y + r * 2.2); c.lineTo(x - r * .5, y + r * .5); c.lineTo(x - r * 2.2, y); c.lineTo(x - r * .5, y - r * .5); c.closePath(); c.fill(); } }
-  if (state === 'crack2') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-36, -6); c.lineTo(-22, 4); c.lineTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.lineTo(32, 2); c.moveTo(-10, -10); c.lineTo(-14, -26); c.lineTo(-6, -36); c.moveTo(14, -8); c.lineTo(22, -24); c.moveTo(2, 4); c.lineTo(6, 22); c.lineTo(-4, 34); c.moveTo(-22, 4); c.lineTo(-28, 20); c.moveTo(22, -24); c.lineTo(14, -38); c.stroke(); c.fillStyle = 'rgba(255,240,190,.55)'; c.beginPath(); c.moveTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.closePath(); c.fill();
+  if (state === 'crack2' || state === 'cap') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-36, -6); c.lineTo(-22, 4); c.lineTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.lineTo(32, 2); c.moveTo(-10, -10); c.lineTo(-14, -26); c.lineTo(-6, -36); c.moveTo(14, -8); c.lineTo(22, -24); c.moveTo(2, 4); c.lineTo(6, 22); c.lineTo(-4, 34); c.moveTo(-22, 4); c.lineTo(-28, 20); c.moveTo(22, -24); c.lineTo(14, -38); c.stroke(); c.fillStyle = 'rgba(255,240,190,.55)'; c.beginPath(); c.moveTo(-10, -10); c.lineTo(2, 4); c.lineTo(14, -8); c.closePath(); c.fill();
     c.fillStyle = '#f2a73a'; c.strokeStyle = '#7a4a10'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-3, -6); c.lineTo(8, -5); c.lineTo(3, 4); c.closePath(); c.fill(); c.stroke(); c.fillStyle = '#ffd27a'; c.beginPath(); c.moveTo(-1, -5); c.lineTo(5, -4.5); c.lineTo(2.5, -1); c.closePath(); c.fill(); }
   if (state === 'crack') { c.strokeStyle = '#2a1e14'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-34, 0); c.lineTo(-20, 8); c.lineTo(-8, -4); c.lineTo(4, 8); c.lineTo(16, -2); c.lineTo(30, 6); c.moveTo(-8, -4); c.lineTo(-4, -18); c.moveTo(16, -2); c.lineTo(20, -16); c.stroke(); }
   c.restore();
