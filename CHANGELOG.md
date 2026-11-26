@@ -1,5 +1,14 @@
 # Nestguard changelog
 
+## 2.99.12 — A shinier egg roll
+
+- **The egg drops in:** it falls into view, squashes as it lands and bounces back before the pecking starts.
+- **The shell pops open:** when the egg bursts, its top flies off spinning, a beam of light shoots up and there's a whoosh as the reel starts.
+- **The reel unrolls** from the middle, with light streaks while it spins fast.
+- **Landing:** every other item dims, and a shine sweeps across the item you got. Rare and better items also send up a beam of light in their colour.
+- **The reveal:** your item floats gently, with sparkles circling it. Rarer items get more sparkles, and mythic ones are rainbow.
+- All of this uses only cheap animations, so the roll stays as smooth as in 2.99.11. The full-screen flash when the egg bursts is gone (the beam of light replaces it), and the reel is drawn in advance so it doesn't stutter when it appears.
+
 ## 2.99.11 — A livelier crow, no stretchy snakes
 
 - **The crow comes alive:** it breathes, flicks its tail, ruffles its wings every few seconds and turns its head to glance around. While it caws, its head shakes.
