@@ -4724,17 +4724,18 @@ function drawProj(kind, col, a, k, t) {
 // every item that changes your feathers puts its own mark on them, in its own spot (tip, sides, rings or the trail), so they stack and you can see them all
 const SHOT_BODY = ['l_forge', 'm_bloodmoon', 'm_void', 'ember', 'u_ember', 'phoenixf', 'frostbite', 'l_winter', 'b_bear', 'blood', 'mana'];   // effects that wrap the feather itself, each a different kind
 const SHOT_NOSE = ['needle', 'sharp', 'u_bone', 'u_cinder'], SHOT_SIDE = ['barbs', 'hex', 'u_spark', 'l_storm', 'b_queen'],
-  SHOT_TRAIL = ['storm', 'm_storm', 'scav', 'acorn', 'wind', 'm_flock', 'b_maw', 'quiver', 'tempest', 'u_gale', 'u_perch'];
-let shotFx = { sig: null, ring: [], nose: [], side: [], trail: [], all: [] };
+  SHOT_GLINT = ['m_midas', 'l_moon', 'l_gilded', 'l_eagleking', 'murder', 'vamp', 'flint', 'u_owl', 'u_plume'],   // crit items: a little sparkle that twinkles beside the feather
+  SHOT_TRAIL = ['pecker', 'storm', 'm_storm', 'scav', 'acorn', 'wind', 'm_flock', 'b_maw', 'quiver', 'tempest', 'u_gale', 'u_perch'];
+let shotFx = { sig: null, ring: [], nose: [], side: [], trail: [], glint: [], all: [] };
 function shotFxNow() {
   if (!run || !run.items) return shotFx;
   const g = gearNow(); if (shotFx.sig === g.sig) return shotFx;
   // one effect per type (tip, orbit, aura, trail): the rarest item you have of that type wins, so a feather never shows more than four
   const has = id => (run.items[id] || 0) > 0, rar = id => (ITEMS.find(x => x.id === id) || {}).rar || 0, pick = l => l.filter(has).sort((x, y) => rar(y) - rar(x)).slice(0, 1);
   const ring = pick(SHOT_BODY);
-  const nose = pick(SHOT_NOSE), side = pick(SHOT_SIDE), trail = pick(SHOT_TRAIL), full = { ring, nose, side, trail }, order = [];
+  const nose = pick(SHOT_NOSE), side = pick(SHOT_SIDE), trail = pick(SHOT_TRAIL), glint = pick(SHOT_GLINT), full = { ring, nose, side, trail, glint }, order = [];
   // when there are lots of feathers each one only shows its first few marks: take one from each spot in turn so they still look different
-  for (let i = 0; order.length < ring.length + nose.length + side.length + trail.length; i++) for (const k of ['ring', 'nose', 'side', 'trail']) if (full[k][i]) order.push([k, full[k][i]]);
+  for (let i = 0; order.length < ring.length + nose.length + side.length + trail.length + glint.length; i++) for (const k of ['ring', 'nose', 'glint', 'side', 'trail']) if (full[k][i]) order.push([k, full[k][i]]);
   return shotFx = { per: shotFx.per, sig: g.sig, ...full, all: order, order, cut: {} };
 }
 // glows under the feather (plain see-through ellipses: blurred shadows were far too slow with lots of feathers)
@@ -4745,10 +4746,12 @@ function drawShotGlow(fx, k, [L, H] = [11, 3]) {
     ctx.fillStyle = o; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (16 + i * 2) * k * sx, (6.5 + i) * k * sy, 0, 0, TAU); ctx.fill();
     ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-i * 2, 0, (12 + i * 2) * k * sx, (3.5 + i) * k * sy, 0, 0, TAU); ctx.fill(); });
 }
+// the marks a small feather shows: just the aura and the glint
+function shotFxSmall(fx) { return fx.small || (fx.small = { ring: fx.ring.slice(0, 1), glint: (fx.glint || []).slice(0, 1), nose: [], side: [], trail: [], all: [...fx.ring.slice(0, 1), ...(fx.glint || []).slice(0, 1)] }); }
 // a trimmed copy of the marks with only the first n kept
 function shotFxCut(fx, n) {
   if (n >= fx.order.length) return fx;
-  return fx.cut[n] || (fx.cut[n] = (() => { const o = { ring: [], nose: [], side: [], trail: [], all: fx.order.slice(0, n), order: fx.order }; for (const [k, id] of o.all) o[k].push(id); return o; })());
+  return fx.cut[n] || (fx.cut[n] = (() => { const o = { ring: [], nose: [], side: [], trail: [], glint: [], all: fx.order.slice(0, n), order: fx.order }; for (const [k, id] of o.all) o[k].push(id); return o; })());
 }
 // rough size of each projectile skin (half length, half width), so the effects fit around it
 const PROJ_BODY = { feather: [11, 3], leaf: [11, 3.8], ice: [12, 4], flame: [14, 6], web: [12, 3.5], shard: [13, 5], plane: [11, 8], orb: [6, 6], petal: [7, 6] };
@@ -4796,6 +4799,20 @@ function drawShotFx(fx, ph, k, now, layer, body) {
       if (id === 'hex') { ctx.save(); ctx.translate(x, y); ctx.rotate(q * 2); ctx.fillRect(-1.3, -1.3, 2.6, 2.6); ctx.restore(); }
       else if (id === 'b_queen') { ctx.beginPath(); ctx.arc(x, y, 1, 0, TAU); ctx.fill(); }
       else { ctx.beginPath(); ctx.moveTo(x, y - 2.2); ctx.lineTo(x + .7, y); ctx.lineTo(x, y + 2.2); ctx.lineTo(x - .7, y); ctx.closePath(); ctx.fill(); } } });
+  // the glint: crit items twinkle above the feather, each in its own shape
+  (fx.glint || []).forEach(id => { const tw = .55 + .45 * Math.sin(w * 7 + ph * 3), x = L * .35 * k, y = -(H + 4.5) * k, r = 3.2 * k * tw;
+    const star = (c, rr, n = 4, inner = .28) => { ctx.fillStyle = c; ctx.beginPath(); for (let j = 0; j < n * 2; j++) { const q = j / (n * 2) * TAU - Math.PI / 2, d = j % 2 ? rr * inner : rr; j ? ctx.lineTo(x + Math.cos(q) * d, y + Math.sin(q) * d) : ctx.moveTo(x + Math.cos(q) * d, y + Math.sin(q) * d); } ctx.closePath(); ctx.fill(); };
+    switch (id) {
+      case 'm_midas': ctx.fillStyle = '#f0c030'; ctx.beginPath(); ctx.ellipse(x, y, Math.max(.6, Math.abs(Math.cos(w * 6 + ph)) * 2.4 * k), 2.4 * k, 0, 0, TAU); ctx.fill(); star('#fff6c0', r * .8); break;   // a spinning gold coin that glints
+      case 'l_moon': ctx.fillStyle = '#e8ecff'; ctx.beginPath(); ctx.arc(x, y, 2.8 * k, Math.PI * .3, Math.PI * 1.7); ctx.arc(x + 1.4 * k, y, 2.1 * k, Math.PI * 1.55, Math.PI * .45, true); ctx.closePath(); ctx.fill(); star('#ffffff', r * .55); break;   // a pale crescent
+      case 'l_gilded': star('#ffd84a', r * 1.15); star('#fff6d0', r * .5); break;   // a big gold four-point star
+      case 'l_eagleking': star('#e8b84a', r * 1.05, 5, .45); break;   // a gold five-point star
+      case 'murder': ctx.fillStyle = '#15141c'; ctx.strokeStyle = '#e8e4f0'; ctx.lineWidth = .6; ctx.beginPath(); ctx.moveTo(x - 3 * k, y); ctx.quadraticCurveTo(x - 1.2 * k, y - 2.4 * k * tw, x, y - .3 * k); ctx.quadraticCurveTo(x + 1.2 * k, y - 2.4 * k * tw, x + 3 * k, y); ctx.quadraticCurveTo(x, y + .6 * k, x - 3 * k, y); ctx.fill(); ctx.stroke(); break;   // a tiny crow flapping
+      case 'vamp': ctx.fillStyle = '#c81a2a'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + sd * 1.6 * k - 1 * k, y - 1.5 * k); ctx.lineTo(x + sd * 1.6 * k + 1 * k, y - 1.5 * k); ctx.lineTo(x + sd * 1.6 * k, y + (1.5 + tw) * k); ctx.closePath(); ctx.fill(); } break;   // two red fangs
+      case 'flint': ctx.strokeStyle = '#ffe0a0'; ctx.lineWidth = .9; ctx.beginPath(); for (let j = 0; j < 3; j++) { const q = w * 9 + j * 2.1 + ph; ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(q) * r, y + Math.sin(q) * r); } ctx.stroke(); break;   // flint sparks flicking off
+      case 'u_owl': star('#c89a5a', r * .9); ctx.fillStyle = '#1a1208'; ctx.beginPath(); ctx.arc(x, y, .7 * k, 0, TAU); ctx.fill(); break;   // a brown owl-eye twinkle
+      case 'u_plume': star('#7ad05a', r * .85); break;   // a small green twinkle
+    } });
   // the trail: each item adds its own mark behind the feather, one after the other
   fx.trail.forEach((id, i) => { const x = (-L - 2 - i * 5.5) * k, y = Math.sin(w * 9 + i * 1.7 + ph) * 1.6, al = Math.max(.35, 1 - i * .08); ctx.globalAlpha = al;
     switch (id) {
@@ -4811,6 +4828,7 @@ function drawShotFx(fx, ph, k, now, layer, body) {
       case 'mana': { const t2 = 1 + Math.sin(w * 14 + i) * .3; ctx.fillStyle = '#8ac4ff'; ctx.beginPath(); ctx.moveTo(x, y - 3 * t2); ctx.lineTo(x + .8, y - .8); ctx.lineTo(x + 3 * t2, y); ctx.lineTo(x + .8, y + .8); ctx.lineTo(x, y + 3 * t2); ctx.lineTo(x - .8, y + .8); ctx.lineTo(x - 3 * t2, y); ctx.lineTo(x - .8, y - .8); ctx.closePath(); ctx.fill(); break; }
       case 'm_void': ctx.fillStyle = '#12081e'; ctx.strokeStyle = '#b06ae8'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, 2.4, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(x, y, 3, w * 8, w * 8 + 4); ctx.stroke(); break;
       case 'storm': case 'l_storm': case 'm_storm': { if (Math.sin(w * 22 + i * 2 + ph) < -.3) break; ctx.strokeStyle = { storm: '#bff0ff', l_storm: '#6ae0ff', m_storm: '#ffe14a' }[id]; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x + 4, y - 1); ctx.lineTo(x + 1, y - 3); ctx.lineTo(x, y + 1); ctx.lineTo(x - 3, y - 1); ctx.lineTo(x - 4, y + 2); ctx.stroke(); break; }
+      case 'pecker': ctx.fillStyle = '#d8342a'; ctx.beginPath(); ctx.moveTo(x + 3, y); ctx.lineTo(x - 3, y - 2.6 - Math.sin(w * 16 + ph) * .8); ctx.lineTo(x - 1.5, y); ctx.lineTo(x - 3, y + 1.6); ctx.closePath(); ctx.fill(); break;   // a woodpecker's red crest
       case 'scav': ctx.strokeStyle = '#8a929c'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(x - 3, y); ctx.lineTo(x + 2, y); ctx.moveTo(x + 2, y - 1.8); ctx.lineTo(x + 2, y + 1.8); ctx.stroke(); break;
       case 'acorn': ctx.fillStyle = '#a06a30'; ctx.beginPath(); ctx.ellipse(x - .5, y, 2, 1.6, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#5a3a18'; ctx.fillRect(x + 1, y - 1.8, 1.4, 3.6); break;
       case 'wind': case 'm_flock': case 'b_maw': { ctx.strokeStyle = { wind: 'rgba(220,246,255,.9)', m_flock: '#2a2834', b_maw: '#b06ae8' }[id]; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.arc(x, y + 3, 3.5, -Math.PI * .9, -Math.PI * .15); ctx.stroke(); if (id === 'b_maw') { ctx.fillStyle = '#e0b0ff'; ctx.beginPath(); ctx.arc(x, y + .2, .9, 0, TAU); ctx.fill(); } break; }
@@ -4825,9 +4843,11 @@ function drawFeather(s) {
   // frog-cursed shots are bubbles: your own projectile and its effects float inside, shrunk down
   const bw = s.bubble ? Math.sin(performance.now() / 90 + s.x) * .8 : 0;
   if (s.bubble) { ctx.fillStyle = 'rgba(160,230,200,.3)'; ctx.beginPath(); ctx.ellipse(0, 0, 8 + bw, 8 - bw, 0, 0, TAU); ctx.fill(); ctx.save(); ctx.scale(.55, .55); }
-  if (s.small) {
-    const l = 7; ctx.rotate(a); ctx.fillStyle = '#cfd6e6';
-    ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
+  if (s.small) {   // magpie and spell feathers: they burn, chill and crit but don't pierce or bounce, so only the aura and glint show, smaller
+    const l = 7, now = performance.now(), fx = shotFx.per ? shotFxSmall(shotFxNow()) : null, body = [7, 2.5], k = .65; ctx.rotate(a);
+    if (fx && fx.all.length) { drawShotGlow(fx, k, body); drawShotFx(fx, s.x * .05, k, now, 'under', body); }
+    ctx.fillStyle = '#cfd6e6'; ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4, -l, 0); ctx.quadraticCurveTo(0, 4, l, 0); ctx.fill();
+    if (fx && fx.all.length) drawShotFx(fx, s.x * .05, k, now, 'over', body);
   } else {
     const [kind, col] = projOf(save.skin), now = performance.now(), R = s.big ? 14 : 9, fx0 = shotFxNow(), k = s.big ? 1.4 : 1;
     const fx = shotFxCut(fx0, shotFx.per ?? 99);
