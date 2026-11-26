@@ -38,8 +38,8 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 .hpwrap { width: min(42vw, 280px); text-align: center; }
 .hpwrap span { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone-dim); }
 .hpbar { position: relative; margin-top: 4px; height: 12px; border-radius: 6px; background: var(--moss); border: 1px solid var(--moss-2); overflow: hidden; }
-.hpbar #hShield { position: absolute; top: 0; bottom: 0; width: 0; background: repeating-linear-gradient(135deg, #6ab8ff 0 6px, #4a90e0 6px 12px); box-shadow: 0 0 8px rgba(106,184,255,.8), inset 0 0 0 1px rgba(220,240,255,.6); transition: width .15s, left .15s; }
-.hpbar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--blood), var(--shine)); transition: width .15s; }
+.hpbar #hShield { position: absolute; top: 0; bottom: 0; width: 0; background: #3b8ff0; transition: width .15s, left .15s; }
+.hpbar i { display: block; height: 100%; width: 100%; background: #e0322a; transition: width .15s; }
 .hpnum { font-family: var(--mono); font-size: 12px; margin-top: 3px; font-variant-numeric: tabular-nums; }
 .bossbar { margin-top: 3px; }
 #bossBars { display: grid; gap: 6px; margin-top: 10px; }
@@ -123,7 +123,7 @@ canvas.manualaim { cursor: crosshair; }
 .cawkey:active, .cawkey.hit { transform: translateY(4px); box-shadow: 0 1px 0 #0b0e0a, 0 3px 8px rgba(0,0,0,.35); }
 .cawkey.ready { border-color: #e8b84a; box-shadow: 0 5px 0 #0b0e0a, 0 0 16px rgba(232,184,74,.35); }
 .cawkey:focus-visible { outline: 3px solid var(--bone); outline-offset: 3px; }
-.cawkey canvas { width: 46px; height: 46px; position: relative; }
+.cawkey canvas { display: none; }
 .cawkey.cd canvas, .cawkey.cd .cawlbl, .cawkey.cd .cawkbd { opacity: .06; }
 .cawkey .cawlbl { position: relative; font: 800 22px var(--display); letter-spacing: .06em; white-space: nowrap; line-height: 1.25; }
 .cawkey { width: auto !important; min-width: 232px; } .cawkey .cawkbd { white-space: nowrap; }
@@ -1013,7 +1013,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.10</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.11</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -2606,6 +2606,8 @@ function update(dt) {
       if (e.hp <= 0) { kill(e); continue; }
     }
     e.x += e.kx * dt; e.y += e.ky * dt; const damp = Math.pow(.02, dt); e.kx *= damp; e.ky *= damp;
+    if (e.trail.length && (e.kx || e.ky)) {   // a caw shoves the head away (even while stunned): drag the body along so snakes don't stretch out
+      const seg = e.shape === 'wyrm' ? e.r * .48 : 6; let px = e.x, py = e.y; for (const p of e.trail) { const dx = p.x - px, dy = p.y - py, dd = Math.hypot(dx, dy); if (dd > seg) { p.x = px + dx / dd * seg; p.y = py + dy / dd * seg; } px = p.x; py = p.y; } }
     if (e.under) { e.stun = 0; e.frozen = 0; e.chill = 0; e.kx = 0; e.ky = 0; }
     if (e.stun > 0) { e.stun -= dt; continue; }
     const d = Math.hypot(e.x, e.y), ux = -e.x / (d || 1), uy = -e.y / (d || 1);
@@ -4371,16 +4373,22 @@ const skinOf = id => SKINS.find(s => s.id === id) || SKINS[0];
 function drawCrow(S, a, flap, bob, time, wk) {
   // rainbow skins shift through every colour, like the Mythic items
   if (S.rainbow) { const h = ((time || performance.now()) / 18) % 360; S = { ...S, body: `hsl(${h},70%,42%)`, wing: `hsl(${(h + 40) % 360},75%,30%)`, sheen: `hsla(${(h + 180) % 360},95%,72%,.8)`, glow: `hsl(${(h + 90) % 360},100%,60%)`, beak: `hsl(${(h + 200) % 360},90%,65%)` }; }
+  // idle life (time 0 = a still portrait): breathing, a wing ruffle every few seconds, tail flicks, head glances
+  const tt = time || 0, breath = tt ? Math.sin(tt / 420) : 0, cyc = tt % 3900, ruffle = tt && cyc < 360 ? Math.sin(cyc / 360 * Math.PI * 3) * (1 - cyc / 360) * .55 : 0;
+  const glanceC = tt % 6100, glance = tt ? (glanceC > 2600 && glanceC < 3300 ? .32 : glanceC > 4800 && glanceC < 5300 ? -.28 : 0) : 0;
+  const headA = tt ? Math.sin(tt / 1300) * .1 + glance + (flap ? Math.sin(tt / 45) * .08 : 0) : 0, tail = tt ? Math.sin(tt / 260) * 2.2 + (cyc > 1900 && cyc < 2150 ? Math.sin((cyc - 1900) / 250 * TAU * 2) * 4 : 0) : 0;
+  const wf = Math.max(flap, Math.abs(ruffle));
   ctx.save(); ctx.rotate(a);
+  if (tt) ctx.scale(1 + breath * .025, 1 + breath * .04);
   if (S.glow) { ctx.shadowColor = S.glow; ctx.shadowBlur = 18 + Math.sin(time / 200) * 6; }
   ctx.fillStyle = S.wing;
   // wk: how far each wing is into its throw (0..1), it snaps forward and eases back
   const kL = wk ? Math.sin(Math.min(1, wk[0]) * Math.PI * .5) : 0, kR = wk ? Math.sin(Math.min(1, wk[1]) * Math.PI * .5) : 0;
-  ctx.beginPath(); ctx.ellipse(-4 + kL * 6, -14 - flap * 8 - kL * 4, 18 + kL * 3, 7 + flap * 4, -.3 - flap * .4 - kL * 1.05, 0, TAU); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(-4 + kR * 6, 14 + flap * 8 + kR * 4, 18 + kR * 3, 7 + flap * 4, .3 + flap * .4 + kR * 1.05, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-4 + kL * 6, -14 - wf * 8 - kL * 4 - breath * .8, 18 + kL * 3, 7 + wf * 4, -.3 - wf * .4 - kL * 1.05, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-4 + kR * 6, 14 + wf * 8 + kR * 4 + breath * .8, 18 + kR * 3, 7 + wf * 4, .3 + wf * .4 + kR * 1.05, 0, TAU); ctx.fill();
   if (kL > .5 || kR > .5) { ctx.save(); ctx.shadowBlur = 0; ctx.strokeStyle = S.sheen; ctx.lineWidth = 1.5; ctx.globalAlpha = .6;
     for (const [k, sd] of [[kL, -1], [kR, 1]]) if (k > .5) { ctx.beginPath(); ctx.arc(-4, sd * 14, 26, sd < 0 ? -1.9 : .7, sd < 0 ? -.7 : 1.9); ctx.stroke(); } ctx.restore(); }
-  ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(-32, -8); ctx.lineTo(-34, 0); ctx.lineTo(-32, 8); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(-32, -8 + tail); ctx.lineTo(-34, tail * 1.2); ctx.lineTo(-32, 8 + tail); ctx.closePath(); ctx.fill();
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.ellipse(0, bob * .3, 18, 13, 0, 0, TAU); ctx.fill();
   ctx.shadowBlur = 0;
   ctx.strokeStyle = S.sheen; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, 0, 13, 8, 0, 2.2, 4.1); ctx.stroke();
@@ -4389,6 +4397,7 @@ function drawCrow(S, a, flap, bob, time, wk) {
     ctx.fillStyle = '#c8322a'; ctx.beginPath(); ctx.moveTo(6, -2.2); ctx.lineTo(6, 2.2); ctx.lineTo(3, 3); ctx.lineTo(-13, 0); ctx.lineTo(3, -3); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#9a1e18'; ctx.beginPath(); ctx.arc(5.5, 0, 2.4, 0, TAU); ctx.fill();
   }
+  ctx.save(); if (headA) { ctx.translate(8, 0); ctx.rotate(headA); ctx.translate(-8, 0); }
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(16, 0, 10, 0, TAU); ctx.fill();
   ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
   if (flap) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
@@ -4410,6 +4419,7 @@ function drawCrow(S, a, flap, bob, time, wk) {
       ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(19.6, -5, 1.1, 0, TAU); ctx.arc(19.6, 5, 1.1, 0, TAU); ctx.fill(); }
   }
   if (S.crown) { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.moveTo(10, -8); ctx.lineTo(6, -12); ctx.lineTo(12, -10); ctx.lineTo(14, -15); ctx.lineTo(16, -10); ctx.lineTo(22, -12); ctx.lineTo(18, -7); ctx.closePath(); ctx.fill(); ctx.fillRect(9, -8, 10, 3); }
+  ctx.restore();
   ctx.restore();
 }
 function drawMagpie(m) {

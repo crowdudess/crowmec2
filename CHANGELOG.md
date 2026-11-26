@@ -1,5 +1,12 @@
 # Nestguard changelog
 
+## 2.99.11 — A livelier crow, no stretchy snakes
+
+- **The crow comes alive:** it breathes, flicks its tail, ruffles its wings every few seconds and turns its head to glance around. While it caws, its head shakes.
+- **No stretchy snakes:** cawing at a snake (or a gator, or the Magma Dragon's tail) used to shove its head away while its body stayed put, so it stretched out to about twice its length. The body now gets pulled along with the head.
+- **Plain health bar:** the nest's health is plain red and its shield plain blue, with no fade or stripes.
+- **Caw button:** the crow-head icon is gone. The button just says CAW!.
+
 ## 2.99.10 — Pecking eggs and a smoother roll
 
 - **Smooth egg rolls again:** the new light rays were a huge spinning layer that made every egg roll drop frames. They're now smaller, painted once, and only shown while the egg shakes and when you see your item. The shockwave rings were redrawn every frame and now aren't, and the battlefield hidden behind the egg screen is no longer drawn. The roll runs as smoothly as it did before 2.99.9.
