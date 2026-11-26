@@ -4438,13 +4438,13 @@ const GEAR = {
 let gear = { sig: null, run: null, crow: {}, orbit: [], nest: [], f: {}, aura: null, counts: {}, skin: null, S: null }, equipQ = [];
 function gearNow() {
   if (!run || !run.items) return gear;
-  const sig = Object.keys(run.items).map(k => k + run.items[k]).join(',');
+  const sig = Object.keys(run.items).map(k => k + run.items[k]).join(',') + '|' + equipQ.filter(e => !e.hit).map(e => e.id).join(',');
   if (sig === gear.sig && gear.run === run) return gear;
   const fresh = gear.run !== run;
   // what was just picked up flies onto the crow at the start of the next wave
   if (!fresh) for (const k of Object.keys(run.items)) if ((run.items[k] || 0) > (gear.counts[k] || 0) && GEAR[k] && equipQ.length < 6) equipQ.push({ id: k, t0: 0 });
   if (fresh) equipQ = [];
-  const ids = Object.keys(run.items).filter(k => run.items[k] > 0 && GEAR[k]).sort((x, y) => ((ITEMS.find(i => i.id === x) || {}).rar || 0) - ((ITEMS.find(i => i.id === y) || {}).rar || 0));
+  const pend = new Set(equipQ.filter(e => !e.hit).map(e => e.id)), ids = Object.keys(run.items).filter(k => run.items[k] > 0 && GEAR[k] && !(pend.has(k) && run.items[k] <= 1)).sort((x, y) => ((ITEMS.find(i => i.id === x) || {}).rar || 0) - ((ITEMS.find(i => i.id === y) || {}).rar || 0));
   const crow = {}, orbit = [], nest = [], f = {}; let aura = null;
   for (const id of ids) { const g = GEAR[id];
     if (g.c) Object.assign(crow, g.c);
@@ -4514,14 +4514,37 @@ function drawNestPieces(list, time, base0, single) {
 // a freshly picked-up item flies down onto the crow when the next wave starts
 function drawEquip(time) {
   if (!equipQ.length || state !== 'wave' || !run) return;
-  const e = equipQ[0], now = performance.now(); if (!e.t0) e.t0 = now + 350;
-  const k = (now - e.t0) / 900; if (k < 0) return;
-  if (k >= 1.35) { equipQ.shift(); return; }
-  const ic = upIconCache[e.id] || (upIconCache[e.id] = upIcon(e.id, 64));
-  if (k < .75) { const p = k / .75, ease = 1 - Math.pow(1 - p, 3), y = -150 * (1 - ease), s = 1.3 - .8 * ease;
-    ctx.save(); ctx.globalAlpha = Math.min(1, p * 4); ctx.translate(0, y); ctx.rotate((1 - ease) * .6); ctx.drawImage(ic, -32 * s, -32 * s, 64 * s, 64 * s); ctx.restore(); }
-  else { if (!e.hit) { e.hit = 1; const it = ITEMS.find(x => x.id === e.id) || { rar: 0 }; rings.push({ x: 0, y: 0, r: 16, max: 70, t: 0, c: RAR_RGB[it.rar] }); for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; parts.push({ x: 0, y: 0, vx: Math.cos(a) * 120, vy: Math.sin(a) * 120, t: .5, c: `rgb(${RAR_RGB[it.rar]})`, r: 2.5 }); } if (actx && !muted) { tone(520, 1040, .18, 'triangle', .05); tone(780, 1560, .22, 'sine', .03); } }
-    const it = ITEMS.find(x => x.id === e.id); const p = (k - .75) / .6; if (it) { ctx.save(); ctx.globalAlpha = Math.max(0, 1 - p); ctx.fillStyle = `rgb(${RAR_RGB[it.rar]})`; ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(it.name, 0, -44 - p * 16); ctx.restore(); } }
+  const e = equipQ[0], now = performance.now(); if (!e.t0) e.t0 = now + 300;
+  const t = now - e.t0; if (t < 0) return;
+  // pop in above the crow (0-.3 s), hover and spin with sparkles (.3-1 s), get pulled onto the crow (1-1.25 s), land and show the name (until 1.9 s)
+  const POP = 300, HOVER = 1000, PULL = 1250, END = 1900;
+  if (t >= END) { equipQ.shift(); return; }
+  const it = ITEMS.find(x => x.id === e.id) || { rar: 0, name: '' }, rgb = RAR_RGB[it.rar], ic = upIconCache[e.id] || (upIconCache[e.id] = upIcon(e.id, 64)), HY = -96;
+  if (!e.snd && actx && !muted) { e.snd = 1; tone(330, 660, .25, 'triangle', .035); setTimeout(() => { if (!muted) tone(440, 1320, .6, 'sine', .025); }, 300); }
+  if (t < PULL) {
+    let x = 0, y = HY, sc = 1, rot = 0, al = 1;
+    if (t < POP) { const p = t / POP; sc = p < .7 ? p / .7 * 1.25 : 1.25 - (p - .7) / .3 * .25; al = Math.min(1, p * 3); rot = (1 - p) * -1.2; }
+    else if (t < HOVER) { const p = (t - POP) / (HOVER - POP); y = HY + Math.sin(p * Math.PI * 2) * 5; rot = Math.sin(p * Math.PI) * .25; sc = 1 + Math.sin(p * Math.PI * 4) * .05; }
+    else { const p = (t - HOVER) / (PULL - HOVER), ease = p * p; y = HY * (1 - ease); sc = 1 - ease * .65; rot = ease * 2.5;
+      ctx.save(); ctx.globalAlpha = .45 * (1 - p); ctx.strokeStyle = `rgb(${rgb})`; ctx.lineWidth = 10 * sc; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, HY * .9); ctx.lineTo(0, y - 10); ctx.stroke(); ctx.restore(); }
+    // glow behind the item
+    const gl = Math.min(1, t / POP) * (t > HOVER ? 1 - (t - HOVER) / (PULL - HOVER) * .5 : 1), pul = 1 + Math.sin(t / 90) * .08;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(${rgb},${.28 * gl})`; ctx.beginPath(); ctx.arc(x, y, 44 * sc * pul, 0, TAU); ctx.fill(); ctx.fillStyle = `rgba(${rgb},${.22 * gl})`; ctx.beginPath(); ctx.arc(x, y, 30 * sc * pul, 0, TAU); ctx.fill();
+    // light rays turning behind it
+    if (t < HOVER + 100) { ctx.fillStyle = `rgba(${rgb},${.16 * gl})`; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + t / 500; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, 62 * sc, a - .1, a + .1); ctx.closePath(); ctx.fill(); } }
+    // sparkles circling, pulled in as it hovers
+    if (t > POP * .5 && t < HOVER + 150) { const n = 6 + it.rar * 2, rr = 46 - Math.max(0, (t - POP) / (HOVER - POP)) * 18; for (let i = 0; i < n; i++) { const a = i / n * TAU + t / 260, sx = x + Math.cos(a) * rr, sy = y + Math.sin(a) * rr * .8, ss = 2.4 + Math.sin(t / 80 + i) * 1.2; ctx.fillStyle = i % 2 ? '#fff6d0' : `rgb(${rgb})`; ctx.beginPath(); ctx.moveTo(sx, sy - ss * 1.6); ctx.lineTo(sx + ss * .4, sy); ctx.lineTo(sx, sy + ss * 1.6); ctx.lineTo(sx - ss * .4, sy); ctx.closePath(); ctx.moveTo(sx - ss * 1.6, sy); ctx.lineTo(sx, sy + ss * .4); ctx.lineTo(sx + ss * 1.6, sy); ctx.lineTo(sx, sy - ss * .4); ctx.closePath(); ctx.fill(); } }
+    ctx.restore();
+    ctx.save(); ctx.globalAlpha = al; ctx.translate(x, y); ctx.rotate(rot); ctx.drawImage(ic, -32 * sc, -32 * sc, 64 * sc, 64 * sc); ctx.restore();
+    // a little "!" from the crow while the item hovers
+    if (t > POP && t < HOVER) { const p = (t - POP) / (HOVER - POP); ctx.save(); ctx.globalAlpha = Math.min(1, p * 4) * (1 - Math.max(0, p - .8) * 5); ctx.fillStyle = '#fff6d0'; ctx.font = '900 16px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('!', 26, -26 - p * 6); ctx.restore(); }
+    return;
+  }
+  // landed: ring, sparks, a flash on the crow and the item's name
+  if (!e.hit) { e.hit = 1; shake = Math.max(shake, 4); rings.push({ x: 0, y: 0, r: 16, max: 80, t: 0, c: rgb }); rings.push({ x: 0, y: 0, r: 8, max: 50, t: -.1, c: '255,246,208' }); for (let i = 0; i < 18; i++) { const a = i / 18 * TAU; parts.push({ x: 0, y: 0, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, t: .55, c: i % 3 ? `rgb(${rgb})` : '#fff6d0', r: 2.6 }); } if (actx && !muted) { tone(520, 1040, .18, 'triangle', .05); tone(780, 1560, .22, 'sine', .03); setTimeout(() => { if (!muted) tone(1046, 1046, .3, 'triangle', .025); }, 90); } }
+  const p = (t - PULL) / (END - PULL);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(${rgb},${.5 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, 26 + p * 10, 0, TAU); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.globalAlpha = Math.max(0, 1 - Math.max(0, p - .5) * 2); ctx.fillStyle = `rgb(${rgb})`; ctx.strokeStyle = 'rgba(10,12,8,.85)'; ctx.lineWidth = 3; ctx.font = '800 14px system-ui, sans-serif'; ctx.textAlign = 'center'; const ty = -46 - p * 18, sc2 = p < .15 ? .6 + p / .15 * .5 : 1.1 - Math.min(.1, (p - .15)); ctx.translate(0, ty); ctx.scale(sc2, sc2); ctx.strokeText(it.name, 0, 0); ctx.fillText(it.name, 0, 0); ctx.restore();
 }
 function drawCrow(S, a, flap, bob, time, wk) {
   // rainbow skins shift through every colour, like the Mythic items

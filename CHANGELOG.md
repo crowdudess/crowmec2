@@ -7,7 +7,7 @@ Every item now shows. Your crow wears it, it circles around you, it sits on your
 - **Around the crow:** pebbles, sparks, embers, a guardian feather, leaves, moths, a spell book, the Hourglass of Ages, the sun, the blood moon, the Moon Sickle, spell blades, little crows and a ghostly twin.
 - **On the nest:** moss, gold coins, metal or bark bands, bones, amber resin, clover, acorns, berries, stones, icicles, dew, a golden egg, a small shrine, an Aegis ring and Titan shell plates.
 - **On your feathers:** fire, ice, lightning, void or blood glows, needle tips and barbs. Feathers also grow a little as your damage goes up.
-- **Equipping:** when you get an item, it drops onto your crow at the start of the next wave, with its name and a ring burst in its rarity colour.
+- **Equipping:** at the start of the next wave, a new item pops up above your crow and hovers, spinning in a glow of its rarity colour with sparkles circling it, while your crow shows a "!". Then it gets pulled down onto your crow and lands with a flash, a ring burst and its name. Its piece only appears on your crow once it lands.
 
 - **New item pictures:** every item's icon now shows the piece it gives you (the crown, the cape, the coins, the quiver, the glowing feather, and so on), so you can tell what you'll be wearing.
 
