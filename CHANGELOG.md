@@ -2,7 +2,7 @@
 
 ## 2.99.20 — Feathers show every item
 
-- **Feather items stack on your shots.** Every item that changes your feathers now leaves its own mark. Pierce items line up at the tip, barbs and stun charms sit on the sides, and the rest leave their own mark in the trail. Fire, ice, void, blood and mana items each change the feather itself in a different way: flames licking up, flapping fire wings, frost spikes, an ice crystal, falling snow, smoke, dripping blood, a winding mana ribbon, a white-hot shaft, bending space or a red glow. No more rings stacked around the feather.
+- **Feather items show on your shots.** Every item that changes your feathers now has its own look, in one of four types: a **tip** (pierce and armour items), an **orbit** of charms circling the feather (barbs and stun items), an **aura** on the feather itself (fire, ice, void, blood and mana: flames, fire wings, frost spikes, an ice crystal, snow, smoke, drips, a mana ribbon, a white-hot glow, bending space or a red glow), and a **trail** (lightning, nails, acorns, homing swirls and speed streaks). A feather shows one effect of each type, from your rarest item of that type, so it stays readable and doesn't lag.
 - **No more beak in the egg.** The orange beak that poked out of every cracking egg is gone. Now a small chip of shell falls out and warm light glows through.
 
 ## 2.99.19 — A fairer Lucky Charm price
