@@ -1,5 +1,12 @@
 # Nestguard changelog
 
+## 2.99.16 — Webs on the ground, rarest item wins
+
+- **Sticky Cobwebs** (and the Silk Crown) now spread a whole cobweb on the ground all around your nest, with dew drops glinting in it.
+- **Wind Whisper** is now curling gusts of wind, both circling your crow and in its picture.
+- **Frost Bear's Heart** gives your crow a glowing ice heart and icy wing tips instead of a white cape, and its picture is an ice heart. Big Lungs and Supernova Heart now glow as hearts too.
+- **The rarest item wins:** items that sit on the same part of your crow no longer stack on top of each other. On the head (crests, crowns, tufts, horns), the eyes, the neck, the back (capes, quivers, drums) and the wing tips, only your rarest item shows.
+
 ## 2.99.15 — No skin crowns
 
 - The Royal Crow, Eclipse Crow and Shardbearer skins no longer wear a gold crown. Crowns now only come from items (Thunder Crown, Rat King's Crown and so on).

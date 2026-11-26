@@ -1040,7 +1040,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.15</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.16</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -4163,6 +4163,7 @@ function draw(time) {
   for (const z of zones) drawZone(z, time, true);
 
   if (rv) { riftLayer(rv, time, b => ambBack(b.id, reduceMotion ? 0 : time)); drawRiftCrack(rv, reduceMotion ? 0 : time); } else ambBack(biome.id, reduceMotion ? 0 : time);
+  if (run && state !== 'menu') drawGearGround(time);
   drawNest(); if (run && state !== 'menu') drawGearNest(time);
   if (run && run.shield > 0 && state !== 'menu') { const a = Math.min(1, run.shield / 60); ctx.strokeStyle = `rgba(140,200,255,${.35 + .45 * a})`; ctx.lineWidth = 4 + 4 * a; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 16, 0, TAU); ctx.stroke(); ctx.fillStyle = `rgba(140,200,255,${.06 + .08 * a})`; ctx.beginPath(); ctx.arc(0, 0, NEST_R + 16, 0, TAU); ctx.fill(); }
   drawQuakes(); drawFrostGround();
@@ -4429,12 +4430,14 @@ const GEAR = {
   scare: { n: [['scare', '#c8a870']] }, ember: { f: { fire: 1 } }, moss: { n: [['moss', '#3a9a4a']] }, ink: { o: ['ember', '#7a4ab8', 1] }, rune: { n: [['runes', '#b88ae0']] },
   storm: { f: { bolt: 1 } }, echo: { c: { halo: '#9fe0ff' } }, wind: { o: ['wind', '#dff6ff', 2] }, slay: { c: { paint: '#c8322a' } }, eagle: { c: { crest: ['#c89a5a', 2, .9] } },
   blood: { f: { blood: 1 } }, shell: { n: [['icicles', '#efe6d2']] }, mana: { f: { mana: 1 } }, judge: { c: { halo: '#ffe27a' } },
-  b_cat: { c: { tufts: '#ff9a4a' } }, b_gator: { c: { beakTip: '#7ad05a', paint: '#7ad05a' } }, b_bear: { c: { cape: ['#e8f6ff', '#9fe0ff'] }, f: { ice: 1 } },
+  b_cat: { c: { tufts: '#ff9a4a' } }, b_gator: { c: { beakTip: '#7ad05a', paint: '#7ad05a' } }, b_bear: { c: { heart: '#bfefff', tip: '#dff6ff' }, f: { ice: 1 } },
   b_ratking: { c: { gcrown: ['#f4cf6a', 'rook'] } }, b_emperor: { o: ['blade', '#ffb040', 1] }, b_kong: { o: ['blade', '#ffe85a', 1], c: { gcrown: ['#ffe85a', 'bolt'] } },
   b_queen: { c: { gcrown: ['#c8a8ff', 'thorn'] }, n: [['web', '#f0eef4']] }, b_wyrm: { c: { cape: ['#c83a1a', '#ffb040'] }, n: [['shell', '#a83a2a']] },
   b_faequeen: { c: { halo: '#ff8ad8' }, o: ['moth', '#ff8ad8', 2] }, b_oni: { c: { horns: '#ff4a6a' }, o: ['club', '#c8322a', 1] }, b_maw: { c: { eyeGlow: '#b06ae8' }, a: '#7a3ac8' },
   l_reaper: { c: { crest: ['#2a2a34', 3, 1.2] }, o: ['sickle', '#9aa3ad', 1] }, u_bramble: { n: [['icicles', '#8a9a5a']] }, l_winter: { c: { tip: '#bfefff' }, n: [['icicles', '#bfefff']], f: { ice: 1 } }
 };
+// pieces that sit on the same part of the crow: only one of each group shows
+const GEAR_SPOTS = [['crest', 'gcrown', 'tufts', 'horns'], ['eyeGlow', 'monocle'], ['band', 'scarf'], ['cape', 'pack'], ['tip', 'gild']];
 let gear = { sig: null, run: null, crow: {}, orbit: [], nest: [], f: {}, aura: null, counts: {}, skin: null, S: null }, equipQ = [];
 function gearNow() {
   if (!run || !run.items) return gear;
@@ -4447,7 +4450,7 @@ function gearNow() {
   const pend = new Set(equipQ.filter(e => !e.hit).map(e => e.id)), ids = Object.keys(run.items).filter(k => run.items[k] > 0 && GEAR[k] && !(pend.has(k) && run.items[k] <= 1)).sort((x, y) => ((ITEMS.find(i => i.id === x) || {}).rar || 0) - ((ITEMS.find(i => i.id === y) || {}).rar || 0));
   const crow = {}, orbit = [], nest = [], f = {}; let aura = null;
   for (const id of ids) { const g = GEAR[id];
-    if (g.c) Object.assign(crow, g.c);
+    if (g.c) for (const k of Object.keys(g.c)) { const grp = GEAR_SPOTS.find(sp => sp.includes(k)); if (grp) for (const o of grp) delete crow[o]; crow[k] = g.c[k]; }   // ids go from common to mythic, so the rarest is set last
     if (g.o) { const [kind, col, n] = g.o; for (let i = 0; i < n && orbit.length < 12; i++) orbit.push({ kind, col }); }
     if (g.n) for (const [kind, col] of g.n) if (!nest.some(p => p.kind === kind && p.col === col)) nest.push({ kind, col });
     if (g.f) Object.assign(f, g.f);
@@ -4471,7 +4474,7 @@ function drawOrbitThing(kind, col, a, t) {
   if (kind === 'pebble') { ctx.beginPath(); ctx.ellipse(0, 0, 4, 3.2, a, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(-1, -1, 1.2, 0, TAU); ctx.fill(); }
   else if (kind === 'spark' || kind === 'ember') { const s = 3.5 + Math.sin(t / 90) * 1.2; ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(0, 0, s * 1.8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
     ctx.beginPath(); if (kind === 'spark') { for (let i = 0; i < 8; i++) { const r = i % 2 ? s * .35 : s; ctx.lineTo(Math.cos(i / 8 * TAU + t / 300) * r, Math.sin(i / 8 * TAU + t / 300) * r); } } else ctx.arc(0, 0, s * .7, 0, TAU); ctx.closePath(); ctx.fill(); }
-  else if (kind === 'feather' || kind === 'leaf' || kind === 'wind') { ctx.rotate(a + Math.PI / 2); if (kind === 'wind') { ctx.globalAlpha = .6; ctx.beginPath(); ctx.arc(0, 0, 6, -1.2, 1.2); ctx.stroke(); ctx.globalAlpha = 1; return; }
+  else if (kind === 'feather' || kind === 'leaf' || kind === 'wind') { ctx.rotate(a + Math.PI / 2); if (kind === 'wind') { ctx.globalAlpha = .75; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.rotate(-Math.PI / 2); ctx.beginPath(); ctx.moveTo(-9, -2); ctx.lineTo(3, -2); ctx.arc(3, -5, 3, Math.PI / 2, -Math.PI * .9, true); ctx.moveTo(-7, 2.5); ctx.lineTo(5, 2.5); ctx.arc(5, 5.3, 2.8, -Math.PI / 2, Math.PI * .9); ctx.stroke(); ctx.globalAlpha = 1; return; }
     ctx.beginPath(); ctx.moveTo(0, -7); ctx.quadraticCurveTo(4.5, 0, 0, 7); ctx.quadraticCurveTo(-4.5, 0, 0, -7); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(0, 6); ctx.stroke(); }
   else if (kind === 'book') { ctx.rotate(Math.sin(t / 600) * .3); ctx.fillRect(-6, -5, 12, 10); ctx.fillStyle = '#f2ead8'; ctx.fillRect(-5, -4, 4.5, 8); ctx.fillRect(.5, -4, 4.5, 8); ctx.fillStyle = '#e8b84a'; ctx.fillRect(-.5, -5, 1, 10); }
   else if (kind === 'hourglass') { ctx.rotate(t / 900); ctx.fillStyle = '#8a6a3a'; ctx.fillRect(-5, -7, 10, 2); ctx.fillRect(-5, 5, 10, 2); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-4, -5); ctx.lineTo(4, -5); ctx.lineTo(0, 0); ctx.lineTo(4, 5); ctx.lineTo(-4, 5); ctx.lineTo(0, 0); ctx.closePath(); ctx.fill(); }
@@ -4484,7 +4487,18 @@ function drawOrbitThing(kind, col, a, t) {
   else if (kind === 'twin') { ctx.globalAlpha = .4; ctx.scale(.55, .55); drawCrow(skinOf(save.skin), a + Math.PI / 2, 0, 0, t); ctx.globalAlpha = 1; }
 }
 // pieces sitting on the nest rim
-function drawGearNest(time) { drawNestPieces(gearNow().nest, time); }
+function drawGearNest(time) { drawNestPieces(gearNow().nest.filter(p => p.kind !== 'web'), time); }
+// a cobweb on the ground all around the nest (Sticky Cobwebs, Silk Crown)
+function drawGearGround(time) {
+  const w = gearNow().nest.find(p => p.kind === 'web'); if (!w) return;
+  const R = NEST_R, N = 14, rings = [R + 12, R + 26, R + 42, R + 58];
+  ctx.save(); ctx.strokeStyle = 'rgba(240,238,244,.32)'; ctx.lineWidth = 1.1; ctx.beginPath();
+  for (let i = 0; i < N; i++) { const a = i / N * TAU + .1; ctx.moveTo(Math.cos(a) * (R - 4), Math.sin(a) * (R - 4)); ctx.lineTo(Math.cos(a) * (R + 66), Math.sin(a) * (R + 66)); }
+  for (const rr of rings) for (let i = 0; i < N; i++) { const a0 = i / N * TAU + .1, a1 = (i + 1) / N * TAU + .1, am = (a0 + a1) / 2, sag = rr - 4; ctx.moveTo(Math.cos(a0) * rr, Math.sin(a0) * rr); ctx.quadraticCurveTo(Math.cos(am) * sag, Math.sin(am) * sag, Math.cos(a1) * rr, Math.sin(a1) * rr); }
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(220,240,255,.55)'; for (let i = 0; i < 6; i++) { const a = i * 2.3 + .4, rr = rings[i % 4], tw = .5 + .5 * Math.sin(time / 400 + i); ctx.globalAlpha = tw; ctx.beginPath(); ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, 1.6, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
 function drawNestPieces(list, time, base0, single) {
   const R = NEST_R;
   list.forEach((p, idx) => {
@@ -4587,7 +4601,7 @@ function drawCrow(S, a, flap, bob, time, wk) {
   }
   if (S.pack) { const [pk, pc] = S.pack; if (pk === 'quiver') { ctx.save(); ctx.rotate(.5); ctx.fillStyle = pc; ctx.fillRect(-16, -3.5, 14, 7); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-16, 1.5, 14, 2); for (let i = 0; i < 3; i++) { ctx.fillStyle = ['#f2efe6', '#d8342a', '#f2efe6'][i]; ctx.beginPath(); ctx.moveTo(-16, -2.5 + i * 2.5); ctx.lineTo(-23, -4 + i * 2.5); ctx.lineTo(-22, -1 + i * 2.5); ctx.closePath(); ctx.fill(); } ctx.restore(); }
     else { ctx.fillStyle = pc; ctx.beginPath(); ctx.arc(-9, 0, 6.5, 0, TAU); ctx.fill(); ctx.strokeStyle = '#f2e6c8'; ctx.lineWidth = 1.4; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-14, -3); ctx.lineTo(-4, 3); ctx.moveTo(-14, 3); ctx.lineTo(-4, -3); ctx.stroke(); } }
-  if (S.heart) { const pu = .6 + .4 * Math.sin(tt / 180); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = S.heart; ctx.globalAlpha = .35 * pu; ctx.beginPath(); ctx.arc(1, 0, 9, 0, TAU); ctx.fill(); ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(1, 0, 3 + pu, 0, TAU); ctx.fill(); ctx.restore(); }
+  if (S.heart) { const pu = .6 + .4 * Math.sin(tt / 180); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = S.heart; ctx.globalAlpha = .3 * pu; ctx.beginPath(); ctx.arc(1, 0, 10, 0, TAU); ctx.fill(); ctx.globalAlpha = .95; ctx.translate(1, 0); ctx.rotate(Math.PI / 2); const hs = .9 + pu * .2; ctx.scale(hs, hs); ctx.beginPath(); ctx.moveTo(0, 4); ctx.bezierCurveTo(-6, -.5, -3.5, -5.5, 0, -2.5); ctx.bezierCurveTo(3.5, -5.5, 6, -.5, 0, 4); ctx.fill(); ctx.restore(); }
   if (S.band || S.scarf) { ctx.strokeStyle = S.scarf || S.band; ctx.lineWidth = S.scarf ? 4 : 2.4; ctx.beginPath(); ctx.moveTo(7, -10); ctx.quadraticCurveTo(11, 0, 7, 10); ctx.stroke();
     if (S.scarf) { ctx.fillStyle = S.scarf; const w = Math.sin(tt / 150) * 2.5; ctx.beginPath(); ctx.moveTo(6, 8); ctx.quadraticCurveTo(-6, 14 + w, -18, 13 + w * 1.6); ctx.lineTo(-17, 9 + w * 1.6); ctx.quadraticCurveTo(-6, 9 + w, 5, 4); ctx.closePath(); ctx.fill(); }
     else { ctx.fillStyle = S.band; ctx.beginPath(); ctx.arc(10.5, 0, 2.2, 0, TAU); ctx.fill(); } }
@@ -8050,6 +8064,8 @@ const iconClub = () => { ctx.save(); ctx.rotate(-.7);
   ctx.strokeStyle = '#4a3018'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(1.5, -12); ctx.quadraticCurveTo(2.5, -2, 1.2, 8); ctx.stroke();
   ctx.fillStyle = '#3a2a1a'; ctx.fillRect(-2.6, 11.5, 5.2, 7); ctx.fillStyle = '#c8322a'; ctx.fillRect(-2.6, 13, 5.2, 1.4); ctx.fillRect(-2.6, 16, 5.2, 1.4); ctx.restore(); };
 const ICON_ART = {
+  wind: () => { ctx.strokeStyle = '#dff6ff'; ctx.lineCap = 'round'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(-16, -7); ctx.lineTo(6, -7); ctx.arc(6, -12, 5, Math.PI / 2, -Math.PI * .85, true); ctx.moveTo(-12, 1); ctx.lineTo(12, 1); ctx.arc(12, -3.5, 4.5, Math.PI / 2, -Math.PI * .85, true); ctx.moveTo(-15, 9); ctx.lineTo(2, 9); ctx.arc(2, 13.5, 4.5, -Math.PI / 2, Math.PI * .85); ctx.stroke(); },
+  b_bear: () => { ctx.fillStyle = 'rgba(160,225,255,.3)'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.fill(); const heart = () => { ctx.beginPath(); ctx.moveTo(0, 14); ctx.bezierCurveTo(-20, -1, -12, -18, 0, -8); ctx.bezierCurveTo(12, -18, 20, -1, 0, 14); ctx.closePath(); }; heart(); ctx.fillStyle = '#9fe0ff'; ctx.fill(); ctx.save(); heart(); ctx.clip(); ctx.fillStyle = '#dff6ff'; ctx.beginPath(); ctx.moveTo(-14, -10); ctx.lineTo(-2, -6); ctx.lineTo(-6, 6); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#6ab8e8'; ctx.beginPath(); ctx.moveTo(14, -6); ctx.lineTo(3, 2); ctx.lineTo(0, 14); ctx.lineTo(12, 4); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-2, -6); ctx.lineTo(3, 2); ctx.lineTo(-6, 6); ctx.moveTo(3, 2); ctx.lineTo(0, 14); ctx.stroke(); ctx.restore(); heart(); ctx.strokeStyle = '#e8f8ff'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.fillStyle = '#ffffff'; for (const [x, y] of [[-14, -14], [15, -12], [16, 10]]) { ctx.beginPath(); ctx.moveTo(x, y - 3); ctx.lineTo(x + .9, y); ctx.lineTo(x, y + 3); ctx.lineTo(x - .9, y); ctx.closePath(); ctx.moveTo(x - 3, y); ctx.lineTo(x, y + .9); ctx.lineTo(x + 3, y); ctx.lineTo(x, y - .9); ctx.closePath(); ctx.fill(); } },
   m_chaos: () => { const egg = () => { ctx.beginPath(); ctx.moveTo(0, -17); ctx.bezierCurveTo(11, -17, 14, 2, 13.5, 6); ctx.bezierCurveTo(13, 13, 7, 16, 0, 16); ctx.bezierCurveTo(-7, 16, -13, 13, -13.5, 6); ctx.bezierCurveTo(-14, 2, -11, -17, 0, -17); ctx.closePath(); };
     egg(); ctx.fillStyle = '#2a1a3a'; ctx.fill(); ctx.save(); egg(); ctx.clip();
     const cols = ['#ffd84a', '#ff6ab0', '#8a7aff', '#6ae0ff', '#7ad05a']; [[-4, -10, 6], [6, 2, 5], [-6, 8, 4.5], [5, -12, 3]].forEach(([x, y, r], i) => { ctx.fillStyle = cols[i]; ctx.globalAlpha = .3; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }); ctx.globalAlpha = 1;
