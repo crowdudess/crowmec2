@@ -1,5 +1,9 @@
 # Nestguard changelog
 
+## 2.99.15 — No skin crowns
+
+- The Royal Crow, Eclipse Crow and Shardbearer skins no longer wear a gold crown. Crowns now only come from items (Thunder Crown, Rat King's Crown and so on).
+
 ## 2.99.14 — Wear your loot
 
 Every item now shows. Your crow wears it, it circles around you, it sits on your nest or it changes your feathers:
