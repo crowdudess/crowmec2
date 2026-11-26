@@ -1055,7 +1055,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.18</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.19</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -1856,10 +1856,10 @@ const ROOST = [
   { id: 'twin', name: 'Second Feather', desc: 'Start every run throwing +1 feather.', base: 500, max: 2 },
   { id: 'magpie', name: 'Loyal Magpie', desc: 'Start every run with a magpie friend.', base: 80, max: 2 },
   { id: 'favour', name: "Magpie's Favour", desc: 'Before every run, pick any unlocked item to start with. Each level lets you pick a rarer one: Uncommon, Rare, Epic, Legendary, then Mythic.', base: 300, max: 5 },
-  { id: 'charm', name: 'Lucky Charm', desc: 'Eggs are 5% more likely to hold an uncommon or better item, per level.', base: 90, max: 20 },
+  { id: 'charm', name: 'Lucky Charm', desc: 'Eggs are 5% more likely to hold an uncommon or better item, per level.', base: 90, max: 20, grow: 1.15 },   // gentler price curve: 90 coins up to about 1,280 for the last level
 ];
 const roostMul = { beak: l => Math.pow(1.1, l), wings: l => (1 + .04 * l) * Math.pow(1.03, l), nest: l => Math.round((100 + 12 * l) * Math.pow(1.03, l)) };
-const roostCost = (u, lvl) => Math.round(lvl < 10 ? u.base * Math.pow(1.3, lvl) : u.base * Math.pow(1.3, 9) * (1 + .35 * (lvl - 9)));
+const roostCost = (u, lvl) => u.grow ? Math.round(u.base * Math.pow(u.grow, lvl)) : Math.round(lvl < 10 ? u.base * Math.pow(1.3, lvl) : u.base * Math.pow(1.3, 9) * (1 + .35 * (lvl - 9)));
 
 // ---------- data: skins ----------
 const SKINS = [
@@ -7612,10 +7612,10 @@ function renderDiff(b, bs, unlocked) {
 }
 let resetArmed = 0;
 // A reset gives back what was actually paid. Levels bought before prices were tracked count at the price they had then.
-const ROOST_OLD_BASE = { twin: 90, voice: 10 };
+const ROOST_OLD_BASE = { twin: 90, voice: 10, charm: 150 };
 function roostSpent(u) {
   const rec = save.upSpent && save.upSpent[u.id]; if (rec != null) return rec;
-  const old = ROOST_OLD_BASE[u.id] ? { ...u, base: ROOST_OLD_BASE[u.id] } : u; let n = 0; for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(old, l); return n;
+  const old = ROOST_OLD_BASE[u.id] ? { ...u, base: ROOST_OLD_BASE[u.id], grow: 0 } : u; let n = 0; for (let l = 0; l < (save.up[u.id] || 0); l++) n += roostCost(old, l); return n;
 }
 function roostRefund() { let n = 0; for (const u of ROOST) n += roostSpent(u); return n; }
 const ROOST_GROUPS = [['attack', ['beak', 'wings', 'eye', 'slayer', 'pen', 'pierce', 'twin', 'magpie', 'rhythm']], ['defence', ['nest', 'thorns', 'regen']], ['cawspell', ['voice', 'focus']], ['economy', ['egg', 'luck', 'haggle', 'favour', 'charm']]];
@@ -7690,9 +7690,9 @@ function renderRoost() {
       b.onclick = () => roostBuy(u, false); acts.append(b);
       if (!max) { let k = 0, c = save.coins, l = lvl; while (l < u.max && c >= roostCost(u, l)) { c -= roostCost(u, l); l++; k++; } if (k > 1) { const bm = el('button', 'ghost rmax', T('buy_n', k)); bm.type = 'button'; bm.onclick = () => roostBuy(u, true); acts.append(bm); } }
       if (lvl > 0) {
-        let back = 0; for (let l = 0; l < lvl; l++) back += roostCost(u, l);
+        const back = roostSpent(u);   // what you really paid, even if prices changed since
         const rf = el('button', 'linkbtn', T('refund', back)); rf.type = 'button';
-        rf.onclick = () => { save.coins += back; delete save.up[u.id]; sfx.buy(); persist(); toastSmall(T('refund_line', u.name, back), T('refunded_t')); renderMenu(); };
+        rf.onclick = () => { save.coins += back; delete save.up[u.id]; if (save.upSpent) delete save.upSpent[u.id]; sfx.buy(); persist(); toastSmall(T('refund_line', u.name, back), T('refunded_t')); renderMenu(); };
         acts.append(rf);
       }
       card.append(head, fx, pips, acts); grid.append(card);
