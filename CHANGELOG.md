@@ -7,6 +7,7 @@
 - **Egg screen:** when you open an egg, the other eggs in the nest no longer crack and shake behind it. They stay whole until your roll is over.
 - **Item info without pausing:** the items on the left side of the screen no longer pause the game and open a pop-up when you click them. Hover over one (or tap it on a phone) to see a see-through bubble with its rarity, name and what it does, while the game keeps going.
 - **More time before the next wave:** after you see what came out of your egg, the next wave now starts after 4.5 seconds (was 2.5). Tap or press Space to start it sooner.
+- **Less teasing on the roll:** the reel sliding onto the better item next to yours and then back now happens about 1 roll in 11 (was about 1 in 3). Every other roll stops right on your item.
 - **Lucky Charm** (Upgrades tab) now has **20 levels** at **+5%** egg luck each (was 10 levels at +12%), so it tops out at +100% instead of +120%. The first levels are cheaper (90 coins instead of 150). If you already bought some levels, you keep them, at +5% each.
 
 ## 2.99.17 — Ten ways to hatch
