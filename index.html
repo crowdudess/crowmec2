@@ -4683,7 +4683,13 @@ function drawProj(kind, col, a, k, t) {
   const spin = t / 90;
   switch (kind) {
     case 'feather': { const l = 11 * k; ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(l, 0); ctx.quadraticCurveTo(0, -4 * k, -l, 0); ctx.quadraticCurveTo(0, 4 * k, l, 0); ctx.fill(); ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(l, 0); ctx.lineTo(-l - 3, 0); ctx.stroke(); break; }
-    case 'leaf': { ctx.rotate(a + Math.sin(spin) * .4); ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, 10 * k, 5 * k, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-10 * k, 0); ctx.lineTo(10 * k, 0); ctx.stroke(); break; }
+    case 'leaf': {   // a slim pointed leaf with a stem: one half a shade darker, a midrib and a few veins
+      ctx.rotate(a + Math.sin(spin) * .22); const L = 11 * k, W = 3.6 * k, [r, g, b] = hexRgb(col).split(',').map(Number), dark = `rgb(${r * .68 | 0},${g * .68 | 0},${b * .68 | 0})`, lite = `rgb(${Math.min(255, r * 1.18) | 0},${Math.min(255, g * 1.18) | 0},${Math.min(255, b * 1.18) | 0})`;
+      const half = sd => { ctx.beginPath(); ctx.moveTo(L, 0); ctx.bezierCurveTo(L * .45, sd * W * 1.25, -L * .45, sd * W * 1.2, -L * .8, 0); ctx.closePath(); };
+      ctx.fillStyle = lite; half(-1); ctx.fill(); ctx.fillStyle = dark; half(1); ctx.fill();
+      ctx.strokeStyle = dark; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-L * .8, 0); ctx.lineTo(-L * 1.05, k * 1.2); ctx.stroke();   // stem
+      ctx.strokeStyle = 'rgba(255,255,240,.55)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-L * .75, 0); ctx.lineTo(L * .85, 0);
+      for (const x of [-.35, .05, .45]) for (const sd of [-1, 1]) { ctx.moveTo(x * L, 0); ctx.lineTo((x + .22) * L, sd * W * .75); } ctx.stroke(); break; }
     case 'ice': { ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(12 * k, 0); ctx.lineTo(-2 * k, -4 * k); ctx.lineTo(-10 * k, 0); ctx.lineTo(-2 * k, 4 * k); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.moveTo(10 * k, 0); ctx.lineTo(0, -1.5 * k); ctx.lineTo(-4 * k, 0); ctx.closePath(); ctx.fill(); break; }
     case 'flame': { ctx.rotate(a); ctx.shadowColor = col; ctx.shadowBlur = 10; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-14 * k, 0); ctx.quadraticCurveTo(-4 * k, -6 * k, 5 * k, -4 * k); ctx.arc(5 * k, 0, 4.5 * k, -Math.PI / 2, Math.PI / 2); ctx.quadraticCurveTo(-4 * k, 6 * k, -14 * k, 0); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#fff6c0'; ctx.beginPath(); ctx.arc(5 * k, 0, 2.2 * k, 0, TAU); ctx.fill(); break; }
     case 'coin': { const w = Math.abs(Math.cos(spin)) * 6 * k + 1; ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, w, 6 * k, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#a07010'; ctx.lineWidth = 1.2; ctx.stroke(); break; }
@@ -4742,7 +4748,7 @@ function shotFxCut(fx, n) {
   return fx.cut[n] || (fx.cut[n] = (() => { const o = { ring: [], nose: [], side: [], trail: [], all: fx.order.slice(0, n), order: fx.order }; for (const [k, id] of o.all) o[k].push(id); return o; })());
 }
 // rough size of each projectile skin (half length, half width), so the effects fit around it
-const PROJ_BODY = { feather: [11, 3], leaf: [10, 5], ice: [12, 4], flame: [14, 6], web: [12, 3.5], shard: [13, 5], plane: [11, 8], orb: [6, 6], petal: [7, 6] };
+const PROJ_BODY = { feather: [11, 3], leaf: [11, 3.8], ice: [12, 4], flame: [14, 6], web: [12, 3.5], shard: [13, 5], plane: [11, 8], orb: [6, 6], petal: [7, 6] };
 // under = the aura and barbs, drawn beneath the projectile so they stick out around it; over = everything else
 function drawShotFx(fx, ph, k, now, layer, body) {
   if (!fx.all.length) return;
@@ -4820,7 +4826,7 @@ function drawFeather(s) {
   } else {
     const [kind, col] = projOf(save.skin), now = performance.now(), R = s.big ? 14 : 9, fx0 = shotFxNow(), k = s.big ? 1.4 : 1;
     const fx = shotFxCut(fx0, shotFx.per ?? 99);
-    const body = PROJ_BODY[kind] || [9, 7], fa = a + (kind === 'leaf' ? Math.sin((now + s.x) / 90) * .4 : 0);   // the leaf sways, so its effects sway with it
+    const body = PROJ_BODY[kind] || [9, 7], fa = a + (kind === 'leaf' ? Math.sin((now + s.x) / 90) * .22 : 0);   // the leaf sways, so its effects sway with it
     if (fx.all.length) { ctx.save(); ctx.rotate(fa); drawShotGlow(fx, k, body); drawShotFx(fx, s.x * .05, k, now, 'under', body); ctx.restore(); }
     else if (P.burn) { ctx.fillStyle = 'rgba(240,138,58,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     const dk = P.baseDmg ? Math.min(1.35, 1 + Math.max(0, P.dmg / P.baseDmg - 1) * .12) : 1;
