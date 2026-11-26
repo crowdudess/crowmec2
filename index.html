@@ -76,6 +76,10 @@ body { background: var(--night); color: var(--bone); font-family: var(--body); o
 @keyframes frzpulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.05); } }
 @media (prefers-reduced-motion: reduce) { .freezebox { animation: none; } }
 .iconbtn.aimbtn { width: auto; min-width: 74px; padding: 0 10px; gap: 6px; display: inline-flex; flex-direction: row; align-items: center; justify-content: center; white-space: nowrap; font: 800 11px var(--mono); letter-spacing: .06em; }
+.iconbtn.aimbtn { position: relative; overflow: hidden; }
+.aimbtn.cool::before { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--shine); transform-origin: left; animation: aimcool 1s linear forwards; }
+@keyframes aimcool { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.aimbtn.cool { opacity: .75; }
 .aimbtn .sw { position: relative; width: 26px; height: 14px; border-radius: 7px; background: var(--moss-3); transition: background .15s; }
 .aimbtn .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--bone); transition: left .15s; }
 .aimbtn.on .sw { background: var(--shine); } .aimbtn.on .sw::after { left: 14px; }
@@ -1042,7 +1046,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.17</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.18</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -5573,7 +5577,13 @@ function renderAimBtn() {
   b.classList.toggle('on', on); b.innerHTML = `<span class="sw" aria-hidden="true"></span>${T('auto_fire')}`;
   b.setAttribute('aria-pressed', String(on)); b.title = T(on ? 'auto_on' : 'auto_off'); cv.classList.toggle('manualaim', !on);
 }
-function toggleAutoFire() { save.autoFire = save.autoFire === false; mouse.down = false; persist(); renderAimBtn(); if (!api.sim) toastSmall(T(save.autoFire ? 'auto_on' : 'auto_off'), T('auto_fire')); }
+// switching between auto fire and point-and-click has a 1 second cooldown
+let autoSwapAt = -1e9; const AUTO_SWAP_CD = 1000;
+function toggleAutoFire() {
+  const now = performance.now(), b = $('aimBtn');
+  if (now - autoSwapAt < AUTO_SWAP_CD) { if (b && b.animate) b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 180 }); return; }
+  autoSwapAt = now; if (b) { b.classList.remove('cool'); void b.offsetWidth; b.classList.add('cool'); clearTimeout(b._cool); b._cool = setTimeout(() => b.classList.remove('cool'), AUTO_SWAP_CD); }
+  save.autoFire = save.autoFire === false; mouse.down = false; persist(); renderAimBtn(); if (!api.sim) toastSmall(T(save.autoFire ? 'auto_on' : 'auto_off'), T('auto_fire')); }
 $('aimBtn').onclick = toggleAutoFire; renderAimBtn();
 function hud() {
   hudFreeze(); hudForm();

@@ -1,5 +1,9 @@
 # Nestguard changelog
 
+## 2.99.18 — Auto fire switch cooldown
+
+- Switching between auto fire and point-and-click now has a 1 second cooldown, whether you use the AUTO button, its key or a gamepad. A bar on the button drains while it recharges, and the button shakes if you press it too early.
+
 ## 2.99.17 — Ten ways to hatch
 
 Five new ways for an egg to crack, on top of peck, rock, hop, spin and charge:
