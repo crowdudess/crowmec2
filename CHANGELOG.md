@@ -3,6 +3,8 @@
 ## 2.99.20 — Feathers show every item
 
 - **Feather items show on your shots.** Every item that changes your feathers now has its own look, in one of four types: a **tip** (pierce and armour items), an **orbit** of charms circling the feather (barbs and stun items), an **aura** on the feather itself (fire, ice, void, blood and mana: flames, fire wings, frost spikes, an ice crystal, snow, smoke, drips, a mana ribbon, a white-hot glow, bending space or a red glow), and a **trail** (lightning, nails, acorns, homing swirls and speed streaks). A feather shows one effect of each type, from your rarest item of that type, so it stays readable and doesn't lag. Effects fit the shape of your crow's projectile: on leaves, fireballs and ice shards the aura and barbs stick out from around it instead of covering it, and on the leaf they sway with it.
+- **New setting: Feather effects** (Settings). Full shows everything, Simple shows one effect per feather, Off shows none. Turn it down if the game slows when lots of feathers fly.
+- **Frog bubbles show your skin.** When you're cursed into a frog, your bubbles now carry your own projectile and its item effects inside, shrunk down.
 - **Better-looking leaves.** The Lily, Oak and Jungle leaf projectiles were big flat ovals. Now they're slim pointed leaves with a stem, a two-tone surface and veins, and they sway more gently.
 - **No more beak in the egg.** The orange beak that poked out of every cracking egg is gone. Now a small chip of shell falls out and warm light glows through.
 
