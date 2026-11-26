@@ -4423,7 +4423,17 @@ const GEAR = {
   l_moon: { o: ['sickle', '#e0e6ff', 1] }, l_rook: { c: { gcrown: ['#3a3a48', 'rook'] } }, l_vampire: { c: { cape: ['#4a0a12', '#a01828'], eyeGlow: '#ff3040' } },
   l_spellblade: { o: ['blade', '#6ae0ff', 2] }, l_titan: { n: [['shell', '#4a6a3a']] }, u_spark: { o: ['spark', '#ffe14a', 1] }, u_ember: { f: { fire: 1 }, o: ['ember', '#ff8a3a', 1] },
   u_plume: { c: { crest: ['#5ac85a', 1, .8] } }, u_echo: { c: { band: '#7fb2c9' } }, u_moth: { o: ['moth', '#d8c8a0', 2] }, u_marrow: { n: [['bones', '#e8e0c8']] },
-  u_twine: { n: [['twine', '#c8a870']] }, u_gale: { c: { tip: '#f0f0f0' } }, u_cinder: { c: { beakTip: '#8a2a1a' } }
+  u_twine: { n: [['twine', '#c8a870']] }, u_gale: { c: { tip: '#f0f0f0' } }, u_cinder: { c: { beakTip: '#8a2a1a' } },
+  sharp: { f: { needle: 1 } }, wings: { c: { tip: '#a3a3e0' } }, thorn: { n: [['icicles', '#7a9a4a']] }, mud: { n: [['stones', '#7a5a3a']] }, eye: { c: { eyeGlow: '#ffd84a' } },
+  caps: { n: [['web', '#f0eef4']] }, lungs: { c: { heart: '#9fe0ff' } }, iron: { c: { beakTip: '#7a8088' } }, twin: { f: {}, o: ['feather', '#f4ecdc', 1] },
+  scare: { n: [['scare', '#c8a870']] }, ember: { f: { fire: 1 } }, moss: { n: [['moss', '#3a9a4a']] }, ink: { o: ['ember', '#7a4ab8', 1] }, rune: { n: [['runes', '#b88ae0']] },
+  storm: { f: { bolt: 1 } }, echo: { c: { halo: '#9fe0ff' } }, wind: { o: ['wind', '#dff6ff', 2] }, slay: { c: { paint: '#c8322a' } }, eagle: { c: { crest: ['#c89a5a', 2, .9] } },
+  blood: { f: { blood: 1 } }, shell: { n: [['icicles', '#efe6d2']] }, mana: { f: { mana: 1 } }, judge: { c: { halo: '#ffe27a' } },
+  b_cat: { c: { tufts: '#ff9a4a' } }, b_gator: { c: { beakTip: '#7ad05a', paint: '#7ad05a' } }, b_bear: { c: { cape: ['#e8f6ff', '#9fe0ff'] }, f: { ice: 1 } },
+  b_ratking: { c: { gcrown: ['#f4cf6a', 'rook'] } }, b_emperor: { o: ['blade', '#ffb040', 1] }, b_kong: { o: ['blade', '#ffe85a', 1], c: { gcrown: ['#ffe85a', 'bolt'] } },
+  b_queen: { c: { gcrown: ['#c8a8ff', 'thorn'] }, n: [['web', '#f0eef4']] }, b_wyrm: { c: { cape: ['#c83a1a', '#ffb040'] }, n: [['shell', '#a83a2a']] },
+  b_faequeen: { c: { halo: '#ff8ad8' }, o: ['moth', '#ff8ad8', 2] }, b_oni: { c: { horns: '#ff4a6a' } }, b_maw: { c: { eyeGlow: '#b06ae8' }, a: '#7a3ac8' },
+  l_reaper: { c: { crest: ['#2a2a34', 3, 1.2] }, o: ['sickle', '#9aa3ad', 1] }, l_winter: { c: { tip: '#bfefff' }, n: [['icicles', '#bfefff']], f: { ice: 1 } }
 };
 let gear = { sig: null, run: null, crow: {}, orbit: [], nest: [], f: {}, aura: null, counts: {}, skin: null, S: null }, equipQ = [];
 function gearNow() {
@@ -4439,7 +4449,7 @@ function gearNow() {
   for (const id of ids) { const g = GEAR[id];
     if (g.c) Object.assign(crow, g.c);
     if (g.o) { const [kind, col, n] = g.o; for (let i = 0; i < n && orbit.length < 12; i++) orbit.push({ kind, col }); }
-    if (g.n) for (const [kind, col] of g.n) if (!nest.some(p => p.kind === kind)) nest.push({ kind, col });
+    if (g.n) for (const [kind, col] of g.n) if (!nest.some(p => p.kind === kind && p.col === col)) nest.push({ kind, col });
     if (g.f) Object.assign(f, g.f);
     if (g.a) aura = g.a; }
   gear = { sig, run, crow, orbit, nest, f, aura, counts: { ...run.items }, skin: null, S: null };
@@ -4473,10 +4483,11 @@ function drawOrbitThing(kind, col, a, t) {
   else if (kind === 'twin') { ctx.globalAlpha = .4; ctx.scale(.55, .55); drawCrow(skinOf(save.skin), a + Math.PI / 2, 0, 0, t); ctx.globalAlpha = 1; }
 }
 // pieces sitting on the nest rim
-function drawGearNest(time) {
-  const g = gearNow(), R = NEST_R;
-  g.nest.forEach((p, idx) => {
-    const base = idx * 2.39 + .4, col = p.col;
+function drawGearNest(time) { drawNestPieces(gearNow().nest, time); }
+function drawNestPieces(list, time, base0) {
+  const R = NEST_R;
+  list.forEach((p, idx) => {
+    const base = base0 != null ? base0 : idx * 2.39 + .4, col = p.col;
     const each = (n, spread, f) => { for (let i = 0; i < n; i++) { const a = base + (i - (n - 1) / 2) * spread; ctx.save(); ctx.rotate(a); ctx.translate(R - 4, 0); f(i, a); ctx.restore(); } };
     if (p.kind === 'bands') { ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, R - 1, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.45)'; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + idx; ctx.beginPath(); ctx.arc(Math.cos(a) * (R - 1), Math.sin(a) * (R - 1), 1.3, 0, TAU); ctx.fill(); } return; }
     if (p.kind === 'aegis') { ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = .55 + Math.sin(time / 400) * .2; ctx.lineWidth = 2; ctx.setLineDash([5, 7]); ctx.lineDashOffset = -time / 60; ctx.beginPath(); ctx.arc(0, 0, R + 8, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.restore(); return; }
@@ -4484,7 +4495,10 @@ function drawGearNest(time) {
     if (p.kind === 'twine') { ctx.strokeStyle = col; ctx.lineWidth = 1.6; for (let i = 0; i < 9; i++) { const a = i / 9 * TAU + idx; ctx.beginPath(); ctx.moveTo(Math.cos(a) * (R - 10), Math.sin(a) * (R - 10)); ctx.lineTo(Math.cos(a + .35) * (R + 4), Math.sin(a + .35) * (R + 4)); ctx.stroke(); } return; }
     if (p.kind === 'goldegg') { ctx.save(); ctx.rotate(base); ctx.translate(R - 10, 0); ctx.rotate(.4); ctx.fillStyle = '#f0c030'; ctx.beginPath(); ctx.ellipse(0, 0, 6, 8, 0, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(-2, -3, 1.6, 2.4, 0, 0, TAU); ctx.fill(); ctx.restore(); return; }
     if (p.kind === 'shrine') { ctx.save(); ctx.rotate(base); ctx.translate(R + 2, 0); ctx.fillStyle = col; ctx.fillRect(-5, -5, 10, 10); ctx.fillStyle = '#6a645a'; ctx.fillRect(-7, -7, 14, 3); ctx.fillStyle = `rgba(255,216,120,${.5 + Math.sin(time / 300) * .3})`; ctx.beginPath(); ctx.arc(0, 1, 2.4, 0, TAU); ctx.fill(); ctx.restore(); return; }
-    if (p.kind === 'moss') each(4, .5, i => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 5 - i % 2, 0, TAU); ctx.arc(3, 3, 3.5, 0, TAU); ctx.arc(-2, 4, 3, 0, TAU); ctx.fill(); });
+    if (p.kind === 'web') { ctx.save(); ctx.rotate(base); ctx.strokeStyle = 'rgba(240,238,244,.6)'; ctx.lineWidth = 1; for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(R - 12, 0); ctx.lineTo(Math.cos(-.5 + k * .33) * (R + 12), Math.sin(-.5 + k * .33) * (R + 12)); ctx.stroke(); } for (const rr of [R - 2, R + 6]) { ctx.beginPath(); ctx.arc(0, 0, rr, -.45, .5); ctx.stroke(); } ctx.restore(); return; }
+    if (p.kind === 'scare') { ctx.save(); ctx.rotate(base); ctx.translate(R + 3, 0); ctx.rotate(-base); ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(0, 8); ctx.moveTo(-7, -3); ctx.lineTo(7, -3); ctx.stroke(); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-6, -3); ctx.lineTo(6, -3); ctx.lineTo(5 + Math.sin(time / 300) * 1.5, 5); ctx.lineTo(-5 + Math.sin(time / 300) * 1.5, 5); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#e8c890'; ctx.beginPath(); ctx.arc(0, -8, 3, 0, TAU); ctx.fill(); ctx.restore(); return; }
+    if (p.kind === 'runes') each(3, .45, i => { ctx.rotate(Math.PI / 2); ctx.strokeStyle = col; ctx.globalAlpha = .55 + .4 * Math.sin(time / 350 + i * 2); ctx.lineWidth = 1.6; ctx.beginPath(); const R2 = RUNES[(i + idx) % RUNES.length]; for (const [x1, y1, x2, y2] of R2) { ctx.moveTo(x1 * .45, y1 * .45); ctx.lineTo(x2 * .45, y2 * .45); } ctx.stroke(); ctx.globalAlpha = 1; });
+    else if (p.kind === 'moss') each(4, .5, i => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 5 - i % 2, 0, TAU); ctx.arc(3, 3, 3.5, 0, TAU); ctx.arc(-2, 4, 3, 0, TAU); ctx.fill(); });
     else if (p.kind === 'coins') each(5, .3, i => { ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, i % 2 * 3, 4.2, 3.4, i, 0, TAU); ctx.fill(); ctx.strokeStyle = '#a8801a'; ctx.lineWidth = .8; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(-1.5, -1.5 + i % 2 * 3, 1.5, 1.5); });
     else if (p.kind === 'bones') each(2, .7, i => { ctx.rotate(.9 + i); ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(6, 0); ctx.stroke(); ctx.fillStyle = col; for (const x of [-6, 6]) { ctx.beginPath(); ctx.arc(x, -1.4, 1.8, 0, TAU); ctx.arc(x, 1.4, 1.8, 0, TAU); ctx.fill(); } });
     else if (p.kind === 'resin') each(3, .4, i => { ctx.fillStyle = col; ctx.globalAlpha = .9; ctx.beginPath(); ctx.moveTo(-4, 0); ctx.quadraticCurveTo(0, -5, 4, 0); ctx.arc(0, 0, 4, 0, Math.PI); ctx.fill(); ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(-1.2, -.5, 1, 0, TAU); ctx.fill(); });
@@ -4519,6 +4533,7 @@ function drawCrow(S, a, flap, bob, time, wk) {
   ctx.save(); ctx.rotate(a);
   if (tt) ctx.scale(1 + breath * .025, 1 + breath * .04);
   if (S.cape) { const w1 = Math.sin(tt / 220) * 3, w2 = Math.sin(tt / 220 + 1.3) * 3; ctx.fillStyle = S.cape[0]; ctx.beginPath(); ctx.moveTo(8, -11); ctx.quadraticCurveTo(-12, -22 + w1, -36, -17 + w1); ctx.lineTo(-40, w2); ctx.lineTo(-36, 17 + w1); ctx.quadraticCurveTo(-12, 22 + w1, 8, 11); ctx.closePath(); ctx.fill(); ctx.strokeStyle = S.cape[1]; ctx.lineWidth = 2; ctx.stroke(); }
+  if (S.only) S = { ...S, glow: null, wing: 'rgba(0,0,0,0)', body: 'rgba(0,0,0,0)', sheen: 'rgba(0,0,0,0)', beak: 'rgba(0,0,0,0)', eye: 'rgba(0,0,0,0)' };
   if (S.glow) { ctx.shadowColor = S.glow; ctx.shadowBlur = 18 + Math.sin(time / 200) * 6; }
   ctx.fillStyle = S.wing;
   // wk: how far each wing is into its throw (0..1), it snaps forward and eases back
@@ -4555,8 +4570,9 @@ function drawCrow(S, a, flap, bob, time, wk) {
   if (S.paint) { ctx.strokeStyle = S.paint; ctx.lineWidth = 1.6; ctx.beginPath(); for (const sd of [-1, 1]) { ctx.moveTo(11, sd * 4); ctx.lineTo(17, sd * 8.5); ctx.moveTo(9, sd * 2); ctx.lineTo(14, sd * 7.5); } ctx.stroke(); }
   ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
   if (S.beakTip) { ctx.fillStyle = S.beakTip; ctx.beginPath(); ctx.moveTo(29, -2.3); ctx.lineTo(38.5, 0); ctx.lineTo(29, 2.3); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.moveTo(30, -1.6); ctx.lineTo(36, -.3); ctx.lineTo(30, -.4); ctx.closePath(); ctx.fill(); }
-  if (flap) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
-  if (S.googly) {
+  if (flap && !S.only) { ctx.fillStyle = '#7a2a20'; ctx.beginPath(); ctx.moveTo(24, -1); ctx.lineTo(34, 3); ctx.lineTo(24, 3); ctx.fill(); }
+  if (S.only) {}
+  else if (S.googly) {
     if (S.bandana) { ctx.fillStyle = S.bandana; ctx.beginPath(); ctx.moveTo(8, -10); ctx.lineTo(13, -10); ctx.lineTo(13, 10); ctx.lineTo(8, 10); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(8, 9); ctx.lineTo(0, 16 + Math.sin(time / 150) * 2); ctx.lineTo(4, 8); ctx.fill(); }
     if (S.mask) { ctx.fillStyle = '#050505'; ctx.beginPath(); ctx.ellipse(19, 0, 4.5, 12, 0, 0, TAU); ctx.fill(); }
     const spin = time / 110;
@@ -4652,6 +4668,7 @@ function drawFeather(s) {
     if (P.burn || gf.fire) { ctx.fillStyle = 'rgba(240,138,58,.35)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); if (gf.fire) { ctx.fillStyle = 'rgba(255,200,80,.6)'; ctx.beginPath(); ctx.arc(-Math.cos(a) * 9 + Math.sin(now / 40 + s.x) * 2, -Math.sin(a) * 9, 2.6, 0, TAU); ctx.fill(); } }
     if (gf.ice) { ctx.fillStyle = 'rgba(160,225,255,.32)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     if (gf.void) { ctx.fillStyle = 'rgba(150,80,230,.35)'; ctx.beginPath(); ctx.arc(0, 0, R + 1, 0, TAU); ctx.fill(); }
+    if (gf.mana) { ctx.fillStyle = 'rgba(110,180,255,.35)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     if (gf.blood) { ctx.fillStyle = 'rgba(210,30,40,.3)'; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); }
     const dk = P.baseDmg ? Math.min(1.35, 1 + Math.max(0, P.dmg / P.baseDmg - 1) * .12) : 1;
     drawProj(kind, s.big ? '#e8b84a' : col, a, (s.big ? 1.5 : 1) * dk, now + s.x);
@@ -7987,9 +8004,48 @@ function paintUpIcon(cv2, id) {
   ctx = pc; pc.setTransform(1, 0, 0, 1, 0, 0); pc.clearRect(0, 0, S, S);
   if (/^l_/.test(id)) { const g = pc.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); g.addColorStop(0, 'rgba(255,190,80,.55)'); g.addColorStop(1, 'rgba(255,140,30,0)'); pc.fillStyle = g; pc.fillRect(0, 0, S, S); pc.strokeStyle = '#ffa030'; pc.lineWidth = S / 26; pc.beginPath(); pc.arc(S / 2, S / 2, S * .42, 0, TAU); pc.stroke(); }
   if (/^[mb]_/.test(id)) { const g = pc.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); g.addColorStop(0, 'rgba(255,220,120,.55)'); g.addColorStop(.55, 'rgba(232,90,180,.22)'); g.addColorStop(1, 'rgba(0,0,0,0)'); pc.fillStyle = g; pc.fillRect(0, 0, S, S); pc.lineWidth = S / 28; for (let i = 0; i < 6; i++) { pc.strokeStyle = `hsl(${i * 60},90%,68%)`; pc.beginPath(); pc.arc(S / 2, S / 2, S * .42, i / 6 * TAU, (i + .75) / 6 * TAU); pc.stroke(); } }
+  if (GEAR[id] && paintGearIcon(pc, id, S)) { pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep; return; }
   const X = ICON_X[id] || { n: 1, ang: -Math.PI / 4, acc: null }, sc = 1;
   for (let i = 0; i < X.n; i++) { const off = X.n > 1 ? (i - (X.n - 1) / 2) : 0; pc.setTransform(S / 26.7 * sc, 0, 0, S / 26.7 * sc, S / 2 - (X.acc ? S * .06 : 0) + off * S * .1, S / 2 - (X.acc ? S * .06 : 0) - off * S * .06); try { drawProj(kind, col, X.ang + off * .32, X.n > 1 ? 1 : 1.2, 0); } catch (e) {} }
   pc.setTransform(1, 0, 0, 1, 0, 0); ctx = keep;
+}
+// item icons show the piece of gear the item puts on you
+// draw something big on a scratch canvas, find where it landed and fit just that into the icon
+function cropPaint(pc, S, draw) {
+  const W = 360, off = document.createElement('canvas'); off.width = off.height = W; const oc = off.getContext('2d'), keep = ctx; ctx = oc;
+  oc.setTransform(3, 0, 0, 3, W / 2, W / 2); try { draw(); } catch (e) {} ctx = keep;
+  const d = oc.getImageData(0, 0, W, W).data; let x0 = W, y0 = W, x1 = -1, y1 = -1;
+  for (let y = 0; y < W; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return;
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, k = Math.min(S * .8 / bw, S * .8 / bh, S / 40);
+  pc.setTransform(1, 0, 0, 1, 0, 0); pc.drawImage(off, x0, y0, bw, bh, (S - bw * k) / 2, (S - bh * k) / 2, bw * k, bh * k);
+}
+const HEAD_GEAR = ['beakTip', 'eyeGlow', 'monocle', 'tufts', 'crest', 'gcrown', 'halo', 'paint', 'horns'];
+function paintGearIcon(pc, id, S) {
+  const g = GEAR[id], it = ITEMS.find(x => x.id === id) || {};
+  const backdrop = () => { pc.setTransform(1, 0, 0, 1, 0, 0); const gr = pc.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S * .46); gr.addColorStop(0, 'rgba(236,230,214,.34)'); gr.addColorStop(1, 'rgba(236,230,214,0)'); pc.fillStyle = gr; pc.fillRect(0, 0, S, S); };
+  const featherFirst = g.f && (/feather|quill/i.test(it.name || '') || ['needle', 'barbs', 'l_storm', 'frostbite'].includes(id));
+  if (featherFirst) {
+    const f = g.f, k = S / 30; pc.setTransform(k, 0, 0, k, S / 2, S / 2); const a = -Math.PI / 4, ca = Math.cos(a), sa = Math.sin(a);
+    const glow = f.mana ? 'rgba(110,180,255,.5)' : f.fire ? 'rgba(240,138,58,.5)' : f.ice ? 'rgba(160,225,255,.5)' : f.void ? 'rgba(150,80,230,.55)' : f.blood ? 'rgba(210,30,40,.5)' : f.bolt ? 'rgba(120,220,255,.4)' : null;
+    if (glow) { pc.fillStyle = glow; pc.beginPath(); pc.arc(0, 0, 11, 0, TAU); pc.fill(); }
+    drawProj('feather', f.void ? '#c8a8ff' : f.blood ? '#ff8a8a' : f.ice ? '#dff6ff' : '#f4ecdc', a, 1.5, 0);
+    pc.rotate(a); pc.lineCap = 'round';
+    if (f.needle) { pc.strokeStyle = '#e8e4d8'; pc.lineWidth = 1.4; pc.beginPath(); pc.moveTo(10, 0); pc.lineTo(14, 0); pc.stroke(); }
+    if (f.barbs) { pc.strokeStyle = '#9aa3ad'; pc.lineWidth = 1.5; pc.beginPath(); for (const x of [4, -1, -6]) { pc.moveTo(x, -2); pc.lineTo(x - 4, -6); pc.moveTo(x, 2); pc.lineTo(x - 4, 6); } pc.stroke(); }
+    if (f.bolt) { pc.strokeStyle = '#bfefff'; pc.lineWidth = 1.4; pc.beginPath(); pc.moveTo(-12, 1); pc.lineTo(-6, -5); pc.lineTo(-1, 2); pc.lineTo(5, -4); pc.lineTo(11, 1); pc.stroke(); }
+    if (f.ice) { pc.fillStyle = '#ffffff'; for (const [x, y] of [[-9, -5], [-11, 4], [7, 6]]) { pc.beginPath(); pc.moveTo(x, y - 2.4); pc.lineTo(x + 1, y); pc.lineTo(x, y + 2.4); pc.lineTo(x - 1, y); pc.fill(); } }
+    if (f.fire) { pc.fillStyle = '#ffd27a'; for (const [x, y, r] of [[-12, 0, 2.4], [-15, -3, 1.6], [-16, 3, 1.4]]) { pc.beginPath(); pc.arc(x, y, r, 0, TAU); pc.fill(); } }
+    return true;
+  }
+  if (g.c) { cropPaint(pc, S, () => drawCrow({ ...skinOf('classic'), ...g.c, only: true }, -Math.PI / 2, 0, 0, 0)); return true; }
+  if (g.o) { const [kind, col, n] = g.o;
+    if (kind === 'twin') { backdrop(); const k = S / 70; pc.setTransform(k, 0, 0, k, S * .4, S * .55); drawCrow(skinOf('classic'), -Math.PI / 2, 0, 0, 0); pc.setTransform(k, 0, 0, k, S * .62, S * .45); pc.globalAlpha = .45; drawCrow(skinOf('classic'), -Math.PI / 2, 0, 0, 0); pc.globalAlpha = 1; return true; }
+    const k = S / (kind === 'crowlet' || kind === 'sun' ? 26 : 22), cnt = Math.min(n, kind === 'pebble' ? 3 : 2);
+    for (let i = 0; i < cnt; i++) { const off = cnt > 1 ? (i - (cnt - 1) / 2) * 9 : 0; pc.setTransform(k, 0, 0, k, S / 2 + off * k, S / 2 + (cnt > 1 ? (i % 2 ? 3 : -3) : 0) * k); drawOrbitThing(kind, col, kind === 'crowlet' || kind === 'blade' || kind === 'feather' || kind === 'leaf' || kind === 'moth' ? -Math.PI / 2 - .5 + i * .6 : 0, 900 + i * 500); }
+    return true; }
+  if (g.n) { cropPaint(pc, S, () => drawNestPieces(g.n.map(([kind, col]) => ({ kind, col })), 600, Math.PI / 2)); return true; }
+  return false;
 }
 function upIcon(id, size) { const c = document.createElement('canvas'); c.width = c.height = size; c.className = 'upic'; paintUpIcon(c, id); return c; }
 let upRar = 'all', upShow = 'all', upQuery = '';

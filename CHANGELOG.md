@@ -9,7 +9,9 @@ Every item now shows. Your crow wears it, it circles around you, it sits on your
 - **On your feathers:** fire, ice, lightning, void or blood glows, needle tips and barbs. Feathers also grow a little as your damage goes up.
 - **Equipping:** when you get an item, it drops onto your crow at the start of the next wave, with its name and a ring burst in its rarity colour.
 
-When two items want the same spot, the rarer one wins.
+- **New item pictures:** every item's icon now shows the piece it gives you (the crown, the cape, the coins, the quiver, the glowing feather, and so on), so you can tell what you'll be wearing.
+
+Every item has its own look except the magpie ones, which already show as magpies. The boss items get their own as well: the Fairy Crown gives you a halo and fairy wings, Oni's Club gives you horns, the Dragon Scale gives you a dragon cape, and so on. When two items want the same spot, the rarer one wins.
 
 ## 2.99.13 — Five ways to hatch
 
