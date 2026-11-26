@@ -1,5 +1,11 @@
 # Nestguard changelog
 
+## 2.99.19 — A fairer Lucky Charm price
+
+- **Lucky Charm** levels now cost from 90 up to about 1,280 coins. All 20 levels cost about 9,200 coins in total (was about 31,800). It's a small nerf: a bit more than the old 10 levels cost, for slightly less luck at the top.
+- **Refunds pay back what you really paid.** Refunding a single upgrade now gives back exactly what you spent on it, even if its price has changed since. Lucky Charm levels bought at the old prices refund in full.
+- **Fixed:** refunding one upgrade and then resetting all of them paid that upgrade back a second time.
+
 ## 2.99.18 — Auto fire cooldown and coins that follow you
 
 - Switching between auto fire and point-and-click now has a 1 second cooldown, whether you use the AUTO button, its key or a gamepad. A bar on the button drains while it recharges, and the button shakes if you press it too early.
