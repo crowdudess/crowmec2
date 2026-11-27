@@ -1,5 +1,11 @@
 # Nestguard changelog
 
+## 2.99.22 — The Monkey King rides in
+
+- **The Monkey King no longer just walks at the nest.** He sits in a royal carrying chair, lifted by its poles by two silverback gorillas at the front and two baboons at the back, circles the nest and throws bananas, coconuts and mangoes at it (shoot them down). While he's in the chair he takes much less damage.
+- **Knock him off.** Take down the two silverbacks at the front and the chair crashes, leaving its wreck on the ground for a few seconds (snapped poles, the cracked seat, the cushion and the back); the baboons at the back let go and run at the nest. He runs at the nest in a rage and slams it, then sits there dizzy for a few seconds, taking extra damage. That's your chance.
+- **Then he swings away like Tarzan** on a vine, and comes back from another side in his chair with four new carriers. His spinning bananas are gone, and he only twirls his staff once he's out of the chair.
+
 ## 2.99.21 — Smoother with lots of effects
 
 - **Effects fit every crow skin.** Fireballs, silk darts and pixie orbs aren't centred (they trail behind), so their tip, orbit, aura and trail effects now line up with the real shape instead of floating off it. Fireballs, pixie and void orbs glow with a soft gradient instead of a blur, which is usually much faster on phones,.
