@@ -2649,7 +2649,7 @@ function update(dt) {
       if (!api.sim) { e.burnAcc = (e.burnAcc || 0) + e.burnD * dt; e.burnTk = (e.burnTk ?? .5) - dt; if (e.burnTk <= 0) { e.burnTk = .5; if (e.burnAcc >= 1 && texts.length < 90) { texts.push({ x: e.x + rnd(-8, 8), y: e.y - e.r - 2, v: Math.round(e.burnAcc), t: .6, fire: true }); e.burnAcc = 0; } } }
       if (e.hp <= 0) { kill(e); continue; }
     }
-    if (e.carrier) { const K = e.carrier; if (K.dead || K.kPhase !== 'ride') { e.carrier = null; } else { const fa = K.thA || 0, along = (e.slot < 2 ? 1.75 : -1.55) * K.r, side = (e.slot % 2 ? 1 : -1) * K.r * .98; e.x = K.x + Math.cos(fa) * along - Math.sin(fa) * side; e.y = K.y + Math.sin(fa) * along + Math.cos(fa) * side; e.kx = e.ky = 0; e.bite = .5; continue; } }   // baboons carrying the Monkey King's throne
+    if (e.carrier) { const K = e.carrier; if (K.dead || K.kPhase !== 'ride') { e.carrier = null; } else { const fa = K.thA || 0, along = (e.slot < 2 ? 1.4 : -1.55) * K.r, side = (e.slot % 2 ? 1 : -1) * K.r * .98; e.x = K.x + Math.cos(fa) * along - Math.sin(fa) * side; e.y = K.y + Math.sin(fa) * along + Math.cos(fa) * side; e.kx = e.ky = 0; e.bite = .5; continue; } }   // baboons carrying the Monkey King's throne
     e.x += e.kx * dt; e.y += e.ky * dt; const damp = Math.pow(.02, dt); e.kx *= damp; e.ky *= damp;
     if (e.trail.length && (e.kx || e.ky)) {   // a caw shoves the head away (even while stunned): drag the body along so snakes don't stretch out
       const seg = e.shape === 'wyrm' ? e.r * .48 : 6; let px = e.x, py = e.y; for (const p of e.trail) { const dx = p.x - px, dy = p.y - py, dd = Math.hypot(dx, dy); if (dd > seg) { p.x = px + dx / dd * seg; p.y = py + dy / dd * seg; } px = p.x; py = p.y; } }
@@ -5083,7 +5083,7 @@ function drawEnemy(e, time) {
   if (e.kPhase === 'ride') {   // the Monkey King's carrying chair: two long poles (a baboon holds each end), a cushioned seat, armrests and a tall gold-trimmed back
     const L = r * 1.55, W = r * .98, bob = Math.sin(time / 140) * r * .03; ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.thA || 0); ctx.translate(0, bob);
     ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 0, L * 1.1, W * 1.25, 0, 0, TAU); ctx.fill();
-    ctx.lineCap = 'round'; for (const sd of [-1, 1]) { ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-L * 1.2, sd * W); ctx.lineTo(L * 1.35, sd * W); ctx.stroke(); ctx.strokeStyle = '#8a5a2a'; ctx.lineWidth = 3.5; ctx.stroke(); ctx.fillStyle = '#e8b84a'; for (const ex of [-L * 1.2, L * 1.35]) { ctx.beginPath(); ctx.arc(ex, sd * W, 4.5, 0, TAU); ctx.fill(); } }
+    ctx.lineCap = 'round'; for (const sd of [-1, 1]) { ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-L * 1.2, sd * W); ctx.lineTo(L * 1.05, sd * W); ctx.stroke(); ctx.strokeStyle = '#8a5a2a'; ctx.lineWidth = 3.5; ctx.stroke(); ctx.fillStyle = '#e8b84a'; for (const ex of [-L * 1.2, L * 1.05]) { ctx.beginPath(); ctx.arc(ex, sd * W, 4.5, 0, TAU); ctx.fill(); } }
     ctx.fillStyle = '#6a3a1a'; ctx.strokeStyle = '#e8b84a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.roundRect(-r * .95, -W * 1.02, r * 1.75, W * 2.04, 10); ctx.fill(); ctx.stroke();   // seat frame
     ctx.fillStyle = '#b02a3a'; ctx.beginPath(); ctx.roundRect(-r * .8, -W * .8, r * 1.45, W * 1.6, 12); ctx.fill();   // red cushion
     ctx.fillStyle = '#6a3a1a'; ctx.strokeStyle = '#e8b84a'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.roundRect(-r * .85, sd * W * .9 - 6, r * 1.4, 12, 6); ctx.fill(); ctx.stroke(); }   // armrests
