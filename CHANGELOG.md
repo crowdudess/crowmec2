@@ -1,5 +1,11 @@
 # Nestguard changelog
 
+## 2.99.22 — The Monkey King rides in
+
+- **The Monkey King no longer just walks at the nest.** He arrives on a throne carried by four baboons, circles the nest and throws bananas, coconuts and mangoes at it (shoot them down). While he's on the throne he takes much less damage.
+- **Knock him off.** Kill the four baboons and the throne crashes. He runs at the nest in a rage and slams it, then sits there dizzy for a few seconds, taking extra damage. That's your chance.
+- **Then he swings away like Tarzan** on a vine, and comes back from another side on a new throne with four new baboons. His spinning bananas still block your feathers.
+
 ## 2.99.21 — Smoother with lots of effects
 
 - **Effects fit every crow skin.** Fireballs, silk darts and pixie orbs aren't centred (they trail behind), so their tip, orbit, aura and trail effects now line up with the real shape instead of floating off it. Fireballs, pixie and void orbs glow with a soft gradient instead of a blur, which is usually much faster on phones,.
