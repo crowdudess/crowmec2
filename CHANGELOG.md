@@ -1,5 +1,9 @@
 # Nestguard changelog
 
+## 2.99.23 — Monkey King tweaks
+
+- **The Monkey King is stunned when his chair breaks.** He falls out and sits there dizzy for about 3 seconds, taking extra damage. Then he gets furious, charges and slams the nest, and swings away right after (no second stun).
+
 ## 2.99.22 — The Monkey King rides in
 
 - **The Monkey King no longer just walks at the nest.** He sits in a royal carrying chair, lifted by its poles by two silverback gorillas at the front and two baboons at the back, circles the nest and throws bananas, coconuts and mangoes at it (shoot them down). While he's in the chair he takes much less damage.
