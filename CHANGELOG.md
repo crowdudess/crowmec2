@@ -3,6 +3,7 @@
 ## 2.99.23 — Monkey King tweaks
 
 - **The Monkey King is stunned when his chair breaks.** He falls out and sits there dizzy for about 3 seconds, taking extra damage. Then he gets furious, charges and slams the nest, and swings away right after (no second stun).
+- **His fruit is sturdier.** A banana, coconut or mango now takes 4 hits from a plain feather at any wave; damage items still break them faster.
 
 ## 2.99.22 — The Monkey King rides in
 

@@ -3166,7 +3166,7 @@ function kongTick(e, dt, d, spd) {
       e.throwT -= dt;
       if (e.throwT <= 0) {   // a fruit flies at the nest (shoot it down)
         e.throwT = angry ? rnd(.9, 1.2) : rnd(1.4, 1.8);
-        const f = makeEnemy('fruit', e.x - e.x / d * e.r * .8, e.y - e.y / d * e.r * .8); f.kind = Math.floor(Math.random() * 3);
+        const f = makeEnemy('fruit', e.x - e.x / d * e.r * .8, e.y - e.y / d * e.r * .8); f.kind = Math.floor(Math.random() * 3); f.hp = f.max = P.baseDmg * 3.5;   // always 4 hits from a plain feather, whatever the wave (damage items still break them faster)
         if (!api.sim && actx && !muted) tone(500, 260, .15, 'triangle', .04);
       }
       e.jamT -= dt; if (e.jamT <= 0 && e.weave) { e.jamT = rnd(8, 10); webCrow(e, 3); }
