@@ -2199,7 +2199,6 @@ function makeEnemy(k, x, y, q = {}) {
   if (d.champ) { const t = q.tier || 1; e.hp *= 1 + .5 * (t - 1); e.dmg *= 1 + .15 * (t - 1); if (t > 1) e.name = d.name + ' ' + ['', 'II', 'III', 'IV', 'V'][Math.min(4, t - 1)]; }
   if (d.boss && !q.minib && !api.sim && !(run && run.sandbox && q.quiet)) { bossCard(e, d); setTimeout(() => say('boss', 1, 'say_b_' + e.k), 1400); }
   if (d.boss) { if (q.share > 1) { e.hp *= .8; } if (q.mini) e.hp *= .65; if (q.minib) { e.minib = true; e.hp *= .3; e.r *= .62; e.dmg *= .6; e.gold *= .4; e.name = T('mini_prefix', e.name.replace(/^The /, '')); } else if (!run.boss || run.boss.dead) run.boss = e; }
-  if (d.fx && P) e.hp = P.baseDmg * 3.5;   // boss projectiles (fruit, fireballs, venom blobs) always take 4 hits from a plain feather, whatever the wave or mode; damage items still break them faster
   e.max = e.hp;
   enemies.push(e);
   return e;
@@ -3167,7 +3166,7 @@ function kongTick(e, dt, d, spd) {
       e.throwT -= dt;
       if (e.throwT <= 0) {   // a fruit flies at the nest (shoot it down)
         e.throwT = angry ? rnd(.9, 1.2) : rnd(1.4, 1.8);
-        const f = makeEnemy('fruit', e.x - e.x / d * e.r * .8, e.y - e.y / d * e.r * .8); f.kind = Math.floor(Math.random() * 3);
+        const f = makeEnemy('fruit', e.x - e.x / d * e.r * .8, e.y - e.y / d * e.r * .8); f.kind = Math.floor(Math.random() * 3); f.hp = f.max = P.baseDmg * 3.5;   // always 4 hits from a plain feather, whatever the wave (damage items still break them faster)
         if (!api.sim && actx && !muted) tone(500, 260, .15, 'triangle', .04);
       }
       e.jamT -= dt; if (e.jamT <= 0 && e.weave) { e.jamT = rnd(8, 10); webCrow(e, 3); }
