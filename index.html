@@ -1032,7 +1032,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
       </div>
       <form class="row" id="codeForm" style="margin-top:14px" autocomplete="off">
         <label class="muted" for="codeInput" data-i18n="code">Code</label>
-        <input class="codein" id="codeInput" type="text" spellcheck="false" autocapitalize="off" placeholder="Enter code" data-i18n-ph="code_ph">
+        <input class="codein" id="codeInput" type="text" maxlength="32" spellcheck="false" autocapitalize="off" placeholder="Enter code" data-i18n-ph="code_ph">
         <button class="ghost" type="submit" data-i18n="enter">Enter</button>
         <span class="muted" id="codeMsg" role="status"></span>
       </form>
@@ -1944,8 +1944,43 @@ const slotKey = n => n === 1 ? 'nestguard-save-v2' : 'nestguard-save-v2-s' + n, 
 const SAVE_KEY = slotKey(SLOT);
 function freshSave() { return { coins: 0, earnedTotal: 0, up: {}, spells: ['bramble'], skin: 'classic', skinsSeen: ['classic'], biome: 0, biomes: { forest: { unlocked: true, cleared: false, best: 0 } }, ach: {}, stats: { kills: 0, casts: 0 }, muted: false }; }
 let save = freshSave();
+// ---------- cleaning what players type or paste ----------
+// a player name: no control, invisible or text-direction characters, single spaces, at most 20 characters
+const cleanName = v => Array.from(String(v == null ? '' : v).normalize('NFC').replace(/\s+/g, ' ').replace(/[\u0000-\u001f\u007f-\u009f\u200b\u200c\u200e\u200f\u2028-\u202e\u2060-\u2069\ufeff]/g, '').replace(/\s+/g, ' ').trim()).slice(0, 20).join('').trim();
+// a save from a pasted save code or from storage: plain JSON only (no __proto__ tricks), sane sizes and the right types, so a broken or tampered save can't crash the game
+const BAD_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+function cleanJSON(v, depth = 0) {
+  if (v === null || typeof v === 'boolean') return v;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+  if (typeof v === 'string') return v.slice(0, 400);
+  if (depth > 6 || typeof v !== 'object') return undefined;
+  if (Array.isArray(v)) return v.slice(0, 1000).map(x => cleanJSON(x, depth + 1)).filter(x => x !== undefined);
+  const o = {}; let n = 0;
+  for (const k of Object.keys(v)) { if (BAD_KEYS.has(k) || k.length > 64 || ++n > 3000) continue; const c = cleanJSON(v[k], depth + 1); if (c !== undefined) o[k] = c; }
+  return o;
+}
+function cleanSave(d) {
+  const s = cleanJSON(d), isObj = v => !!v && typeof v === 'object' && !Array.isArray(v), num = (v, max = 1e15) => typeof v === 'number' ? Math.min(max, Math.max(0, v)) : 0;
+  if (!isObj(s)) return null;
+  for (const k of ['seen', 'itemStats', 'stats', 'keys', 'ach', 'upSpent', 'codes', 'skinWins', 'entered', 'diffSel', 'chaosBest', 'biomes', 'up', 'vol']) if (k in s && !isObj(s[k])) delete s[k];
+  for (const k of ['spells', 'skinsSeen', 'loadout', 'itemsOpen', 'history']) if (k in s && !Array.isArray(s[k])) delete s[k];
+  for (const k of ['challenge', 'deathMode', 'lang', 'skin', 'player']) if (k in s && typeof s[k] !== 'string') delete s[k];
+  for (const k of ['coins', 'earnedTotal', 'chaos', 'chaosMax', 'biome']) if (k in s) s[k] = Math.floor(num(s[k]));
+  if (s.up) for (const k of Object.keys(s.up)) s.up[k] = Math.floor(num(s.up[k], 1000));
+  for (const m of ['seen', 'itemStats', 'upSpent', 'entered', 'diffSel', 'chaosBest', 'ach']) if (s[m]) for (const k of Object.keys(s[m])) { if (typeof s[m][k] === 'number') s[m][k] = num(s[m][k]); else delete s[m][k]; }
+  if (s.keys) for (const k of Object.keys(s.keys)) if (typeof s.keys[k] !== 'string') delete s.keys[k];
+  if (s.biomes) for (const k of Object.keys(s.biomes)) if (!isObj(s.biomes[k]) || !BIOMES.some(b => b.id === k)) delete s.biomes[k];
+  for (const k of ['spells', 'skinsSeen', 'itemsOpen']) if (s[k]) s[k] = s[k].filter(x => typeof x === 'string');
+  if (s.skinsSeen) s.skinsSeen = s.skinsSeen.filter(x => SKINS.some(k => k.id === x));
+  if (s.skin && !SKINS.some(k => k.id === s.skin)) s.skin = 'classic';
+  if (s.lang && !LANGS.some(l => l[0] === s.lang)) delete s.lang;
+  if ('biome' in s && s.biome >= BIOMES.length) s.biome = 0;
+  if ('player' in s) s.player = cleanName(s.player);
+  return s;
+}
+const loadSave = d => Object.assign(freshSave(), cleanSave(d) || {});
 try { if (/[?&]reset=1/.test(location.search)) { for (const k of Object.keys(localStorage)) if (k.startsWith('nestguard')) localStorage.removeItem(k); history.replaceState(null, '', location.pathname); } } catch (e) {}
-try { const raw = localStorage.getItem(SAVE_KEY); if (raw) save = Object.assign(freshSave(), JSON.parse(raw)); } catch (e) {}
+try { const raw = localStorage.getItem(SAVE_KEY); if (raw) save = loadSave(JSON.parse(raw)); } catch (e) {}
 function persist() { if (api.sim || (run && run.sandbox)) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 const biomeState = id => { const st = save.biomes[id] || (save.biomes[id] = { unlocked: false, cleared: false, best: 0 }); if (id === 'forest') st.unlocked = true; return st; };
 muted = !!save.muted;
@@ -7039,7 +7074,7 @@ function sandboxTick() {
 }
 function exitSandbox() {
   $('sbPanel').hidden = true; run.sandbox = false;
-  try { const raw = localStorage.getItem(SAVE_KEY); save = raw ? Object.assign(freshSave(), JSON.parse(raw)) : freshSave(); } catch (e) {}
+  try { const raw = localStorage.getItem(SAVE_KEY); save = raw ? loadSave(JSON.parse(raw)) : freshSave(); } catch (e) {}
   toMenu('fly');
 }
 function sbSpawn(k) {
@@ -7218,7 +7253,7 @@ function buildSettings(box, pre) {
   mr.append(ml, mc, el('span')); g.append(mr);
   const nr = el('div', 'setrow'), nl = el('label', '', T('your_name')), ni = document.createElement('input');
   ni.type = 'text'; ni.maxLength = 20; ni.className = 'codein'; ni.id = pre + '-name'; nl.htmlFor = ni.id; ni.value = save.player || ''; ni.placeholder = T('name_ph'); ni.style.width = '100%';
-  ni.oninput = () => { save.player = ni.value.trim().slice(0, 20); persist(); updateHello(); };
+  ni.oninput = () => { save.player = cleanName(ni.value); persist(); updateHello(); };
   nr.append(nl, ni, el('span')); g.append(nr);
   const lr = el('div', 'setrow'), ll = el('label', '', T('language')), sel = document.createElement('select');
   sel.id = pre + '-lang'; ll.htmlFor = sel.id;
@@ -7282,6 +7317,11 @@ const b64u = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x800
 const unb64u = str => { str = str.replace(/-/g, '+').replace(/_/g, '/'); while (str.length % 4) str += '='; const s = atob(str), out = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i); return out; };
 const sum4 = str => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36).slice(-4).padStart(4, '0'); };
 async function streamBytes(bytes, stream) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
+async function streamBytesMax(bytes, stream, max) {
+  const r = new Blob([bytes]).stream().pipeThrough(stream).getReader(), parts = []; let n = 0;
+  for (;;) { const { done, value } = await r.read(); if (done) break; n += value.length; if (n > max) { try { r.cancel(); } catch (e) {} throw new Error('bad'); } parts.push(value); }
+  const out = new Uint8Array(n); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out;
+}
 async function makeSaveCode() {
   const raw = new TextEncoder().encode(JSON.stringify(save));
   let tag = 'NG0', body = raw;
@@ -7289,12 +7329,14 @@ async function makeSaveCode() {
   const data = b64u(body); return tag + '-' + data + '-' + sum4(data);
 }
 async function readSaveCode(code) {
+  if (String(code || '').length > 2e6) throw new Error('bad');
   const m = String(code || '').replace(/\s+/g, '').match(/^(NG[01])-([A-Za-z0-9_-]+)-([0-9a-z]{4})$/);
   if (!m || sum4(m[2]) !== m[3]) throw new Error('bad');
   let bytes = unb64u(m[2]);
-  if (m[1] === 'NG1') bytes = await streamBytes(bytes, new DecompressionStream('deflate-raw'));
-  const d = JSON.parse(new TextDecoder().decode(bytes));
-  if (!d || typeof d !== 'object' || !d.biomes || typeof d.coins !== 'number') throw new Error('bad');
+  if (m[1] === 'NG1') bytes = await streamBytesMax(bytes, new DecompressionStream('deflate-raw'), 4e6);   // a tiny code can't unpack into gigabytes
+  if (bytes.length > 4e6) throw new Error('bad');
+  const d = cleanSave(JSON.parse(new TextDecoder().decode(bytes)));
+  if (!d || !d.biomes || typeof d.coins !== 'number') throw new Error('bad');
   return d;
 }
 function renderSaveMove() {
@@ -7318,7 +7360,7 @@ function renderSaveMove() {
     let d; try { d = await readSaveCode(area.value); } catch (e) { msg.textContent = T('mv_bad'); msg.className = 'muted savemsg bad'; return; }
     if (armedUntil < Date.now()) { armedUntil = Date.now() + 5000; const cpd = completion(d).pct; msg.textContent = T('mv_confirm', SLOT, cpd, d.coins); msg.className = 'muted savemsg warn'; lb.textContent = T('mv_sure'); setTimeout(() => { if (lb.isConnected && armedUntil < Date.now()) lb.textContent = T('mv_load'); }, 5100); return; }
     try { localStorage.setItem(slotBackup(SLOT), JSON.stringify(save)); } catch (e) {}
-    save = Object.assign(freshSave(), d); persist(); location.reload();
+    save = loadSave(d); persist(); location.reload();
   };
   row.append(cb, pb); box.append(row, area, lb, msg); return box;
 }
@@ -7393,7 +7435,7 @@ function drawWelcomeArt() {
 $('welBack').onclick = () => { $('welStep1').hidden = false; $('welStep2').hidden = true; };
 $('welName').addEventListener('keydown', e => { if (e.key === 'Enter') $('welGo').click(); });
 $('welGo').onclick = () => {
-  save.player = $('welName').value.trim().slice(0, 20); save.welcomed = true; persist();
+  save.player = cleanName($('welName').value); save.welcomed = true; persist();
   $('welcome').hidden = true; updateHello(); renderMenu(); sfx.buy();
   if (!save.sawIntro) playIntro();
   $('startBtn').focus({ preventScroll: true });
@@ -8312,7 +8354,7 @@ function codeStatus(text) {
 }
 $('codeForm').addEventListener('submit', ev => {
   ev.preventDefault();
-  const v = $('codeInput').value.trim().toLowerCase();
+  const v = $('codeInput').value.trim().toLowerCase().slice(0, 32);
   $('codeInput').value = '';
   if (v === 'bandito') {
     save.codes = Object.assign({}, save.codes, { bandito: true });
@@ -8330,7 +8372,7 @@ $('codeForm').addEventListener('submit', ev => {
   if (save.testMode) {
     let back = null;
     try { back = JSON.parse(codeBackup); } catch (e) {}
-    save = Object.assign(freshSave(), back || {});
+    save = loadSave(back || {});
     delete save.testMode;
     codeBackup = null;
     try { localStorage.removeItem(BACKUP_KEY); } catch (e) {}
