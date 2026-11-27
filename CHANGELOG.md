@@ -6,7 +6,7 @@
 - **Feather effects adapt to your device.** If the game drops below about 50 fps while lots of feathers fly, it draws fewer feather effects (down to none) until it runs smoothly again, then brings them back. The glow under Void, Blood Moon and Forge feathers is lighter too.
 - **New setting: Particles & effects** (replaces the Low effects switch): High, Medium, Low or Minimal. Medium keeps fewer particles and halves the screen shake. Low keeps even fewer, turns off screen shake and glows, and draws more lightly (it's what Low effects did, and still the default on small phones). Minimal keeps almost no particles and one effect per feather. Your old Low effects choice carries over.
 - **Winter's Heart is easier to see:** a frosty white edge around the feather and little snowflakes spinning off behind it.
-- **Blood Moon looks different from Ember Forge:** a pulsing blood-red crescent moon now sits behind the feather instead of a red glow.
+- **Blood Moon looks different from Ember Forge:** your feather now flies across a full blood-red moon, with craters and a soft pulsing glow, instead of a plain red glow.
 - **Snowflake projectiles are drawn faster.**
 
 ## 2.99.20 — Feathers show every item
