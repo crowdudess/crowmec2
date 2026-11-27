@@ -1055,7 +1055,7 @@ button:focus:not(:focus-visible), canvas:focus:not(:focus-visible), [tabindex]:f
     </section>
     <section id="tab-settings" class="tabpane" hidden>
       <div id="settingsMenu"></div>
-      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.23</div>
+      <div id="verTag" style="text-align:right;margin-top:14px;font-size:12px;opacity:.55;letter-spacing:.04em">v2.99.24</div>
     </section>
     <section id="tab-upgrades" class="tabpane" hidden>
       <p data-i18n="up_intro"></p>
@@ -3173,7 +3173,7 @@ function kongTick(e, dt, d, spd) {
     }
     return;
   }
-  if (e.kPhase === 'fall') { if (e.kT <= 0) { e.kPhase = 'dizzy'; e.kT = angry ? 2.6 : 3.2; e.afterDizzy = 'charge'; say('kong_dizzy', false); } return; }   // knocked out of his chair: stunned
+  if (e.kPhase === 'fall') { if (e.kT <= 0) { e.kPhase = 'dizzy'; e.kT = angry ? 1.3 : 1.6; e.afterDizzy = 'charge'; say('kong_dizzy', false); } return; }   // knocked out of his chair: stunned
   if (e.kPhase === 'charge') {   // runs straight at the nest, fast
     if (d > NEST_R + e.r - 4) { const v = e.spd * 4.2 * sp; e.x -= e.x / d * v * dt; e.y -= e.y / d * v * dt; return; }
     const d0 = e.dmg; e.dmg *= 1.5; biteNest(e); e.dmg = d0;   // the slam
