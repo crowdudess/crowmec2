@@ -2649,7 +2649,7 @@ function update(dt) {
       if (!api.sim) { e.burnAcc = (e.burnAcc || 0) + e.burnD * dt; e.burnTk = (e.burnTk ?? .5) - dt; if (e.burnTk <= 0) { e.burnTk = .5; if (e.burnAcc >= 1 && texts.length < 90) { texts.push({ x: e.x + rnd(-8, 8), y: e.y - e.r - 2, v: Math.round(e.burnAcc), t: .6, fire: true }); e.burnAcc = 0; } } }
       if (e.hp <= 0) { kill(e); continue; }
     }
-    if (e.carrier) { const K = e.carrier; if (K.dead || K.kPhase !== 'ride') { e.carrier = null; } else { const fa = K.thA || 0, along = (e.slot < 2 ? 1.4 : -1.55) * K.r, side = (e.slot % 2 ? 1 : -1) * K.r * .98; e.x = K.x + Math.cos(fa) * along - Math.sin(fa) * side; e.y = K.y + Math.sin(fa) * along + Math.cos(fa) * side; e.kx = e.ky = 0; e.bite = .5; continue; } }   // baboons carrying the Monkey King's throne
+    if (e.carrier) { const K = e.carrier; if (K.dead || K.kPhase !== 'ride') { e.carrier = null; e.zig = E[e.k].zig || 0; } else { const fa = K.thA || 0, along = (e.slot < 2 ? 1.4 : -1.55) * K.r, side = (e.slot % 2 ? 1 : -1) * K.r * .98; e.x = K.x + Math.cos(fa) * along - Math.sin(fa) * side; e.y = K.y + Math.sin(fa) * along + Math.cos(fa) * side; e.kx = e.ky = 0; e.bite = .5; continue; } }   // baboons carrying the Monkey King's throne
     e.x += e.kx * dt; e.y += e.ky * dt; const damp = Math.pow(.02, dt); e.kx *= damp; e.ky *= damp;
     if (e.trail.length && (e.kx || e.ky)) {   // a caw shoves the head away (even while stunned): drag the body along so snakes don't stretch out
       const seg = e.shape === 'wyrm' ? e.r * .48 : 6; let px = e.x, py = e.y; for (const p of e.trail) { const dx = p.x - px, dy = p.y - py, dd = Math.hypot(dx, dy); if (dd > seg) { p.x = px + dx / dd * seg; p.y = py + dy / dd * seg; } px = p.x; py = p.y; } }
@@ -3138,7 +3138,7 @@ function kongTick(e, dt, d, spd) {
   e.kT = (e.kT || 0) - dt;
   if (e.kPhase === 'ride') {
     e.thA = Math.atan2(-e.y, -e.x);
-    if (!enemies.some(c => c.carrier === e && !c.dead)) {   // all four baboons down: the throne crashes
+    if (!enemies.some(c => c.carrier === e && !c.dead && c.slot < 2)) {   // both silverbacks at the front down: the chair tips over and crashes (the baboons at the back let go and run at the nest)
       e.kPhase = 'fall'; e.kT = .9; say('kong_fall');
       if (!api.sim) { shake = Math.max(shake, 10); rings.push({ x: e.x, y: e.y, r: e.r, max: e.r * 3, t: 0, c: '200,150,60' }); for (let i = 0; i < 22; i++) parts.push({ x: e.x, y: e.y, vx: rnd(-200, 200), vy: rnd(-200, 200), t: rnd(.3, .7), c: i % 3 ? '#8a5a2a' : '#e8b84a', r: rnd(2, 4) }); if (actx && !muted) tone(120, 40, .4, 'sawtooth', .06); }
       return;
