@@ -1,5 +1,9 @@
 # Nestguard changelog
 
+## 2.99.24 — Shorter Monkey King stun
+
+- **The Monkey King's stun is shorter.** When his chair breaks he's dizzy for about 1.6 seconds (1.3 below half health), down from about 3.
+
 ## 2.99.23 — Monkey King tweaks
 
 - **The Monkey King is stunned when his chair breaks.** He falls out and sits there dizzy for about 3 seconds, taking extra damage. Then he gets furious, charges and slams the nest, and swings away right after (no second stun).
