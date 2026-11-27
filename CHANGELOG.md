@@ -1,5 +1,14 @@
 # Nestguard changelog
 
+## 2.99.21 — Smoother with lots of effects
+
+- **Effects fit every crow skin.** Fireballs, silk darts and pixie orbs aren't centred (they trail behind), so their tip, orbit, aura and trail effects now line up with the real shape instead of floating off it. Fireballs, pixie and void orbs glow with a soft gradient instead of a blur, which is usually much faster on phones,.
+- **Feather effects adapt to your device.** If the game drops below about 50 fps while lots of feathers fly, it draws fewer feather effects (down to none) until it runs smoothly again, then brings them back. The glow under Void, Blood Moon and Forge feathers is lighter too.
+- **New setting: Particles & effects** (replaces the Low effects switch): High, Medium, Low or Minimal. Medium keeps fewer particles and halves the screen shake. Low keeps even fewer, turns off screen shake and glows, and draws more lightly (it's what Low effects did, and still the default on small phones). Minimal keeps almost no particles and one effect per feather. Your old Low effects choice carries over.
+- **Winter's Heart is easier to see:** a frosty white edge around the feather and little snowflakes spinning off behind it.
+- **Blood Moon looks different from Ember Forge:** a pulsing blood-red crescent moon now sits behind the feather instead of a red glow.
+- **Snowflake projectiles are drawn faster.**
+
 ## 2.99.20 — Feathers show every item
 
 - **Feather items show on your shots.** Every item that changes your feathers now has its own look, in one of four types: a **tip** (pierce and armour items), an **orbit** of charms circling the feather (barbs and stun items), an **aura** on the feather itself (fire, ice, void, blood and mana: flames, fire wings, frost spikes, an ice crystal, snow, smoke, drips, a mana ribbon, a white-hot glow, bending space or a red glow), and a **trail** (lightning, nails, acorns, homing swirls and speed streaks). A feather shows one effect of each type, from your rarest item of that type, so it stays readable and doesn't lag. Effects fit the shape of your crow's projectile: on leaves, fireballs and ice shards the aura and barbs stick out from around it instead of covering it, and on the leaf they sway with it.
