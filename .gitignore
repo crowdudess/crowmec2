@@ -1,1 +1,4 @@
 _site/
+# signing keys never go in the repo
+*.keystore
+*.jks

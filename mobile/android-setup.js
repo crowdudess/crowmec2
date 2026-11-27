@@ -1,5 +1,5 @@
 // Runs after "cap add android": sets the app version from package.json,
-// signs release builds with nestguard.keystore (the same key every time, so updates keep your save),
+// signs release builds with the secret Nestguard key (the same key every time, so updates keep your save),
 // and keeps the screen awake-friendly full screen layout.
 const fs = require('fs');
 const path = require('path');
@@ -9,13 +9,19 @@ const code = a * 10000 + b * 100 + c;
 const gradle = path.join(__dirname, 'android', 'app', 'build.gradle');
 let g = fs.readFileSync(gradle, 'utf8');
 g = g.replace(/versionCode \d+/, 'versionCode ' + code).replace(/versionName "[^"]*"/, 'versionName "' + v + '"');
-if (!g.includes('nestguardRelease')) {
+// The signing key is never in the repo. Release builds read it from these environment variables
+// (GitHub Actions fills them from the repository's secrets):
+//   NESTGUARD_KEYSTORE           path to the .keystore file
+//   NESTGUARD_KEYSTORE_PASSWORD  NESTGUARD_KEY_ALIAS  NESTGUARD_KEY_PASSWORD
+// Without NESTGUARD_KEYSTORE the release APK is built unsigned.
+if (!process.env.NESTGUARD_KEYSTORE) console.warn('NESTGUARD_KEYSTORE is not set: the release APK will be unsigned.');
+else if (!g.includes('nestguardRelease')) {
   g = g.replace(/buildTypes \{/, `signingConfigs {
         nestguardRelease {
-            storeFile file("../../nestguard.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
+            storeFile file(System.getenv("NESTGUARD_KEYSTORE"))
+            storePassword System.getenv("NESTGUARD_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("NESTGUARD_KEY_ALIAS")
+            keyPassword System.getenv("NESTGUARD_KEY_PASSWORD")
         }
     }
     buildTypes {`);

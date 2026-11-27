@@ -95,6 +95,28 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
+      # The signing key lives in the repository's secrets, never in the code.
+      - name: Get signing key
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Add the ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD secrets (Settings -> Secrets and variables -> Actions)."
+            exit 1
+          fi
+          KS="$RUNNER_TEMP/nestguard-release.keystore"
+          echo "$KEYSTORE_B64" | base64 -d > "$KS"
+          {
+            echo "NESTGUARD_KEYSTORE=$KS"
+            echo "NESTGUARD_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+            echo "NESTGUARD_KEY_ALIAS=$KEY_ALIAS"
+            echo "NESTGUARD_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
       - name: Make Android project
         run: npm run android
 
@@ -150,3 +172,4 @@ jobs:
             - **macOS:** download the `.dmg`, drag Nestguard to Applications, then open it. The first time, macOS blocks it because it is not signed: go to **System Settings → Privacy & Security** and click **Open Anyway**.
             - **Linux:** download the `.AppImage`, make it executable (`chmod +x`), and run it.
             - **Android:** download the `.apk` on your phone and open it. Allow installing from your browser when Android asks. Updates install over the old version and keep your save.
+              If Android says the app can't be installed (the app is now signed with a new key), first copy your save in the game (**Copy save code**), uninstall the old Nestguard, install this one, then paste the code back in.
