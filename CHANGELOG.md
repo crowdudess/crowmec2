@@ -2,9 +2,9 @@
 
 ## 2.99.22 — The Monkey King rides in
 
-- **The Monkey King no longer just walks at the nest.** He arrives on a throne carried by four baboons, circles the nest and throws bananas, coconuts and mangoes at it (shoot them down). While he's on the throne he takes much less damage.
-- **Knock him off.** Kill the four baboons and the throne crashes. He runs at the nest in a rage and slams it, then sits there dizzy for a few seconds, taking extra damage. That's your chance.
-- **Then he swings away like Tarzan** on a vine, and comes back from another side on a new throne with four new baboons. His spinning bananas still block your feathers.
+- **The Monkey King no longer just walks at the nest.** He sits in a royal carrying chair that four baboons lift by its poles, circles the nest and throws bananas, coconuts and mangoes at it (shoot them down). While he's in the chair he takes much less damage.
+- **Knock him off.** Kill the four baboons and the chair crashes down. He runs at the nest in a rage and slams it, then sits there dizzy for a few seconds, taking extra damage. That's your chance.
+- **Then he swings away like Tarzan** on a vine, and comes back from another side in his chair with four new baboons. His spinning bananas still block your feathers.
 
 ## 2.99.21 — Smoother with lots of effects
 
