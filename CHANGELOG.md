@@ -1,7 +1,11 @@
 # Nestguard changelog
 
-## 2.99.20 — Spell Focus and Spell Power
+## 2.99.20 — Meme skins, Spell Focus and Spell Power
 
+- **Three new meme skins**, each with its own look, passive, projectile, caw and nest:
+  - **Buff Crow:** huge flexing wing muscles and a red sweatband. +25% damage, but 10% slower attack speed (it skipped cardio). Throws dumbbells. Unlock: max out one upgrade.
+  - **Knife Crow:** holds a knife across its beak, which glints now and then. +5% critical hit chance, and critical hits deal 40% more damage. Throws knives. Unlock: defeat 2,500 enemies.
+  - **Judgment Crow:** half-closed eyes, a slow side-eye and one raised brow. Its caw stuns 0.3 s longer, and bosses and elites take 15% more damage. Throws gavels. Unlock: end 10 runs without beating the boss (it has been watching).
 - **Spell Focus** is now only about recharge: spells recharge 6% faster per level, up to level 8 (−48%).
 - **Spell Power** is a new upgrade in the Upgrades tab (Caw & spells): spell damage +15% per level, up to level 15.
 - **You keep everything you had.** If you had Spell Focus at level 12, you now have Spell Focus 8 and Spell Power 12, with the same spell damage and recharge as before. The coins you paid are split between the two, so refunding both gives back exactly what you spent.
