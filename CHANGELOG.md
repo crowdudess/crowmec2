@@ -1,5 +1,13 @@
 # Nestguard changelog
 
+## 2.99.20 — Spell Focus and Spell Power
+
+- **Spell Focus** is now only about recharge: spells recharge 6% faster per level, up to level 8 (−48%).
+- **Spell Power** is a new upgrade in the Upgrades tab (Caw & spells): spell damage +15% per level, up to level 15.
+- **You keep everything you had.** If you had Spell Focus at level 12, you now have Spell Focus 8 and Spell Power 12, with the same spell damage and recharge as before. The coins you paid are split between the two, so refunding both gives back exactly what you spent.
+- **Safer save codes:** a broken or tampered save code can no longer crash the game. Codes that are far too big are refused.
+- **Cleaner names:** invisible characters and line breaks are removed from your crow's name.
+
 ## 2.99.19 — A fairer Lucky Charm price
 
 - **Lucky Charm** levels now cost from 90 up to about 1,280 coins. All 20 levels cost about 9,200 coins in total (was about 31,800). It's a small nerf: a bit more than the old 10 levels cost, for slightly less luck at the top.

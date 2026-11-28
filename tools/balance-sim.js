@@ -27,9 +27,9 @@ const path = require('path');
 let chromium; try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playwright is missing: npm i -g playwright && npx playwright install chromium'); process.exit(1); }
 const GAME = path.join(__dirname, '..', 'index.html');
 
-const ROOST_BASE = { beak: 12, wings: 12, nest: 9, egg: 40, voice: 40, eye: 10, luck: 10, focus: 12, pen: 14, slayer: 14, thorns: 10, regen: 12, rhythm: 60, haggle: 16, pierce: 70, twin: 500, magpie: 80, favour: 300, charm: 150 };
+const ROOST_BASE = { beak: 12, wings: 12, nest: 9, egg: 40, voice: 40, eye: 10, luck: 10, focus: 12, power: 12, pen: 14, slayer: 14, thorns: 10, regen: 12, rhythm: 60, haggle: 16, pierce: 70, twin: 500, magpie: 80, favour: 300, charm: 150 };
 const roostCost = (k, l) => { const b = ROOST_BASE[k]; return Math.round(l < 10 ? b * Math.pow(1.3, l) : b * Math.pow(1.3, 9) * (1 + .35 * (l - 9))); };
-const ROOST_MAX = { beak: 25, wings: 20, nest: 20, egg: 5, voice: 8, eye: 8, luck: 8, focus: 15, pen: 10, slayer: 15, thorns: 15, regen: 15, rhythm: 5, haggle: 6, pierce: 2, twin: 2, magpie: 2, favour: 5, charm: 10 };
+const ROOST_MAX = { beak: 25, wings: 20, nest: 20, egg: 5, voice: 8, eye: 8, luck: 8, focus: 8, power: 15, pen: 10, slayer: 15, thorns: 15, regen: 15, rhythm: 5, haggle: 6, pierce: 2, twin: 2, magpie: 2, favour: 5, charm: 10 };
 const DEFAULTS = { world: 'void', diff: 0, skin: 'classic', up: 'full', spells: 'razor,meteor,fury,hole,shadow', runs: 16, workers: 4, seed: 1000, heal: 0.4 };
 function parse(argv, defaults = DEFAULTS) {
   const o = { ...defaults };
