@@ -4701,8 +4701,11 @@ function drawCrow(S, a, flap, bob, time, wk) {
   if (S.crest) { const [cc, cn, cs] = S.crest; ctx.fillStyle = cc; for (let i = 0; i < cn; i++) { const off = (i - (cn - 1) / 2) * 3.2, sw = Math.sin(tt / 240 + i) * 1.2; ctx.beginPath(); ctx.moveTo(14, off * .6); ctx.quadraticCurveTo(6, off - 3, 2 - 9 * cs, off * 1.5 + sw); ctx.quadraticCurveTo(6, off + 3, 14, off * .6); ctx.fill(); } }
   if (S.tufts) { ctx.fillStyle = S.tufts; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(15, sd * 6); ctx.lineTo(7, sd * 14); ctx.lineTo(11, sd * 4); ctx.closePath(); ctx.fill(); } }
   ctx.fillStyle = S.body; ctx.beginPath(); ctx.arc(16, 0, 10, 0, TAU); ctx.fill();
-  if (S.headband) { const w = Math.sin(tt / 140) * 2; ctx.strokeStyle = S.headband; ctx.lineWidth = 3.2; ctx.lineCap = 'butt'; ctx.beginPath(); ctx.moveTo(12.5, -9.3); ctx.lineTo(12.5, 9.3); ctx.stroke();
-    ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(11, 8); ctx.quadraticCurveTo(5, 13 + w, -1, 12 + w * 1.5); ctx.moveTo(11, 8.5); ctx.quadraticCurveTo(6, 15 + w, 1, 16 + w * 1.5); ctx.stroke(); }
+  if (S.headband) {   // a white gym sweatband with two stripes, snug round the head (no tails: that's the Bandito's bandana)
+    ctx.save(); ctx.beginPath(); ctx.arc(16, 0, 10.6, 0, TAU); ctx.clip();
+    ctx.fillStyle = '#f2efe6'; ctx.fillRect(10.2, -11, 5.2, 22);
+    ctx.fillStyle = S.headband; ctx.fillRect(11, -11, 1.1, 22); ctx.fillRect(13.5, -11, 1.1, 22);
+    ctx.restore(); }
   if (S.paint) { ctx.strokeStyle = S.paint; ctx.lineWidth = 1.6; ctx.beginPath(); for (const sd of [-1, 1]) { ctx.moveTo(11, sd * 4); ctx.lineTo(17, sd * 8.5); ctx.moveTo(9, sd * 2); ctx.lineTo(14, sd * 7.5); } ctx.stroke(); }
   ctx.fillStyle = S.beak; ctx.beginPath(); ctx.moveTo(23, -4); ctx.lineTo(37, 0); ctx.lineTo(23, 4); ctx.closePath(); ctx.fill();
   if (S.beakTip) { ctx.fillStyle = S.beakTip; ctx.beginPath(); ctx.moveTo(29, -2.3); ctx.lineTo(38.5, 0); ctx.lineTo(29, 2.3); ctx.closePath(); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.moveTo(30, -1.6); ctx.lineTo(36, -.3); ctx.lineTo(30, -.4); ctx.closePath(); ctx.fill(); }

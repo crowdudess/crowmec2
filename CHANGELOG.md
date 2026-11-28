@@ -3,7 +3,7 @@
 ## 2.99.20 — Meme skins, Spell Focus and Spell Power
 
 - **Three new meme skins**, each with its own look, passive, projectile, caw and nest:
-  - **Buff Crow:** huge flexing wing muscles and a red sweatband. +25% damage, but 10% slower attack speed (it skipped cardio). Throws dumbbells. Unlock: max out one upgrade.
+  - **Buff Crow:** huge flexing wing muscles and a striped gym sweatband. +25% damage, but 10% slower attack speed (it skipped cardio). Throws dumbbells. Unlock: max out one upgrade.
   - **Knife Crow:** holds a knife across its beak, which glints now and then. +5% critical hit chance, and critical hits deal 40% more damage. Throws knives. Unlock: defeat 2,500 enemies.
   - **Judgment Crow:** half-closed eyes, a slow side-eye and one raised brow. Its caw stuns 0.3 s longer, and bosses and elites take 15% more damage. Throws gavels. Unlock: end 10 runs without beating the boss (it has been watching).
 - **Spell Focus** is now only about recharge: spells recharge 6% faster per level, up to level 8 (−48%).
